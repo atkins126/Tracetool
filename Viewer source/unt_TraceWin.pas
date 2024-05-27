@@ -207,7 +207,6 @@ interface
          IsWatch: boolean;
          IsDateTimeResized: boolean;
          MainCol: Integer;
-         //leftPercent : extended;
          rightPercent : extended;
          // Log variables
          LogFileName: string;
