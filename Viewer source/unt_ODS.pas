@@ -17,11 +17,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, registry,
-  Dialogs, StdCtrls, ExtCtrls, VirtualTrees, Menus, XMLDoc, XMLIntf, pscMenu ,
+  Dialogs, StdCtrls, ExtCtrls, VirtualTrees, VirtualTrees.Types, Menus, XMLDoc, XMLIntf, pscMenu ,
   application6,  // the generated delphi code for the XML schema (Application6.xsd)
   ComCtrls, ToolWin, ImgList,  ActnList , clipbrd, SyncObjs, Contnrs, Unt_Tool,
   DebugOptions , unt_base,  Buttons, unt_pageContainer, unt_editor , VstSort,unt_filter, untPrintPreview,
-  unt_FrameMemo;
+  unt_FrameMemo, VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree,
+  VirtualTrees.AncestorVCL;
 
 {$Include TraceTool.Inc}
 

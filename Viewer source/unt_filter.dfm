@@ -2,27 +2,27 @@ object FrmFilter: TFrmFilter
   Left = 373
   Top = 254
   Caption = 'Filter'
-  ClientHeight = 157
-  ClientWidth = 523
+  ClientHeight = 156
+  ClientWidth = 519
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object PanelBottom: TPanel
     Left = 0
-    Top = 58
-    Width = 523
+    Top = 57
+    Width = 519
     Height = 58
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 58
+    ExplicitWidth = 523
     object PanelChildren: TPanel
       Left = 224
       Top = 0
@@ -73,14 +73,16 @@ object FrmFilter: TFrmFilter
   end
   object PanelButtons: TPanel
     Left = 0
-    Top = 116
-    Width = 523
+    Top = 115
+    Width = 519
     Height = 41
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitTop = 116
+    ExplicitWidth = 523
     DesignSize = (
-      523
+      519
       41)
     object butCancel: TButton
       Left = 8
@@ -94,7 +96,7 @@ object FrmFilter: TFrmFilter
       OnClick = butCancelClick
     end
     object butFilter: TButton
-      Left = 438
+      Left = 430
       Top = 8
       Width = 75
       Height = 25
@@ -104,21 +106,24 @@ object FrmFilter: TFrmFilter
       ModalResult = 1
       TabOrder = 1
       OnClick = butFilterClick
+      ExplicitLeft = 438
     end
   end
   object PanelFilterList: TPanel
     Left = 0
     Top = 29
-    Width = 523
-    Height = 29
+    Width = 519
+    Height = 28
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 523
+    ExplicitHeight = 29
   end
   object ToolBarAdd: TToolBar
     Left = 0
     Top = 0
-    Width = 523
+    Width = 519
     Height = 29
     AutoSize = True
     ButtonHeight = 29
@@ -128,6 +133,7 @@ object FrmFilter: TFrmFilter
     EdgeOuter = esNone
     ShowCaptions = True
     TabOrder = 3
+    ExplicitWidth = 523
     object ButAdd: TToolButton
       Left = 0
       Top = 0

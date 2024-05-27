@@ -13,7 +13,8 @@ unit unt_PageContainer;
 interface
 
 uses
-  system.Contnrs, types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,VirtualTrees ,
+  system.Contnrs, types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  VirtualTrees , VirtualTrees.Types, VirtualTrees.BaseTree,
   Dialogs, ComCtrls, ToolWin, ActnList, ImgList, ExtCtrls, Menus, CommCtrl,pscMenu,
   System.Actions;
 

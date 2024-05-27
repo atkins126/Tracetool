@@ -4,12 +4,13 @@ interface
 
 uses
   system.Contnrs, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, unt_Details_base, VirtualTrees,
+  Dialogs, unt_Details_base, VirtualTrees, VirtualTrees.Types,
   unt_Editor, Menus , ExtCtrls, clipbrd,
   unt_TraceWin ,
   unt_utility,
   vstSort,
-  unt_tool;            // VstEditor, IVstEditor, TMember
+  unt_tool, VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree,
+  VirtualTrees.AncestorVCL;            // VstEditor, IVstEditor, TMember
 
 type
   PTableRec = ^TTableRec ;

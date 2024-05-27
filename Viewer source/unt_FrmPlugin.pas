@@ -14,7 +14,7 @@ interface
 
 uses
   system.Contnrs, system.types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls , VirtualTrees, unt_plugin , unt_tool;
+  Dialogs, StdCtrls , VirtualTrees, VirtualTrees.Types, VirtualTrees.BaseTree, unt_plugin , unt_tool;
 
 type
   TfrmPlugin = class(TFrame)

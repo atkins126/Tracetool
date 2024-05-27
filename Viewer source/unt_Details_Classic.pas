@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, unt_Details_base, VirtualTrees, Menus , clipbrd, 
+  Dialogs, unt_Details_base, VirtualTrees, VirtualTrees.Types, Menus , clipbrd,
   unt_Editor,           // TMoveMemoEditLink, const
   unt_TraceWin ,
   unt_search ,
@@ -13,7 +13,8 @@ uses
   SynEditCodeFolding, SynHighlighterJSON, Vcl.ToolWin, Vcl.ComCtrls,
   System.JSON,     // , REST.Json
   Xml.xmldom,
-  Xml.XMLIntf, Xml.Win.msxmldom, Xml.XMLDoc, unt_FrameMemo;          // IsSeparator
+  Xml.XMLIntf, Xml.Win.msxmldom, Xml.XMLDoc, unt_FrameMemo,
+  VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;          // IsSeparator
 
 type
   Tframe_Classic = class(Tframe_BaseDetails)

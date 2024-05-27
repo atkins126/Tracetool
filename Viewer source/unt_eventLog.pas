@@ -14,9 +14,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Clipbrd, xmldoc ,
-  Dialogs, unt_base, StdCtrls, Buttons, VirtualTrees, Unt_Tool, pscMenu ,
+  Dialogs, unt_base, StdCtrls, Buttons, VirtualTrees, VirtualTrees.Types, Unt_Tool, pscMenu ,
   ExtCtrls, ComCtrls,Eventlog, unt_tracewin, unt_PageContainer, unt_editor, vstSort,unt_filter,
-  Menus, untPrintPreview, Vcl.ToolWin, SynEdit, unt_FrameMemo;
+  Menus, untPrintPreview, Vcl.ToolWin, SynEdit, unt_FrameMemo,
+  VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
 
 type
 

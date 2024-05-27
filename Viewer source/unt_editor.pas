@@ -15,7 +15,7 @@ interface
 uses
   types,
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, VirtualTrees, Buttons, ExtCtrls, ComCtrls, Spin;//, unit1;
+  StdCtrls, VirtualTrees, VirtualTrees.Types, Buttons, ExtCtrls, ComCtrls, Spin;//, unit1;
 
 {$I Compilers.inc}
 

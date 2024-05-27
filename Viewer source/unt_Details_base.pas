@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls ,
-  VirtualTrees,
+  VirtualTrees, VirtualTrees.BaseTree,
   unt_TraceWin,
   unt_tool ;
 

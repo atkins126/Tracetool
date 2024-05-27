@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   StdCtrls, ExtCtrls, Tabs, Preview, Dialogs, jpeg, ImgList,
-  ComCtrls, CheckLst, VirtualTrees, Math, unt_base;
+  ComCtrls, CheckLst, VirtualTrees, VirtualTrees.Types, Math, unt_base;
 
 type
   TFrmPrintPreview = class(TForm)

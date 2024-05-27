@@ -17,9 +17,10 @@ uses
   Windows, Messages, SysUtils, AnsiStrings,
   Classes, Graphics, Controls, Forms, Dialogs, Contnrs,
   StdCtrls, ComCtrls, variants, CheckLst, ExtCtrls, ImgList
-  , VirtualTrees
+  , VirtualTrees, VirtualTrees.Types
   ,ColorPickerButton
-  ,unt_TraceConfig
+  ,unt_TraceConfig, VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree,
+  VirtualTrees.AncestorVCL
   ;
 
 const

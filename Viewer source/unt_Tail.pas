@@ -17,10 +17,11 @@ interface
 
 uses
   system.Contnrs , system.types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, pscMenu ,
-  Dialogs, ExtCtrls, VirtualTrees, StdCtrls, ComCtrls , dirmon, ToolWin, unt_TraceWin,
+  Dialogs, ExtCtrls, VirtualTrees, VirtualTrees.Types, StdCtrls, ComCtrls , dirmon, ToolWin, unt_TraceWin,
   Buttons, Clipbrd, unt_base , unt_pageContainer ,  unt_editor , VstSort,unt_filter, unt_tool,
   generics.collections,
-  Menus, untPrintPreview, unt_FrameMemo;
+  Menus, untPrintPreview, unt_FrameMemo, VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
 
 const
    //BUFSIZE = 1024 {400h} ;

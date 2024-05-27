@@ -14,7 +14,7 @@ interface
 
 uses
   system.Contnrs, system.SyncObjs, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, VirtualTrees; 
+  Dialogs, VirtualTrees, VirtualTrees.Types;
 
 {$Include TraceConst.Inc}
 

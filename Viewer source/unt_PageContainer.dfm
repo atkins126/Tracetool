@@ -1,8 +1,8 @@
 object FrmPageContainer: TFrmPageContainer
   Left = 756
   Top = 244
-  ClientHeight = 271
-  ClientWidth = 464
+  ClientHeight = 270
+  ClientWidth = 460
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,13 +16,11 @@ object FrmPageContainer: TFrmPageContainer
   object PanelPageControl: TPanel
     Left = 0
     Top = 0
-    Width = 464
-    Height = 271
+    Width = 460
+    Height = 270
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 460
-    ExplicitHeight = 270
     object ToolBar: TToolBar
       Left = 0
       Top = 0

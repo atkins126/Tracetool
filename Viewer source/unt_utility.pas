@@ -18,7 +18,8 @@ interface
 
 
 uses
-  system.SyncObjs, system.UITypes, Windows, SysUtils, Classes, Types, PSAPI, Tlhelp32, VirtualTrees, graphics , messages, printers, unt_tool;
+  system.SyncObjs, system.UITypes, Windows, SysUtils, Classes, Types, PSAPI, Tlhelp32, VirtualTrees, VirtualTrees.Types,
+  graphics , messages, printers, unt_tool;
 
 {$Include TraceConst.Inc}
 

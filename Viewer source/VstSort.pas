@@ -20,7 +20,7 @@ interface
 {$endif COMPILER_7_UP}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, contnrs, VirtualTrees;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, contnrs, VirtualTrees, VirtualTrees.Types;
 
 type
   TSortColumn = class
@@ -289,13 +289,13 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
     begin
       if DoCompare(A, B) <= 0 then  // ascending. For descending use >= 0
       begin
-        Result.NextSibling := A;
+        Result.SetNextSibling(A);; //Result.NextSibling := A;
         Result := A;
         A := A.NextSibling;
       end
       else
       begin
-        Result.NextSibling := B;
+        Result.SetNextSibling(B);
         Result := B;
         B := B.NextSibling;
       end;
@@ -303,9 +303,9 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
 
     // Just append the list which is not nil (or set end of result list to nil if both lists are nil).
     if Assigned(A) then
-      Result.NextSibling := A
+      Result.SetNextSibling(A)
     else
-      Result.NextSibling := B;
+      Result.SetNextSibling(B);
     // return start of the new merged list
     Result := Dummy.NextSibling;
   end;
@@ -330,7 +330,7 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
     begin
       Result := Node;
       Node := Node.NextSibling;
-      Result.NextSibling := nil;
+      Result.SetNextSibling(nil);
     end;
   end;
 
@@ -382,17 +382,17 @@ begin
 
        // Consolidate the child list finally.
        Run := Node.FirstChild;
-       Run.PrevSibling := nil;
+       Run.SetPrevSibling(nil);
        Index := 0;
        repeat
-         Run.Index := Index;
+         Run.SetIndex(Index);
          Inc(Index);
          if Run.NextSibling = nil then
            Break;
-         Run.NextSibling.PrevSibling := Run;
+         Run.NextSibling.SetPrevSibling(Run);
          Run := Run.NextSibling;
        until False;
-       Node.LastChild := Run;
+       Node.SetLastChild(Run);
 
        //InvalidateCache;
        tree.TreeStates := tree.TreeStates + [tsValidationNeeded] - [tsUseCache];  // DoStateChange([tsValidationNeeded], [tsUseCache]);

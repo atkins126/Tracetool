@@ -18,7 +18,7 @@ interface
    uses
       system.types, system.UITypes,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls,
       Forms, registry,
-      Dialogs, StdCtrls, ExtCtrls, VirtualTrees, Menus, XMLDoc, XMLIntf,
+      Dialogs, StdCtrls, ExtCtrls, VirtualTrees, VirtualTrees.Types, Menus, XMLDoc, XMLIntf,
       pscMenu, math, printers,
       ComCtrls, ToolWin, ImgList, TrayIcon, ActnList, clipbrd, SyncObjs,
       Contnrs, SynEdit, unt_tool,
@@ -26,7 +26,8 @@ interface
       unt_base, DebugOptions, Buttons, Unt_linkedList, unt_utility,
       MSXML2_TLB,
 
-      unt_pageContainer, unt_editor, unt_search, vstSort, unt_filter, unt_addLine;
+      unt_pageContainer, unt_editor, unt_search, vstSort, unt_filter, unt_addLine,
+  VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
    {$INCLUDE TraceTool.Inc}
 
    type
@@ -148,11 +149,12 @@ interface
             TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
             CellPaintMode: TVTCellPaintMode; CellRect: TRect;
             var ContentRect: TRect);
-    procedure vstTraceEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; var Allowed: Boolean);
-    procedure PanelLeftResize(Sender: TObject);
-    procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer;
-      var Accept: Boolean);
+        procedure vstTraceEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
+            Column: TColumnIndex; var Allowed: Boolean);
+        procedure PanelLeftResize(Sender: TObject);
+        procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
+        procedure PanelTTracesCanResize(Sender: TObject; var NewWidth,
+            NewHeight: Integer; var Resize: Boolean);
 
       private
          procedure WMStartEditingMember(var Message: TMessage);
@@ -205,7 +207,8 @@ interface
          IsWatch: boolean;
          IsDateTimeResized: boolean;
          MainCol: Integer;
-
+         //leftPercent : extended;
+         rightPercent : extended;
          // Log variables
          LogFileName: string;
          LogFileType: Integer;
@@ -355,8 +358,14 @@ procedure TFrm_Trace.FormCreate(Sender: TObject);
 var
    res: TPlugResource;
    temp_Classic: Tframe_Classic;
+   accept : boolean;
+   size : integer;
 begin
    inherited;
+
+   size := PanelRight.Width;
+   VSplitterCanResize(self,size,accept); // calculated once left and right percent
+
    IsDateTimeResized := false;
    IsWatch := false;
 
@@ -718,8 +727,7 @@ begin
       AutosizeAll(vstTrace); // VstTail.Header.AutoFitColumns(false);
 
       // force last column width to maximum
-      vstTrace.Header.Columns[vstTrace.Header.Columns.Count - 1].Width :=
-         9000;
+      vstTrace.Header.Columns[vstTrace.Header.Columns.Count - 1].Width := 9000;
 
    end;
 end;
@@ -2642,8 +2650,7 @@ begin
       if (IsDateTimeResized = false) and (length(TreeRec.Time) > 12) then
          begin
          IsDateTimeResized := true;
-         vstTrace.Header.Columns[1].Width := vstTrace.Header.Columns[1]
-            .Width * 2;
+         vstTrace.Header.Columns[1].Width := vstTrace.Header.Columns[1].Width * 2;
       end;
 
       // get col2
@@ -2906,8 +2913,7 @@ begin
       if (IsDateTimeResized = false) and (length(TreeRec.Time) > 12) then
          begin
          IsDateTimeResized := true;
-         vstTrace.Header.Columns[1].Width := vstTrace.Header.Columns[1]
-            .Width * 2;
+         vstTrace.Header.Columns[1].Width := vstTrace.Header.Columns[1].Width * 2;
       end;
 
       if NodeTag.ColValue.Count <> 0 then begin
@@ -3815,8 +3821,7 @@ end;
 // CST_RES_MENU_ACTION      = 7 ;     // Item menu in the Actions Menu
 // CST_RES_MENU_WINDOW      = 8 ;     // Item menu in the Windows Menu. Call CreateResource on the main win trace to create this menu item
 
-procedure TFrm_Trace.CreateResource(ResId: Integer; ResType: Integer;
-   ResWidth: Integer; ResText: string);
+procedure TFrm_Trace.CreateResource(ResId: Integer; ResType: Integer; ResWidth: Integer; ResText: string);
 var
    res: TPlugResource;
    but: tbutton;
@@ -4769,12 +4774,17 @@ begin
    end;
 end;
 
+procedure TFrm_Trace.PanelTTracesCanResize(Sender: TObject; var NewWidth, NewHeight: Integer; var Resize: Boolean);
+begin
+   PanelRight.Width := Round(PanelTTraces.Width * rightPercent);
+end;
+
 procedure TFrm_Trace.VSplitterCanResize(Sender: TObject; var NewSize: Integer;  var Accept: Boolean);
 begin
+   rightPercent := NewSize / (PanelTTraces.Width - vsplitter.width);
    if (Width - NewSize < 105) then
       NewSize := Width - 105;
 end;
-
 
 // ------------------------------------------------------------------------------
 // apply font change and return true if at least one font change is detected

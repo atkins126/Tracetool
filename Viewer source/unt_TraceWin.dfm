@@ -22,6 +22,9 @@ object Frm_Trace: TFrm_Trace
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    OnCanResize = PanelTTracesCanResize
+    ExplicitWidth = 564
+    ExplicitHeight = 323
     object VSplitter: TSplitter
       Left = 216
       Top = 22
@@ -42,11 +45,13 @@ object Frm_Trace: TFrm_Trace
       BevelOuter = bvNone
       TabOrder = 0
       OnResize = PanelLeftResize
+      ExplicitWidth = 212
+      ExplicitHeight = 301
       object vstTrace: TVirtualStringTree
         Left = 12
         Top = 0
-        Width = 208
-        Height = 303
+        Width = 204
+        Height = 302
         Align = alClient
         BevelInner = bvLowered
         BevelOuter = bvRaised
@@ -114,6 +119,8 @@ object Frm_Trace: TFrm_Trace
         OnMeasureItem = vstTraceMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+        ExplicitLeft = 11
+        ExplicitTop = 2
         Columns = <
           item
             Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coShowDropMark, coVisible]
@@ -151,12 +158,12 @@ object Frm_Trace: TFrm_Trace
         Left = 0
         Top = 0
         Width = 12
-        Height = 303
+        Height = 302
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 1
         OnDblClick = PanelGutterDblClick
-        ExplicitHeight = 302
+        ExplicitHeight = 301
       end
     end
     object PanelRight: TPanel
@@ -168,6 +175,8 @@ object Frm_Trace: TFrm_Trace
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
+      ExplicitLeft = 222
+      ExplicitTop = 24
     end
     object PanelTop: TPanel
       Left = 0
@@ -179,6 +188,7 @@ object Frm_Trace: TFrm_Trace
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 564
       DesignSize = (
         568
         22)
@@ -243,6 +253,7 @@ object Frm_Trace: TFrm_Trace
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 541
       end
     end
   end

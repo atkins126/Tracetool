@@ -16,7 +16,7 @@ interface
 
 uses
   system.Contnrs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, unt_PageContainer, VirtualTrees, unt_tool, Menus, unt_filter;
+  Dialogs, ComCtrls, unt_PageContainer, VirtualTrees, VirtualTrees.Types, unt_tool, Menus, unt_filter;
 
 type
   // base class for all forms : ODS, Eventlog , FrmTail and Frm_Trace
