@@ -106,7 +106,9 @@ begin
 
    VstTable.Header.Options           := TraceWin.vstTrace.Header.Options ;
    VstTable.TreeOptions.AutoOptions  := TraceWin.vstTrace.TreeOptions.AutoOptions
-             + [toDisableAutoscrollOnEdit] ; // Do not center a node horizontally when it is edited.
+             - [toDisableAutoscrollOnFocus] // Disable scrolling a column entirely into view if it gets focused.
+             + [toDisableAutoscrollOnEdit];  // Do not center a node horizontally when it is edited.      + [toDisableAutoscrollOnFocus] // Disable scrolling a column entirely into view if it gets focused.
+
 
    VstTable.TreeOptions.PaintOptions := TraceWin.vstTrace.TreeOptions.PaintOptions
              - [toShowTreeLines] ;        // show tree lines in 'members' tree
