@@ -299,26 +299,20 @@ begin
 
    if StartSelectedColumn = -1 then begin
       VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-      TFrm_Trace.InternalTrace('MouseMove, start, column: ' + inttostr(HitInfo.HitColumn) + ', with text "' + celltext + '"') ;
       StartSelectedColumn := HitInfo.HitColumn;
-      LastSelectedColumn  :=  HitInfo.HitColumn;
+      LastSelectedColumn  := HitInfo.HitColumn;
       StartSelectedNode   := HitInfo.HitNode;
       LastSelectedNode    := HitInfo.HitNode;
    end else begin
       if (LastSelectedNode <> HitInfo.HitNode) or (LastSelectedColumn <> HitInfo.HitColumn) then begin
          DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-         TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
+         //TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
          vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
+         LastSelectedColumn := HitInfo.HitColumn;
+         LastSelectedNode   := HitInfo.HitNode;
          vstTable.Refresh;
       end;
-      LastSelectedColumn := HitInfo.HitColumn;
-      LastSelectedNode   := HitInfo.HitNode;
-
-//      if HitInfo.HitColumn < StartSelectedColumn then begin
-//        StartSelectedColumn := HitInfo.HitColumn;
-//        LastSelectedColumn := StartSelectedColumn;
-//      end;
    end;
 end;
 
@@ -331,22 +325,17 @@ var
 begin
 
     if tsLeftButtonDown in enter then begin
-       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ');
-
-       //vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
-       //TFrm_Trace.InternalTrace('   column: ' + inttostr(HitInfo.HitColumn) + ', with text "' + celltext + '"') ;
+       // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ');
        StartSelectedColumn := -1;
        LastSelectedColumn := -1;
        StartSelectedNode := nil;
        LastSelectedNode := nil;
        Selecting := true;
     end else if tsLeftButtonDown in leave then begin
-       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
+       // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
        Selecting := false;
        vstTable.Refresh;
     end;
-
-
 end;
 //------------------------------------------------------------------------------
 
