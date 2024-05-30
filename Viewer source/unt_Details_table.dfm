@@ -52,7 +52,7 @@ inherited frame_Table: Tframe_Table
     TabOrder = 0
     TreeOptions.AnimationOptions = [toAnimatedToggle]
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
-    TreeOptions.SelectionOptions = [toExtendedFocus]
+    TreeOptions.SelectionOptions = [toExtendedFocus, toMultiSelect, toSimpleDrawSelection]
     OnBeforeCellPaint = VstTableBeforeCellPaint
     OnChange = VstTableChange
     OnColumnClick = VstTableColumnClick
@@ -66,6 +66,8 @@ inherited frame_Table: Tframe_Table
     OnPaintText = VstTablePaintText
     OnKeyAction = VstTableKeyAction
     OnMeasureItem = VstTableMeasureItem
+    OnMouseMove = VstTableMouseMove
+    OnStateChange = VstTableStateChange
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
     Columns = <

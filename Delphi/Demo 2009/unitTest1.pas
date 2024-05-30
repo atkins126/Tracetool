@@ -602,9 +602,31 @@ begin
    TTrace.Debug.SendTable('memo1.lines', Memo1.lines);
 
    stringList := TStringList.create;
-   stringList.AddObject('self', self);
-   stringList.AddObject('self', self);
-   stringList.AddObject('self', self);
+   stringList.AddObject('self01', self);
+   stringList.AddObject('self02', self);
+   stringList.AddObject('self03', self);
+   stringList.AddObject('self04', self);
+   stringList.AddObject('self05', self);
+   stringList.AddObject('self06', self);
+   stringList.AddObject('self07', self);
+   stringList.AddObject('self08', self);
+   stringList.AddObject('self09', self);
+   stringList.AddObject('self10', self);
+   stringList.AddObject('self11', self);
+   stringList.AddObject('self12', self);
+   stringList.AddObject('self13', self);
+   stringList.AddObject('self14', self);
+   stringList.AddObject('self15', self);
+   stringList.AddObject('self16', self);
+   stringList.AddObject('self17', self);
+   stringList.AddObject('self18', self);
+   stringList.AddObject('self19', self);
+   stringList.AddObject('self20', self);
+   stringList.AddObject('self21', self);
+   stringList.AddObject('self22', self);
+   stringList.AddObject('self23', self);
+   stringList.AddObject('self24', self);
+   stringList.AddObject('self25', self);
    TTrace.Debug.SendTable('stringList as table', stringList);
    stringList.Free;
 

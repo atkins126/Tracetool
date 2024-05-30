@@ -22,24 +22,26 @@ object frmDebugOptions: TfrmDebugOptions
     Height = 483
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 596
+    ExplicitHeight = 471
     object PanelRight: TPanel
       Left = 617
       Top = 1
-      Width = 2
-      Height = 493
+      Width = 6
+      Height = 481
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 481
+      ExplicitHeight = 469
     end
     object PageControl: TPageControl
       Left = 201
       Top = 1
       Width = 416
-      Height = 493
-      ActivePage = TabSheetFramework
+      Height = 481
+      ActivePage = TabSheetGeneral
       Align = alLeft
       TabOrder = 1
-      ExplicitHeight = 481
+      ExplicitHeight = 469
       object TabSheetGeneral: TTabSheet
         Caption = 'General'
         ImageIndex = 2
@@ -47,7 +49,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -230,10 +232,11 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitHeight = 441
           DesignSize = (
             408
             453)
@@ -550,7 +553,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -728,7 +731,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -890,11 +893,10 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 453
           DesignSize = (
             408
             453)
@@ -1089,7 +1091,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -1292,7 +1294,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -1440,7 +1442,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -1574,7 +1576,7 @@ object frmDebugOptions: TfrmDebugOptions
           Left = 0
           Top = 0
           Width = 408
-          Height = 465
+          Height = 453
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -1622,6 +1624,7 @@ object frmDebugOptions: TfrmDebugOptions
       Colors.UnfocusedColor = clGray
       Colors.UnfocusedSelectionColor = clWhite
       Colors.UnfocusedSelectionBorderColor = clWhite
+      DefaultNodeHeight = 17
       Header.AutoSizeIndex = 0
       Header.DefaultHeight = 17
       Header.Height = 13
@@ -1648,6 +1651,8 @@ object frmDebugOptions: TfrmDebugOptions
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 471
+    ExplicitWidth = 596
     DesignSize = (
       604
       45)
@@ -1659,6 +1664,7 @@ object frmDebugOptions: TfrmDebugOptions
       Align = alClient
       Panels = <>
       SimplePanel = True
+      ExplicitWidth = 596
     end
     object btnOK: TButton
       Left = 8
@@ -1691,7 +1697,7 @@ object frmDebugOptions: TfrmDebugOptions
       ModalResult = 2
       TabOrder = 2
       OnClick = btnCancelClick
-      ExplicitLeft = 494
+      ExplicitLeft = 478
     end
   end
 end

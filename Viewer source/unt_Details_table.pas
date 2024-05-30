@@ -9,12 +9,18 @@ uses
   unt_TraceWin ,
   unt_utility,
   vstSort,
-  unt_tool, VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree,
+  unt_tool,
+  System.Generics.Collections,
+  System.TypInfo,
+  System.Math,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree,
   VirtualTrees.AncestorVCL;            // VstEditor, IVstEditor, TMember
 
 type
   PTableRec = ^TTableRec ;
   TTableRec = record
+     OriginalOrder: integer; // Original order when inserted. Used to Unsort nodes
      Columns : TStringList ;
   end ;
 
@@ -50,8 +56,13 @@ type
     procedure VstTableBeforeCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+    procedure VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure VstTableStateChange(Sender: TBaseVirtualTree; Enter,
+      Leave: TVirtualTreeStates);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
+    function IsSelected(Node: PVirtualNode; Column:integer): boolean;
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
@@ -61,10 +72,18 @@ type
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override;
     procedure copySelected() ; override;
+
   end;
 
 var
   frame_table: Tframe_table;
+
+StartSelectedColumn: integer;
+LastSelectedColumn: integer;
+StartSelectedNode : PVirtualNode;
+LastSelectedNode : PVirtualNode;
+
+Selecting: boolean;
 
 implementation
 
@@ -78,7 +97,7 @@ unt_TraceConfig, unt_Details_Classic,  unt_search ;
 constructor Tframe_table.Create(AOwner: TComponent);
 begin
    inherited create (AOwner) ;
-   
+
    TraceWin := TFrm_Trace(owner);
 
    // initialize sort
@@ -103,25 +122,40 @@ begin
    VstTable.Header.Columns.Items[1].text := '' ;
    VstTable.Header.Columns.Items[2].text := '' ;
 
-
    VstTable.Header.Options           := TraceWin.vstTrace.Header.Options ;
    VstTable.TreeOptions.AutoOptions  := TraceWin.vstTrace.TreeOptions.AutoOptions
-             - [toDisableAutoscrollOnFocus] // Disable scrolling a column entirely into view if it gets focused.
-             + [toDisableAutoscrollOnEdit];  // Do not center a node horizontally when it is edited.      + [toDisableAutoscrollOnFocus] // Disable scrolling a column entirely into view if it gets focused.
-
-
+      + [toAutoSpanColumns]           // Large entries continue into next columns
+      - [toDisableAutoscrollOnFocus]  // Disable scrolling a column entirely into view if it gets focused.
+      + [toDisableAutoscrollOnEdit];  // Do not center a node horizontally when it is edited.
+ 
    VstTable.TreeOptions.PaintOptions := TraceWin.vstTrace.TreeOptions.PaintOptions
-             - [toShowTreeLines] ;        // show tree lines in 'members' tree
+      - [toUseBlendedImages]        // Don't use blended images
+      - [toShowTreeLines]           // don't Display tree lines to show hierarchy of nodes.
+      - [toHideSelection]           // show a grayed selection when the tree lose the focus
+      + [toShowRoot]                // show root.
+      + [toShowButtons]             // Display collapse/expand buttons left to a node.
+      + [toThemeAware]              // Draw UI elements (header, tree buttons etc.) according to the current theme
+      + [toHideFocusRect];          // hide focus rect
 
    VstTable.TreeOptions.SelectionOptions := TraceWin.vstTrace.TreeOptions.SelectionOptions
-             + [toExtendedFocus]          // Entries other than in the main column can be selected, edited etc.
-             - [toFullRowSelect]          // selection highlight the whole line
-             + [toMultiselect] ;          // don't Allow more than one node to be selected.
-
+      + [toDisableDrawSelection]    // Prevent user from selecting with the selection rectangle in multiselect mode.
+      + [toExtendedFocus]           // Entries other than in the main column can be selected, edited etc.
+      + [toMultiselect]             // Allow more than one node to be selected.
+      + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
+      - [toFullRowSelect];          // selection highlight the whole line
+ 
    VstTable.TreeOptions.MiscOptions := TraceWin.vstTrace.TreeOptions.MiscOptions
-             + [toGridExtensions]
-             - [toEditable]               // don't allow edition. Code is used to detect double click or F2 key
-             - [toReportMode] ;           // Tree behaves like TListView in report mode.
+      - [toReportMode]              // Tree behaves like TListView in report mode.
+      + [toFullRepaintOnResize]     // Fully invalidate the tree when its window is resized (CS_HREDRAW/CS_VREDRAW).
+      + [toWheelPanning]            // Support for mouse panning (wheel mice only).
+      - [toFullRowDrag]             // Start node dragging by clicking anywhere in it instead only on the caption or image.
+                                    // Must be used together with toDisableDrawSelection.
+      + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
+      - [toVariableNodeHeight]      // variable node height
+      - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
+      - [toEditable]                // don't allow edition. Code is used to detect double click or F2 key
+      - [toCheckSupport];           // no checkboxes
+
 
    VstTable.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
    VstTable.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
@@ -141,8 +175,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableCreateEditor(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
+procedure Tframe_table.VstTableCreateEditor(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
 begin
    if IVstEditor = nil then begin
       VstEditor  := TMoveMemoEditLink.Create ();    // unt_tool
@@ -196,24 +229,21 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableEditCancelled(Sender: TBaseVirtualTree;
-  Column: TColumnIndex);
+procedure Tframe_table.VstTableEditCancelled(Sender: TBaseVirtualTree; Column: TColumnIndex);
 begin
    VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableEdited(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
+procedure Tframe_table.VstTableEdited(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 begin
    VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableFreeNode(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
+procedure Tframe_table.VstTableFreeNode(Sender: TBaseVirtualTree;  Node: PVirtualNode);
 var
    DetailRec : PTableRec ;
    //c : integer ;
@@ -231,9 +261,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: string);
+procedure Tframe_table.VstTableGetText(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;  var CellText: string);
 var
    DetailRec : PTableRec ;
 begin
@@ -254,9 +282,134 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableBeforeCellPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+procedure Tframe_table.VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
+var
+  HitInfo: THitInfo;
+  DetailRec : PTableRec ;
+  CellText: string;
+begin
+  // VstTableMouseMove not called if toDisableDrawSelection is false
+
+   if Selecting = false then
+      exit;
+
+   vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
+   if HitInfo.HitNode = nil then
+      exit;
+
+   if StartSelectedColumn = -1 then begin
+      VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
+      TFrm_Trace.InternalTrace('MouseMove, start, column: ' + inttostr(HitInfo.HitColumn) + ', with text "' + celltext + '"') ;
+      StartSelectedColumn := HitInfo.HitColumn;
+      LastSelectedColumn  :=  HitInfo.HitColumn;
+      StartSelectedNode   := HitInfo.HitNode;
+      LastSelectedNode    := HitInfo.HitNode;
+   end else begin
+      if (LastSelectedNode <> HitInfo.HitNode) or (LastSelectedColumn <> HitInfo.HitColumn) then begin
+         DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
+         VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
+         TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
+         vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
+         vstTable.Refresh;
+      end;
+      LastSelectedColumn := HitInfo.HitColumn;
+      LastSelectedNode   := HitInfo.HitNode;
+
+//      if HitInfo.HitColumn < StartSelectedColumn then begin
+//        StartSelectedColumn := HitInfo.HitColumn;
+//        LastSelectedColumn := StartSelectedColumn;
+//      end;
+   end;
+end;
+
+//------------------------------------------------------------------------------
+procedure Tframe_table.VstTableStateChange(Sender: TBaseVirtualTree; Enter,  Leave: TVirtualTreeStates);
+var
+  HitInfo: THitInfo;
+  DetailRec : PTableRec ;
+  CellText: string;
+begin
+
+    if tsLeftButtonDown in enter then begin
+       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ');
+
+       //vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
+       //TFrm_Trace.InternalTrace('   column: ' + inttostr(HitInfo.HitColumn) + ', with text "' + celltext + '"') ;
+       StartSelectedColumn := -1;
+       LastSelectedColumn := -1;
+       StartSelectedNode := nil;
+       LastSelectedNode := nil;
+       Selecting := true;
+    end else if tsLeftButtonDown in leave then begin
+       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
+       Selecting := false;
+       vstTable.Refresh;
+    end;
+
+
+end;
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstTableFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
+var
+   DetailRec : PTableRec ;
+   CellText: String;
+begin
+   TFrm_Trace.InternalTrace('Tframe_table.VstTableFocusChanged, column: ' + inttostr(Column) + ', with text "' + celltext + '"') ;
+
+   DetailRec := Sender.GetNodeData(Node) ;
+   if DetailRec = nil then
+      exit ;
+   CellText := DetailRec.Columns[Column] ;
+   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
+
+function Tframe_table.IsSelected( Node: PVirtualNode; Column:integer) : boolean;
+var
+  LoopEnd : PVirtualNode;
+  loopNode : PVirtualNode ;
+begin
+   result := false;
+
+   if (StartSelectedColumn < LastSelectedColumn) then begin
+      if (Column < StartSelectedColumn) or (column > LastSelectedColumn) then
+          exit;
+   end else begin     // reverse
+      if (Column > StartSelectedColumn) or (column < LastSelectedColumn) then
+          exit;
+   end;
+
+   if (node = StartSelectedNode) or (node = LastSelectedNode) then begin
+      result := true;
+      exit;
+   end;
+
+   // start and last are the same node. Looping over LastSelectedNode will always found nodes
+   if (StartSelectedNode = LastSelectedNode ) then
+      exit;
+
+   if (StartSelectedNode^.Index) <= (LastSelectedNode^.Index) then begin   // Top to bottom
+      loopNode := StartSelectedNode;
+      loopEnd := LastSelectedNode;
+   end else begin
+      loopNode := LastSelectedNode ;
+      loopEnd   := StartSelectedNode;
+   end;
+
+   while loopNode <> nil do begin
+      if (node = loopNode) then begin
+         result := true;
+         exit;
+      end;
+      loopNode := loopNode.NextSibling;
+      if (loopNode = loopEnd) or (loopNode = nil) then
+         break;
+   end;
+end;
+
+procedure Tframe_table.VstTableBeforeCellPaint(Sender: TBaseVirtualTree;   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
    DetailRec : PTableRec ;
 begin
@@ -265,12 +418,48 @@ begin
       if (MatchSearch (DetailRec.Columns[Column]) <> 0) then
          DrawHighlight (TargetCanvas, CellRect,false) ;
    end;
+
+   if (IsSelected(node,Column) = false) then
+      exit ;
+
+   //TFrm_Trace.InternalTrace('BeforeCellPaint ' +  DetailRec.Columns[0] + ' col ' + inttostr (Column) + ', NodeIsSelected : ' + BoolToStr(NodeIsSelected,true) );
+
+   if VstTable.Focused then
+     TargetCanvas.Brush.Color := VstTable.Colors.FocusedSelectionColor
+   else
+     TargetCanvas.Brush.Color := VstTable.Colors.UnfocusedSelectionColor;
+   TargetCanvas.Brush.Style := bsSolid;
+   TargetCanvas.FillRect(CellRect);
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableMeasureItem(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+procedure Tframe_table.VstTablePaintText(Sender: TBaseVirtualTree;  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  TextType: TVSTTextType);
+//var
+//   DetailRec : PTableRec ;
+begin
+//   DetailRec := Sender.GetNodeData(Node) ;
+//   // force font
+//   TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
+
+//   if (IsSelected(node,Column) = false) then
+//      exit ;
+
+//   if (IsSelected(node)) and (InRange(column, StartSelectedColumn, LastSelectedColumn)) then
+//   begin
+//     if VstTable.Focused then
+//       TargetCanvas.Font.Color := clHighlightText
+//     else
+//       TargetCanvas.Font.Color := VstTable.Font.Color;
+//   end;
+
+
+end;
+
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstTableMeasureItem(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
 var
 //   h2,h3 : integer ;
 //   DetailRec : PTableRec ;
@@ -303,33 +492,6 @@ begin
 //   // if multiline, NodeHeight is bigger than DefaultNodeHeight
 //   if NodeHeight = 0 then
 //      NodeHeight := newNodeHeight ;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstTablePaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
-//var
-//   DetailRec : PTableRec ;
-begin
-//   DetailRec := Sender.GetNodeData(Node) ;
-//   // force font
-//   TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstTableFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
-var
-   DetailRec : PTableRec ;
-   CellText: String;
-begin
-   DetailRec := Sender.GetNodeData(Node) ;
-   if DetailRec = nil then
-      exit ;
-   CellText := DetailRec.Columns[Column] ;
-   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -394,7 +556,8 @@ begin
       DetailRec := VstTable.GetNodeData(DetailNode) ;
 
       cols := getTabStrings(pchar(SubMember.Col1)) ;
-      DetailRec.Columns := cols ; // free by OnFreeNodes
+      DetailRec.OriginalOrder := c;   // for unsort
+      DetailRec.Columns := cols ;     // free by OnFreeNodes
    end ;
 
    //TFrm_Trace.InternalTrace (FormatDateTime('yyyymmdd hh:mm:ss:zzz',now) + ' after add table');
@@ -424,7 +587,6 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-
 
 procedure Tframe_table.copySelected;
 var
@@ -486,11 +648,13 @@ end;
 // To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
 // When the F2 key is pressed or the user double click the node, the flag is set
 
-procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree;
-  var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
+procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree;    var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
    if CharCode = VK_F2 then
       VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
 end;
+
+
+
 
 end.

@@ -445,47 +445,48 @@ begin
    vstTrace.Header.MainColumn := 3;
    vstTrace.Header.AutoSizeIndex := -1; // auto
 
-   vstTrace.Header.options := vstTrace.Header.options - [hoAutoResize]
-   // no auto resize columns
-      + [hovisible] // header must be visible to enable resize !
-      + [hoOwnerDraw] // needed for sort
-      + [hoDblClickResize]; // allows a column to resize itself to its largest entry
+   vstTrace.Header.options := vstTrace.Header.options
+      - [hoAutoResize]               // no auto resize columns
+      + [hovisible]                  // header must be visible to enable resize !
+      + [hoOwnerDraw]                // needed for sort
+      + [hoDblClickResize];          // allows a column to resize itself to its largest entry
 
    // vstTrace.TreeOptions.AnimatedOptions
    // vstTrace.TreeOptions.StringOptions
 
-   vstTrace.TreeOptions.AutoOptions := vstTrace.TreeOptions.AutoOptions +
-      [toAutoSpanColumns] // Large entries continue into next columns
+   vstTrace.TreeOptions.AutoOptions := vstTrace.TreeOptions.AutoOptions
+      + [toAutoSpanColumns]          // Large entries continue into next columns
       + [toDisableAutoscrollOnFocus] // Disable scrolling a column entirely into view if it gets focused.
-   // TPA : If not set, when the user click a cell, vt will
-   // scroll the complete column into view. Pose problem with ODS for example
+                                     // TPA : If not set, when the user click a cell, vt will
+                                     // scroll the complete column into view. Pose problem with ODS for example
       + [toDisableAutoscrollOnEdit]; // Same for edit : don't scroll to column
-   vstTrace.TreeOptions.PaintOptions := vstTrace.TreeOptions.PaintOptions -
-      [toUseBlendedImages] // Don't use blended images
-      - [toShowTreeLines] // don't Display tree lines to show hierarchy of nodes.
-      - [toHideSelection] // show a grayed selection when the tree lose the focus
-      + [toShowRoot] // show root.
-      + [toShowButtons] // Display collapse/expand buttons left to a node.
-      + [toThemeAware] // Draw UI elements (header, tree buttons etc.) according to the current theme
-      + [toHideFocusRect]; // hide focus rect
 
-   vstTrace.TreeOptions.SelectionOptions :=
-      vstTrace.TreeOptions.SelectionOptions + [toExtendedFocus] // Entries other than in the main column can be selected, edited etc.
-      + [toFullRowSelect] // selection highlight the whole line
-      + [toSimpleDrawSelection] // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
-      + [toMultiselect]; // Allow more than one node to be selected.
+   vstTrace.TreeOptions.PaintOptions := vstTrace.TreeOptions.PaintOptions
+      - [toUseBlendedImages]        // Don't use blended images
+      - [toShowTreeLines]           // don't Display tree lines to show hierarchy of nodes.
+      - [toHideSelection]           // show a grayed selection when the tree lose the focus
+      + [toShowRoot]                // show root.
+      + [toShowButtons]             // Display collapse/expand buttons left to a node.
+      + [toThemeAware]              // Draw UI elements (header, tree buttons etc.) according to the current theme
+      + [toHideFocusRect];          // hide focus rect
 
-   vstTrace.TreeOptions.MiscOptions := vstTrace.TreeOptions.MiscOptions +
-      [toReportMode] // Tree behaves like TListView in report mode.
-      + [toFullRepaintOnResize] // Fully invalidate the tree when its window is resized (CS_HREDRAW/CS_VREDRAW).
-      + [toWheelPanning] // Support for mouse panning (wheel mice only).
-      - [toFullRowDrag] // Start node dragging by clicking anywhere in it instead only on the caption or image.
-   // Must be used together with toDisableDrawSelection.
-      + [toGridExtensions] // Use some special enhancements to simulate and support grid behavior.
-      - [toVariableNodeHeight] // variable node height
-      - [toToggleOnDblClick] // Toggle node expansion state when it is double clicked.
-      - [toEditable] // don't allow edition. Code is used to detect double click or F2 key
-      - [toCheckSupport]; // no checkboxes
+   vstTrace.TreeOptions.SelectionOptions := vstTrace.TreeOptions.SelectionOptions
+      + [toExtendedFocus]           // Entries other than in the main column can be selected, edited etc.
+      + [toFullRowSelect]           // selection highlight the whole line
+      + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
+      + [toMultiselect];            // Allow more than one node to be selected.
+
+   vstTrace.TreeOptions.MiscOptions := vstTrace.TreeOptions.MiscOptions
+      + [toReportMode]              // Tree behaves like TListView in report mode.
+      + [toFullRepaintOnResize]     // Fully invalidate the tree when its window is resized (CS_HREDRAW/CS_VREDRAW).
+      + [toWheelPanning]            // Support for mouse panning (wheel mice only).
+      - [toFullRowDrag]             // Start node dragging by clicking anywhere in it instead only on the caption or image.
+                                    // Must be used together with toDisableDrawSelection.
+      + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
+      - [toVariableNodeHeight]      // variable node height
+      - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
+      - [toEditable]                // don't allow edition. Code is used to detect double click or F2 key
+      - [toCheckSupport];           // no checkboxes
 
 
    // vstTrace.OnDrawNode := DrawNode ;
@@ -2146,8 +2147,7 @@ end;
 procedure TFrm_Trace.TimerInfo;
 begin
 
-   TracesInfo.Caption := TimeToStr(LastModified)
-      + ', not filtered lines : ' + inttostr(vstTrace.RootNode.ChildCount);
+   TracesInfo.Caption := TimeToStr(LastModified) + ', not filtered lines : ' + inttostr(vstTrace.RootNode.ChildCount);
 
    // + ', Cache1 : ' + inttostr(MostUsedList.Count)
    // + ', Cache2 : ' + inttostr(LastUsedList.Count) ;
