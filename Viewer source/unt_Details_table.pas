@@ -290,12 +290,15 @@ begin
    
    end else begin
       // mouse down without Shift: start selection
-      StartSelectedColumn := HitInfo.HitColumn;
-      EndSelectedColumn   := HitInfo.HitColumn;
-      StartSelectedNode   := HitInfo.HitNode;
-      EndSelectedNode     := HitInfo.HitNode;
-      Selecting := true;
-      SelectingWithMouse := true;      
+
+      if (HitInfo.HitNode <> nil) then begin
+         StartSelectedColumn := HitInfo.HitColumn;
+         EndSelectedColumn   := HitInfo.HitColumn;
+         StartSelectedNode   := HitInfo.HitNode;
+         EndSelectedNode     := HitInfo.HitNode;
+         Selecting := true;
+         SelectingWithMouse := true;      
+      end;
    end;
    // refresh on both mouse down and mouse up
    vstTable.Refresh;
