@@ -1249,9 +1249,8 @@ end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
 // To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
+// When the user double click the node, the flag is set
 
 procedure TFrm_ODS.VstDebugStringDblClick(Sender: TObject);
 var
@@ -1286,14 +1285,9 @@ end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
-// To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
 procedure TFrm_ODS.VstDebugStringKeyAction(Sender: TBaseVirtualTree;
   var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
-   if CharCode = VK_F2 then
-      VstDebugString.TreeOptions.MiscOptions := VstDebugString.TreeOptions.MiscOptions + [toEditable] ;
    if CharCode = VK_DELETE then
       DeleteSelected() ;
 end;

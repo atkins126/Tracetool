@@ -141,7 +141,7 @@ begin
       + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
       - [toVariableNodeHeight]      // variable node height
       - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
-      - [toEditable]                // don't allow edition. Code is used to detect double click or F2 key
+      - [toEditable]                // don't allow edition. Code is used to detect double click 
       - [toCheckSupport];           // no checkboxes
 
    VstTable.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
@@ -347,10 +347,6 @@ end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
-// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
-
 procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
    if (selecting) and not (ssShift in Shift) then begin
@@ -362,9 +358,6 @@ begin
       EndSelectedNode     := VstTable.GetFirstSelected;      
       vstTable.Refresh;
    end;
-   
-   if CharCode = VK_F2 then
-      VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
@@ -633,29 +626,43 @@ var
    CopyStrings : TStringList ;
    CopyText: PChar;
    DetailRec : PTableRec ;
+   orderedList : Array of integer;
+   ColumnIndex : integer ;
 
    procedure CopyDetail (TestNode : PVirtualNode);
    var
       node : PVirtualNode ;
       NewLine: string;
-      c : integer ;
+      OrderedIndex: integer ;
+      //ColumnIndex : integer ;
       CellText :string ;
       //col : TVirtualTreeColumn ;
    begin
-      if VstTable.Selected [TestNode] then begin
-         DetailRec := VstTable.GetNodeData(TestNode) ;
-         if DetailRec = nil then
-            exit ;
+
+      DetailRec := VstTable.GetNodeData(TestNode) ;
+      //if VstTable.Selected [TestNode] then begin
+      if DetailRec <> nil then begin
+            
          NewLine := '' ;
-         for c := 0 to VstTable.header.Columns.Count-1 do begin
-            //col := VstTable.header.Columns[c] ;
-            CellText := DetailRec.Columns[c] ;
-            if NewLine = '' then
-               NewLine := TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier
-            else
-               NewLine := NewLine + TraceConfig.TextExport_Separator  + TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier ;
+         var hasSelectionInNode : boolean := false;
+
+         // ordered column.
+         
+         for OrderedIndex := 0 to length(orderedList)-1 do begin // VstTable.header.Columns.Count-1 do begin
+            ColumnIndex :=  orderedList[OrderedIndex];
+            if IsSelected(TestNode,ColumnIndex) then begin
+                hasSelectionInNode := true;
+                //col := VstTable.header.Columns[c] ;
+                CellText := DetailRec.Columns[ColumnIndex] ;
+                if NewLine = '' then
+                   NewLine := TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier
+                else
+                   NewLine := NewLine + TraceConfig.TextExport_Separator  + TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier ;
+
+            end;
          end ;
-         CopyStrings.Add(NewLine);
+         if hasSelectionInNode then         
+            CopyStrings.Add(NewLine);
       end ;
 
       // multi select
@@ -666,8 +673,14 @@ var
       end ;
    end ;
 begin
+
    CopyStrings := TStringList.Create;
    try
+      SetLength(orderedList, VstTable.header.Columns.Count);
+
+      for ColumnIndex := 0 to VstTable.header.Columns.Count-1 do 
+         orderedList[VstTable.header.Columns[ColumnIndex].Position] := ColumnIndex ;
+      
       CopyDetail (VstTable.RootNode);
       CopyText := CopyStrings.GetText;
    finally

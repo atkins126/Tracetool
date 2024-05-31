@@ -2,8 +2,8 @@ object Frm_ODS: TFrm_ODS
   Left = 358
   Top = 200
   Caption = 'ODS'
-  ClientHeight = 248
-  ClientWidth = 592
+  ClientHeight = 247
+  ClientWidth = 588
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,17 +16,17 @@ object Frm_ODS: TFrm_ODS
   object PanelOds: TPanel
     Left = 0
     Top = 0
-    Width = 592
-    Height = 248
+    Width = 588
+    Height = 247
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 596
-    ExplicitHeight = 249
+    ExplicitWidth = 592
+    ExplicitHeight = 248
     object VSplitter: TSplitter
-      Left = 200
+      Left = 196
       Top = 22
-      Height = 226
+      Height = 225
       Align = alRight
       Visible = False
       ExplicitLeft = 176
@@ -35,8 +35,8 @@ object Frm_ODS: TFrm_ODS
     object VstDebugString: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 188
-      Height = 226
+      Width = 184
+      Height = 225
       Align = alClient
       BevelInner = bvNone
       Colors.BorderColor = clBlack
@@ -100,6 +100,8 @@ object Frm_ODS: TFrm_ODS
       OnMeasureItem = VstDebugStringMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+      ExplicitWidth = 188
+      ExplicitHeight = 226
       Columns = <
         item
           Position = 0
@@ -121,21 +123,21 @@ object Frm_ODS: TFrm_ODS
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 203
+      Left = 199
       Top = 22
       Width = 389
-      Height = 226
+      Height = 225
       Align = alRight
       BevelInner = bvLowered
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
       Visible = False
-      ExplicitLeft = 207
-      ExplicitHeight = 227
+      ExplicitLeft = 203
+      ExplicitHeight = 226
       object SplitterH: TSplitter
         Left = 2
-        Top = 137
+        Top = 136
         Width = 385
         Height = 5
         Cursor = crVSplit
@@ -146,7 +148,7 @@ object Frm_ODS: TFrm_ODS
         Left = 2
         Top = 2
         Width = 385
-        Height = 135
+        Height = 134
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
@@ -202,6 +204,7 @@ object Frm_ODS: TFrm_ODS
         OnMeasureItem = VstDetailMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+        ExplicitHeight = 135
         Columns = <
           item
             Color = 16117479
@@ -218,13 +221,13 @@ object Frm_ODS: TFrm_ODS
       end
       inline FrameMemo: TFrameMemo
         Left = 2
-        Top = 142
+        Top = 141
         Width = 385
         Height = 82
         Align = alBottom
         TabOrder = 1
         ExplicitLeft = 2
-        ExplicitTop = 143
+        ExplicitTop = 142
         ExplicitWidth = 385
         ExplicitHeight = 82
         inherited SynMemo: TSynEdit
@@ -242,7 +245,7 @@ object Frm_ODS: TFrm_ODS
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 592
+      Width = 588
       Height = 22
       Align = alTop
       BevelOuter = bvNone
@@ -250,7 +253,7 @@ object Frm_ODS: TFrm_ODS
       ParentBackground = False
       TabOrder = 2
       DesignSize = (
-        592
+        588
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -260,7 +263,7 @@ object Frm_ODS: TFrm_ODS
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 569
+        Left = 565
         Top = 0
         Width = 22
         Height = 20
@@ -294,17 +297,19 @@ object Frm_ODS: TFrm_ODS
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 569
       end
     end
     object PanelGutter: TPanel
       Left = 0
       Top = 22
       Width = 12
-      Height = 226
+      Height = 225
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
+      ExplicitHeight = 226
     end
   end
   object PopupTree: TPopupMenu

@@ -2267,12 +2267,11 @@ begin
       if IsMultiColTree then begin
 
          // set indentation on first col  (no way to know the 'master col')
-         NewLine := String(StrRepeat(TreeIndentation, vstTrace.GetNodeLevel
-                  (TestNode)));
+         NewLine := String(StrRepeat(TreeIndentation, vstTrace.GetNodeLevel (TestNode)));
          ColIdx := vstTrace.Header.Columns.GetFirstVisibleColumn;
          while ColIdx <> InvalidColumn do begin
             if ColIdx < TreeRec.Columns.Count then begin
-            // check if more header than data
+               // check if more header than data
                if IsFirst = false then
                   NewLine := NewLine + TraceConfig.TextExport_Separator;
                // Last column can contain CRLF
@@ -2291,8 +2290,7 @@ begin
                RemoveLastCRLF(TreeRec.Columns[c])
                + TraceConfig.TextExport_TextQualifier;
 
-      end
-      else begin
+      end else begin
 
          LeftMsg := TreeRec.LeftMsg;
 
