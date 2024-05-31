@@ -30,42 +30,23 @@ type
     CopyMenu: TMenuItem;
     N2: TMenuItem;
     SelectAllMenu: TMenuItem;
-    procedure VstTableCreateEditor(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
+    procedure VstTableCreateEditor(Sender: TBaseVirtualTree;Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
     procedure VstTableDblClick(Sender: TObject);
-    procedure VstTableEditCancelled(Sender: TBaseVirtualTree;
-      Column: TColumnIndex);
-    procedure VstTableEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex);
-    procedure VstTableFreeNode(Sender: TBaseVirtualTree;
-      Node: PVirtualNode);
-    procedure VstTableMeasureItem(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
-    procedure VstTablePaintText(Sender: TBaseVirtualTree;
-      const TargetCanvas: TCanvas; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType);
-    procedure VstTableKeyAction(Sender: TBaseVirtualTree;
-      var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-    procedure VstTableGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+    procedure VstTableEditCancelled(Sender: TBaseVirtualTree;Column: TColumnIndex);
+    procedure VstTableEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;Column: TColumnIndex);
+    procedure VstTableFreeNode(Sender: TBaseVirtualTree;Node: PVirtualNode);
+    procedure VstTableMeasureItem(Sender: TBaseVirtualTree;TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+    procedure VstTablePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType);
+    procedure VstTableKeyAction(Sender: TBaseVirtualTree;var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
+    procedure VstTableGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure VstTableChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
-    procedure VstTableColumnClick(Sender: TBaseVirtualTree;
-      Column: TColumnIndex; Shift: TShiftState);
-    procedure VstTableFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex);
-    procedure VstTableBeforeCellPaint(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    procedure VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Integer);
-    procedure VstTableMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure VstTableMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure VstTableKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure VstTableKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure VstTableColumnClick(Sender: TBaseVirtualTree; Column: TColumnIndex; Shift: TShiftState);
+    procedure VstTableFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+    procedure VstTableBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+    procedure VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,      Y: Integer);
+    procedure VstTableMouseDown(Sender: TObject; Button: TMouseButton;      Shift: TShiftState; X, Y: Integer);
+    procedure VstTableMouseUp(Sender: TObject; Button: TMouseButton;      Shift: TShiftState; X, Y: Integer);
+    procedure VstTableKeyDown(Sender: TObject; var Key: Word;      Shift: TShiftState);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
@@ -163,13 +144,9 @@ begin
       - [toEditable]                // don't allow edition. Code is used to detect double click or F2 key
       - [toCheckSupport];           // no checkboxes
 
-
    VstTable.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
    VstTable.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
    VstTable.Colors.UnfocusedSelectionBorderColor := TraceWin.vstTrace.Colors.UnfocusedSelectionBorderColor ;
-
-   //VstTable.OnDrawNode := DrawNode ;
-
 end;
 
 //------------------------------------------------------------------------------
@@ -294,7 +271,6 @@ begin
    if (not Selecting) and (Key = VK_SHIFT) then  begin
       Selecting := true;
       SelectingWithMouse := false;
-      TFrm_Trace.InternalTrace('KeyDown selecting = true');
    end;
 end;
 
@@ -352,7 +328,7 @@ begin
       if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
          DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-         TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
+         //TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
          vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
          EndSelectedColumn := HitInfo.HitColumn;
          EndSelectedNode   := HitInfo.HitNode;
@@ -362,7 +338,6 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-
 procedure Tframe_table.VstTableMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
    Selecting := false;
@@ -372,36 +347,12 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
-begin
-   if ssShift in Shift then
-      TFrm_Trace.InternalTrace('KeyUp Shift ' + inttostr(Key))
-   else
-      TFrm_Trace.InternalTrace('KeyUp no Shift ' + inttostr(Key));
-
-//   if not (ssShift in Shift) then begin
-//      Selecting := false;
-//      SelectingWithMouse := false;
-//      StartSelectedColumn := -1;
-//      EndSelectedColumn   := -1;
-//      StartSelectedNode   := nil;
-//      EndSelectedNode     := nil;      
-//      TFrm_Trace.InternalTrace('KeyDown selecting = false');
-//   end;
-end;
-
-
 // Detect the F2 key.
 // To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
 // When the F2 key is pressed or the user double click the node, the flag is set
 
 procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
-   if ssShift in Shift then
-      TFrm_Trace.InternalTrace('KeyAction Shift ' + inttostr(charCode))
-   else
-      TFrm_Trace.InternalTrace('KeyAction no Shift ' + inttostr(charCode));
-
    if (selecting) and not (ssShift in Shift) then begin
       Selecting := false;
       SelectingWithMouse := false;
@@ -410,14 +361,11 @@ begin
       StartSelectedNode   := VstTable.GetFirstSelected;
       EndSelectedNode     := VstTable.GetFirstSelected;      
       vstTable.Refresh;
-      TFrm_Trace.InternalTrace('KeyAction selecting = false');
    end;
-   
    
    if CharCode = VK_F2 then
       VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
 end;
-
 
 //------------------------------------------------------------------------------
 
@@ -513,8 +461,6 @@ begin
 
    if (IsSelected(node,Column) = false) then
       exit ;
-
-   //TFrm_Trace.InternalTrace('BeforeCellPaint ' +  DetailRec.Columns[0] + ' col ' + inttostr (Column) + ', NodeIsSelected : ' + BoolToStr(NodeIsSelected,true) );
 
    if VstTable.Focused then
      TargetCanvas.Brush.Color := VstTable.Colors.FocusedSelectionColor

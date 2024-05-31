@@ -66,7 +66,6 @@ inherited frame_Table: Tframe_Table
     OnPaintText = VstTablePaintText
     OnKeyAction = VstTableKeyAction
     OnKeyDown = VstTableKeyDown
-    OnKeyUp = VstTableKeyUp
     OnMeasureItem = VstTableMeasureItem
     OnMouseDown = VstTableMouseDown
     OnMouseMove = VstTableMouseMove
