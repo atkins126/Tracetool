@@ -58,8 +58,10 @@ type
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
-    procedure VstTableStateChange(Sender: TBaseVirtualTree; Enter,
-      Leave: TVirtualTreeStates);
+    procedure VstTableMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure VstTableMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
@@ -78,10 +80,10 @@ type
 var
   frame_table: Tframe_table;
 
-StartSelectedColumn: integer;
-LastSelectedColumn: integer;
-StartSelectedNode : PVirtualNode;
-LastSelectedNode : PVirtualNode;
+  StartSelectedColumn: integer;
+  EndSelectedColumn: integer;
+  StartSelectedNode : PVirtualNode;
+  EndSelectedNode : PVirtualNode;
 
 Selecting: boolean;
 
@@ -140,7 +142,7 @@ begin
    VstTable.TreeOptions.SelectionOptions := TraceWin.vstTrace.TreeOptions.SelectionOptions
       + [toDisableDrawSelection]    // Prevent user from selecting with the selection rectangle in multiselect mode.
       + [toExtendedFocus]           // Entries other than in the main column can be selected, edited etc.
-      + [toMultiselect]             // Allow more than one node to be selected.
+      - [toMultiselect]             // Allow more than one node to be selected.
       + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
       - [toFullRowSelect];          // selection highlight the whole line
  
@@ -282,13 +284,37 @@ end;
 
 //------------------------------------------------------------------------------
 
+procedure Tframe_table.VstTableMouseDown(Sender: TObject;  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+   HitInfo: THitInfo;
+begin
+   vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
+
+   if (ssShift in Shift) then begin
+      // mouse down With Shift : extend selection 
+      EndSelectedColumn  := HitInfo.HitColumn;
+      EndSelectedNode    := HitInfo.HitNode;
+      // Selecting not changed 
+   
+   end else begin
+      // mouse down without Shift: start selection
+      StartSelectedColumn := HitInfo.HitColumn;
+      EndSelectedColumn  := HitInfo.HitColumn;
+      StartSelectedNode   := HitInfo.HitNode;
+      EndSelectedNode    := HitInfo.HitNode;
+      Selecting := true;
+   end;
+   // refresh on both mouse down and mouse up
+   vstTable.Refresh;
+end;
+
 procedure Tframe_table.VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var
-  HitInfo: THitInfo;
-  DetailRec : PTableRec ;
-  CellText: string;
+   HitInfo: THitInfo;
+   DetailRec : PTableRec ;
+   CellText: string;
 begin
-  // VstTableMouseMove not called if toDisableDrawSelection is false
+   // VstTableMouseMove not called if toDisableDrawSelection is false
 
    if Selecting = false then
       exit;
@@ -300,48 +326,30 @@ begin
    if StartSelectedColumn = -1 then begin
       VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
       StartSelectedColumn := HitInfo.HitColumn;
-      LastSelectedColumn  := HitInfo.HitColumn;
+      EndSelectedColumn  := HitInfo.HitColumn;
       StartSelectedNode   := HitInfo.HitNode;
-      LastSelectedNode    := HitInfo.HitNode;
+      EndSelectedNode    := HitInfo.HitNode;
    end else begin
-      if (LastSelectedNode <> HitInfo.HitNode) or (LastSelectedColumn <> HitInfo.HitColumn) then begin
+      if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
          DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
          TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
          vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
-         LastSelectedColumn := HitInfo.HitColumn;
-         LastSelectedNode   := HitInfo.HitNode;
+         EndSelectedColumn := HitInfo.HitColumn;
+         EndSelectedNode   := HitInfo.HitNode;
          vstTable.Refresh;
       end;
    end;
 end;
 
 //------------------------------------------------------------------------------
-procedure Tframe_table.VstTableStateChange(Sender: TBaseVirtualTree; Enter,  Leave: TVirtualTreeStates);
-var
-  HitInfo: THitInfo;
-  DetailRec : PTableRec ;
-  CellText: string;
+
+procedure Tframe_table.VstTableMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-
-   if tsLeftButtonDown in enter then begin
-      cellText := '';
-      for var c := 0 to VstTable.Header.Columns.Count - 1 do
-         celltext := cellText + ',' +inttostr(VstTable.Header.Columns[c].Position);
-
-      //TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ' + celltext);
-
-      StartSelectedColumn := -1;
-      LastSelectedColumn := -1;
-      StartSelectedNode := nil;
-      LastSelectedNode := nil;
-      Selecting := true;
-   end else if tsLeftButtonDown in leave then begin
-      // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
-      Selecting := false;
-      vstTable.Refresh;
-   end;
+   Selecting := false;
+   vstTable.Refresh;
 end;
+
 //------------------------------------------------------------------------------
 
 procedure Tframe_table.VstTableFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
@@ -349,13 +357,6 @@ var
    DetailRec : PTableRec ;
    CellText: String;
 begin
-   //TFrm_Trace.InternalTrace('Tframe_table.VstTableFocusChanged, column: ' + inttostr(Column) + ', with text "' + celltext + '"') ;
-   StartSelectedColumn := -1;
-   LastSelectedColumn := -1;
-   StartSelectedNode := nil;
-   LastSelectedNode := nil;
-   vstTable.Refresh;
-
    DetailRec := Sender.GetNodeData(Node) ;
    if DetailRec = nil then
       exit ;
@@ -378,36 +379,36 @@ begin
    // LastSelectedColumn 0 => index 3
    // 0..3
 
-   if (StartSelectedColumn = -1) or (LastSelectedColumn = -1) then
+   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) then
       exit;
    
    PositionToCheck := VstTable.Header.Columns[ColumnIndexToCheck].Position;
 
-   if VstTable.Header.Columns[StartSelectedColumn].Position <= VstTable.Header.Columns[LastSelectedColumn].Position then begin
+   if VstTable.Header.Columns[StartSelectedColumn].Position <= VstTable.Header.Columns[EndSelectedColumn].Position then begin
      startPosition := VstTable.Header.Columns[StartSelectedColumn].Position;
-     endPosition   := VstTable.Header.Columns[LastSelectedColumn].Position;     
+     endPosition   := VstTable.Header.Columns[EndSelectedColumn].Position;
    end else begin  // reverse selection
-     startPosition := VstTable.Header.Columns[LastSelectedColumn].Position;
+     startPosition := VstTable.Header.Columns[EndSelectedColumn].Position;
      endPosition   := VstTable.Header.Columns[StartSelectedColumn].Position;
    end;
 
    if (PositionToCheck < startPosition) or (PositionToCheck > endPosition) then
        exit;
 
-   if (node = StartSelectedNode) or (node = LastSelectedNode) then begin
+   if (node = StartSelectedNode) or (node = EndSelectedNode) then begin
       result := true;
       exit;
    end;
 
    // start and last are the same node. Looping over LastSelectedNode will always found nodes
-   if (StartSelectedNode = LastSelectedNode ) then
+   if (StartSelectedNode = EndSelectedNode ) then
       exit;
 
-   if (StartSelectedNode^.Index) <= (LastSelectedNode^.Index) then begin   // Top to bottom
+   if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
       loopNode := StartSelectedNode;
-      loopEnd := LastSelectedNode;
+      loopEnd := EndSelectedNode;
    end else begin
-      loopNode := LastSelectedNode ;
+      loopNode := EndSelectedNode ;
       loopEnd   := StartSelectedNode;
    end;
 

@@ -66,8 +66,9 @@ inherited frame_Table: Tframe_Table
     OnPaintText = VstTablePaintText
     OnKeyAction = VstTableKeyAction
     OnMeasureItem = VstTableMeasureItem
+    OnMouseDown = VstTableMouseDown
     OnMouseMove = VstTableMouseMove
-    OnStateChange = VstTableStateChange
+    OnMouseUp = VstTableMouseUp
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
     Columns = <
