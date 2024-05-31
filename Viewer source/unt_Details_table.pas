@@ -62,7 +62,7 @@ type
       Leave: TVirtualTreeStates);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
-    function IsSelected(Node: PVirtualNode; Column:integer): boolean;
+    function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
@@ -307,7 +307,7 @@ begin
       if (LastSelectedNode <> HitInfo.HitNode) or (LastSelectedColumn <> HitInfo.HitColumn) then begin
          DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-         //TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
+         TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
          vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
          LastSelectedColumn := HitInfo.HitColumn;
          LastSelectedNode   := HitInfo.HitNode;
@@ -325,7 +325,12 @@ var
 begin
 
     if tsLeftButtonDown in enter then begin
-       // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ');
+      cellText := '';
+      for var c := 0 to VstTable.Header.Columns.Count - 1 do
+         celltext := cellText + ',' +inttostr(VstTable.Header.Columns[c].Position);
+
+       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ' + celltext);
+
        StartSelectedColumn := -1;
        LastSelectedColumn := -1;
        StartSelectedNode := nil;
@@ -355,20 +360,34 @@ end;
 
 //------------------------------------------------------------------------------
 
-function Tframe_table.IsSelected( Node: PVirtualNode; Column:integer) : boolean;
+function Tframe_table.IsSelected( Node: PVirtualNode; ColumnIndexToCheck:integer) : boolean;
 var
   LoopEnd : PVirtualNode;
   loopNode : PVirtualNode ;
+  startPosition, EndPosition, PositionToCheck: integer;
 begin
    result := false;
 
-   if (StartSelectedColumn < LastSelectedColumn) then begin
-      if (Column < StartSelectedColumn) or (column > LastSelectedColumn) then
-          exit;
-   end else begin     // reverse
-      if (Column > StartSelectedColumn) or (column < LastSelectedColumn) then
-          exit;
+   // todo :
+   // StartSelectedColumn 1 => index 0
+   // LastSelectedColumn 0 => index 3
+   // 0..3
+
+   if (StartSelectedColumn = -1) or (LastSelectedColumn = -1) then
+      exit;
+   
+   PositionToCheck := VstTable.Header.Columns[ColumnIndexToCheck].Position;
+
+   if VstTable.Header.Columns[StartSelectedColumn].Position <= VstTable.Header.Columns[LastSelectedColumn].Position then begin
+     startPosition := VstTable.Header.Columns[StartSelectedColumn].Position;
+     endPosition   := VstTable.Header.Columns[LastSelectedColumn].Position;     
+   end else begin  // reverse selection
+     startPosition := VstTable.Header.Columns[LastSelectedColumn].Position;
+     endPosition   := VstTable.Header.Columns[StartSelectedColumn].Position;
    end;
+
+   if (PositionToCheck < startPosition) or (PositionToCheck > endPosition) then
+       exit;
 
    if (node = StartSelectedNode) or (node = LastSelectedNode) then begin
       result := true;
