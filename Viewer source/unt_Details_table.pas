@@ -62,6 +62,10 @@ type
       Shift: TShiftState; X, Y: Integer);
     procedure VstTableMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
+    procedure VstTableKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure VstTableKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
@@ -85,7 +89,8 @@ var
   StartSelectedNode : PVirtualNode;
   EndSelectedNode : PVirtualNode;
 
-Selecting: boolean;
+  Selecting: boolean;
+  SelectingWithMouse : boolean;
 
 implementation
 
@@ -284,6 +289,17 @@ end;
 
 //------------------------------------------------------------------------------
 
+procedure Tframe_table.VstTableKeyDown(Sender: TObject; var Key: Word;  Shift: TShiftState);
+begin
+   if (not Selecting) and (Key = VK_SHIFT) then  begin
+      Selecting := true;
+      SelectingWithMouse := false;
+      TFrm_Trace.InternalTrace('KeyDown selecting = true');
+   end;
+end;
+
+//------------------------------------------------------------------------------
+
 procedure Tframe_table.VstTableMouseDown(Sender: TObject;  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
    HitInfo: THitInfo;
@@ -299,14 +315,17 @@ begin
    end else begin
       // mouse down without Shift: start selection
       StartSelectedColumn := HitInfo.HitColumn;
-      EndSelectedColumn  := HitInfo.HitColumn;
+      EndSelectedColumn   := HitInfo.HitColumn;
       StartSelectedNode   := HitInfo.HitNode;
-      EndSelectedNode    := HitInfo.HitNode;
+      EndSelectedNode     := HitInfo.HitNode;
       Selecting := true;
+      SelectingWithMouse := true;      
    end;
    // refresh on both mouse down and mouse up
    vstTable.Refresh;
 end;
+
+//------------------------------------------------------------------------------
 
 procedure Tframe_table.VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var
@@ -316,7 +335,7 @@ var
 begin
    // VstTableMouseMove not called if toDisableDrawSelection is false
 
-   if Selecting = false then
+   if (SelectingWithMouse = false)  then
       exit;
 
    vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
@@ -326,9 +345,9 @@ begin
    if StartSelectedColumn = -1 then begin
       VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
       StartSelectedColumn := HitInfo.HitColumn;
-      EndSelectedColumn  := HitInfo.HitColumn;
+      EndSelectedColumn   := HitInfo.HitColumn;
       StartSelectedNode   := HitInfo.HitNode;
-      EndSelectedNode    := HitInfo.HitNode;
+      EndSelectedNode     := HitInfo.HitNode;
    end else begin
       if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
          DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
@@ -347,8 +366,58 @@ end;
 procedure Tframe_table.VstTableMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
    Selecting := false;
+   SelectingWithMouse := false;      
    vstTable.Refresh;
 end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstTableKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
+begin
+   if ssShift in Shift then
+      TFrm_Trace.InternalTrace('KeyUp Shift ' + inttostr(Key))
+   else
+      TFrm_Trace.InternalTrace('KeyUp no Shift ' + inttostr(Key));
+
+//   if not (ssShift in Shift) then begin
+//      Selecting := false;
+//      SelectingWithMouse := false;
+//      StartSelectedColumn := -1;
+//      EndSelectedColumn   := -1;
+//      StartSelectedNode   := nil;
+//      EndSelectedNode     := nil;      
+//      TFrm_Trace.InternalTrace('KeyDown selecting = false');
+//   end;
+end;
+
+
+// Detect the F2 key.
+// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
+// When the F2 key is pressed or the user double click the node, the flag is set
+
+procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
+begin
+   if ssShift in Shift then
+      TFrm_Trace.InternalTrace('KeyAction Shift ' + inttostr(charCode))
+   else
+      TFrm_Trace.InternalTrace('KeyAction no Shift ' + inttostr(charCode));
+
+   if (selecting) and not (ssShift in Shift) then begin
+      Selecting := false;
+      SelectingWithMouse := false;
+      StartSelectedColumn := VstTable.FocusedColumn;
+      EndSelectedColumn   := VstTable.FocusedColumn;
+      StartSelectedNode   := VstTable.GetFirstSelected;
+      EndSelectedNode     := VstTable.GetFirstSelected;      
+      vstTable.Refresh;
+      TFrm_Trace.InternalTrace('KeyAction selecting = false');
+   end;
+   
+   
+   if CharCode = VK_F2 then
+      VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
+end;
+
 
 //------------------------------------------------------------------------------
 
@@ -357,6 +426,15 @@ var
    DetailRec : PTableRec ;
    CellText: String;
 begin
+
+   if not Selecting then begin
+      StartSelectedColumn := Column;      
+      StartSelectedNode   := Node;
+   end;
+   
+   EndSelectedColumn  := Column;
+   EndSelectedNode    := Node;
+
    DetailRec := Sender.GetNodeData(Node) ;
    if DetailRec = nil then
       exit ;
@@ -379,7 +457,7 @@ begin
    // LastSelectedColumn 0 => index 3
    // 0..3
 
-   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) then
+   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
       exit;
    
    PositionToCheck := VstTable.Header.Columns[ColumnIndexToCheck].Position;
@@ -406,10 +484,10 @@ begin
 
    if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
       loopNode := StartSelectedNode;
-      loopEnd := EndSelectedNode;
+      loopEnd  := EndSelectedNode;
    end else begin
       loopNode := EndSelectedNode ;
-      loopEnd   := StartSelectedNode;
+      loopEnd  := StartSelectedNode;
    end;
 
    while loopNode <> nil do begin
@@ -538,6 +616,12 @@ var
    DetailNode :  PVirtualNode ;
    DetailRec : PTableRec ;
 begin
+
+  StartSelectedColumn := -1;
+  EndSelectedColumn   := -1;
+  StartSelectedNode   := nil;
+  EndSelectedNode     := nil;
+
    VstTable.Clear ;
    VstTable.header.Columns.Clear ;
 
@@ -653,18 +737,6 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-
-// Detect the F2 key.
-// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
-
-procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree;    var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-begin
-   if CharCode = VK_F2 then
-      VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
-end;
-
-
 
 
 end.
