@@ -324,23 +324,23 @@ var
   CellText: string;
 begin
 
-    if tsLeftButtonDown in enter then begin
+   if tsLeftButtonDown in enter then begin
       cellText := '';
       for var c := 0 to VstTable.Header.Columns.Count - 1 do
          celltext := cellText + ',' +inttostr(VstTable.Header.Columns[c].Position);
 
-       TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ' + celltext);
+      //TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange enter tsLeftButtonDown ' + celltext);
 
-       StartSelectedColumn := -1;
-       LastSelectedColumn := -1;
-       StartSelectedNode := nil;
-       LastSelectedNode := nil;
-       Selecting := true;
-    end else if tsLeftButtonDown in leave then begin
-       // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
-       Selecting := false;
-       vstTable.Refresh;
-    end;
+      StartSelectedColumn := -1;
+      LastSelectedColumn := -1;
+      StartSelectedNode := nil;
+      LastSelectedNode := nil;
+      Selecting := true;
+   end else if tsLeftButtonDown in leave then begin
+      // TFrm_Trace.InternalTrace('Tframe_table.VstTableStateChange leave tsLeftButtonDown ');
+      Selecting := false;
+      vstTable.Refresh;
+   end;
 end;
 //------------------------------------------------------------------------------
 
@@ -349,7 +349,12 @@ var
    DetailRec : PTableRec ;
    CellText: String;
 begin
-   TFrm_Trace.InternalTrace('Tframe_table.VstTableFocusChanged, column: ' + inttostr(Column) + ', with text "' + celltext + '"') ;
+   //TFrm_Trace.InternalTrace('Tframe_table.VstTableFocusChanged, column: ' + inttostr(Column) + ', with text "' + celltext + '"') ;
+   StartSelectedColumn := -1;
+   LastSelectedColumn := -1;
+   StartSelectedNode := nil;
+   LastSelectedNode := nil;
+   vstTable.Refresh;
 
    DetailRec := Sender.GetNodeData(Node) ;
    if DetailRec = nil then
@@ -447,21 +452,17 @@ procedure Tframe_table.VstTablePaintText(Sender: TBaseVirtualTree;  const Target
 //   DetailRec : PTableRec ;
 begin
 //   DetailRec := Sender.GetNodeData(Node) ;
-//   // force font
-//   TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
+
+   // force font
+   //TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
 
 //   if (IsSelected(node,Column) = false) then
 //      exit ;
-
-//   if (IsSelected(node)) and (InRange(column, StartSelectedColumn, LastSelectedColumn)) then
-//   begin
-//     if VstTable.Focused then
-//       TargetCanvas.Font.Color := clHighlightText
-//     else
-//       TargetCanvas.Font.Color := VstTable.Font.Color;
-//   end;
-
-
+//
+//   if VstTable.Focused then
+//      TargetCanvas.Font.Color := clHighlightText
+//   else
+//      TargetCanvas.Font.Color := VstTable.Font.Color;
 end;
 
 
