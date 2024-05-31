@@ -485,7 +485,7 @@ begin
       + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
       - [toVariableNodeHeight]      // variable node height
       - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
-      - [toEditable]                // don't allow edition. Code is used to detect double click or F2 key
+      - [toEditable]                // don't allow edition. Code is used to detect double click
       - [toCheckSupport];           // no checkboxes
 
 
@@ -1672,7 +1672,7 @@ end;
 
 // Detect the double click.
 // To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
+// When the user double click the node, the flag is set
 
 procedure TFrm_Trace.vstTraceDblClick(Sender: TObject);
 var
@@ -1705,18 +1705,11 @@ begin
    PostMessage(self.Handle, WM_STARTEDITING_TRACE, Integer(SelectedNode), 0);
 end;
 
-
 // ------------------------------------------------------------------------------
 
-// Detect the F2 key.
-// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
 procedure TFrm_Trace.vstTraceKeyAction(Sender: TBaseVirtualTree;
    var CharCode: Word; var Shift: TShiftState; var DoDefault: boolean);
 begin
-   if CharCode = VK_F2 then
-      vstTrace.TreeOptions.MiscOptions := vstTrace.TreeOptions.MiscOptions +  [toEditable];
-
    if CharCode = VK_DELETE then
       DeleteSelected() ;
 end;

@@ -23,8 +23,6 @@ object Frm_Trace: TFrm_Trace
     BevelOuter = bvNone
     TabOrder = 0
     OnCanResize = PanelTTracesCanResize
-    ExplicitWidth = 564
-    ExplicitHeight = 323
     object VSplitter: TSplitter
       Left = 216
       Top = 22
@@ -188,7 +186,6 @@ object Frm_Trace: TFrm_Trace
       Color = clCream
       ParentBackground = False
       TabOrder = 2
-      ExplicitWidth = 564
       DesignSize = (
         568
         22)
