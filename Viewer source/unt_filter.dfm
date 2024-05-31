@@ -79,8 +79,6 @@ object FrmFilter: TFrmFilter
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 116
-    ExplicitWidth = 523
     DesignSize = (
       519
       41)

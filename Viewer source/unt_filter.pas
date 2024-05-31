@@ -14,7 +14,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms ,unt_utility,
-  Dialogs, StdCtrls, ExtCtrls, Menus, ComCtrls, ToolWin, Contnrs, VirtualTrees, VirtualTrees.Types, pscMenu;
+  Dialogs, StdCtrls, ExtCtrls, Menus, ComCtrls, ToolWin, Contnrs,VirtualTrees.BaseTree, VirtualTrees, VirtualTrees.Types, pscMenu;
 
 type
   TFrmFilter = class(TForm)

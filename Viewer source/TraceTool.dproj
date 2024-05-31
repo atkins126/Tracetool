@@ -133,8 +133,8 @@
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Build>567</VerInfo_Build>
-        <VerInfo_Keys>CompanyName=Thierry Parent;FileDescription=TraceTool utility;FileVersion=13.4.0.567;InternalName=TraceTool;LegalCopyright=Thierry Parent;LegalTrademarks=Thierry Parent;OriginalFilename=none;ProductName=TraceTool;ProductVersion=13.4;Comments=Freeware Trace utility for  Dot Net, Javascript, Java, Delphi,  C++ and Python</VerInfo_Keys>
+        <VerInfo_Build>571</VerInfo_Build>
+        <VerInfo_Keys>CompanyName=Thierry Parent;FileDescription=TraceTool utility;FileVersion=13.4.0.571;InternalName=TraceTool;LegalCopyright=Thierry Parent;LegalTrademarks=Thierry Parent;OriginalFilename=none;ProductName=TraceTool;ProductVersion=13.4;Comments=Freeware Trace utility for  Dot Net, Javascript, Java, Delphi,  C++ and Python</VerInfo_Keys>
         <VerInfo_MinorVer>3</VerInfo_MinorVer>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">

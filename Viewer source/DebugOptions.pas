@@ -1114,6 +1114,7 @@ end;
 
 //------------------------------------------------------------------------------
 
+// The return value must be a nonzero value to continue enumeration; to stop enumeration, it must return zero.
 function FontDetailEnumProc(
    var EnumLogFont: TEnumLogFont;       // pointer to logical-font data
    var TextMetric : TNewTextMetric;     // pointer to physical-font data
@@ -1125,6 +1126,7 @@ var
    fontSize : integer ;
    c : integer ;
 begin
+   result := 1 ;
    try
      LogFont := EnumLogFont.elfLogFont;
      FontDetail.lfCharSet := LogFont.lfCharSet ;
@@ -1146,7 +1148,8 @@ begin
          //LowTrace ('FontDetailEnumProc exception: ' + e.message);
          //TFrm_Trace.InternalTrace ('FontDetailEnumProc exception', e.message);
       end;
-   end;end;
+   end;
+end;
 
 //------------------------------------------------------------------------------
 

@@ -36,7 +36,6 @@ type
     function  DoCompare(Node1, Node2: PVirtualNode): Integer;
     procedure DoNextColumnOrder (Column: TColumnIndex);
     function  GetSortColumn(Column: TColumnIndex): TSortColumn;
-    procedure ClearSortExcept(SortCol: TSortColumn);
   public
     SortColumns : TObjectList ; // array of TSortColumn. SortColumns is the owner
     Tree : TVirtualStringTree ;
@@ -45,6 +44,7 @@ type
 
     procedure Sort (Node: PVirtualNode; DoInit: Boolean = True);
     procedure Unsort (Node: PVirtualNode) ; // unsort node if the application provide an OnCompare methode with sort on the -1 column
+    procedure ClearSortExcept(SortCol: TSortColumn);
 
   public  // events
     procedure onHeaderDrawQueryElements (Sender: TVTHeader; var PaintInfo: THeaderPaintInfo; var Elements: THeaderPaintElements);

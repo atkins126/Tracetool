@@ -39,7 +39,7 @@ uses
    , unt_utility
    , DebugOptions
    , unt_TraceConfig
-   , VirtualTrees, VirtualTrees.Types ;
+   , VirtualTrees.BaseTree, VirtualTrees, VirtualTrees.Types ;
 
 
 // called only by the timer (then main thread) for each messages in the stack object list

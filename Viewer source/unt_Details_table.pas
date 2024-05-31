@@ -309,7 +309,7 @@ end;
 procedure Tframe_table.VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
 var
    HitInfo: THitInfo;
-   DetailRec : PTableRec ;
+   //DetailRec : PTableRec ;
    CellText: string;
 begin
    // VstTableMouseMove not called if toDisableDrawSelection is false
@@ -329,8 +329,8 @@ begin
       EndSelectedNode     := HitInfo.HitNode;
    end else begin
       if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
-         DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
+         //DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
          //TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
          vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
          EndSelectedColumn := HitInfo.HitColumn;
@@ -565,6 +565,9 @@ begin
   EndSelectedNode     := nil;
 
    VstTable.Clear ;
+   if Sorter.SortColumns.Count > 1 then  
+      Sorter.ClearSortExcept(nil);
+   
    VstTable.header.Columns.Clear ;
 
    // first member, col1 is the title
