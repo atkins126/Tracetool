@@ -419,8 +419,8 @@ var
 
 begin
   st := '';
-  count := EventStringCount;
-  GetMem (args, count * sizeof (PChar));
+  count := EventStringCount;  // 3
+  GetMem (args, count * sizeof (PChar));  // 3 * 4
   try
 
     // create a pointer array on each strings. Used by FormatMessage method.

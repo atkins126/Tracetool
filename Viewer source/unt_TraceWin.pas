@@ -1653,12 +1653,13 @@ begin
          end; // next member
       end;
 
+      if Tframe_Classic(TreeDetailFrame).frameMemo.SynMemo.Text = '' then
+         Tframe_Classic(TreeDetailFrame).frameMemo.SetMemoText(TreeRec.LeftMsg,false,false);
+
       if VstDetailHaschildren then // if a node has chidren, show the root
-         VstDetail.TreeOptions.PaintOptions :=
-            VstDetail.TreeOptions.PaintOptions + [toShowRoot]
+         VstDetail.TreeOptions.PaintOptions := VstDetail.TreeOptions.PaintOptions + [toShowRoot]
       else // no children : remove the root
-         VstDetail.TreeOptions.PaintOptions :=
-            VstDetail.TreeOptions.PaintOptions - [toShowRoot];
+         VstDetail.TreeOptions.PaintOptions := VstDetail.TreeOptions.PaintOptions - [toShowRoot];
 
       ShowViewers();
 

@@ -524,6 +524,11 @@ var
       for c := 0 to Member.SubMembers.Count -1 do begin
          SubMember := TMember (Member.SubMembers.Items[c]) ;
          ChildNode := VstDetail.AddChild(MasterNode , SubMember) ;
+         if subMember.Col1 = 'Text' then
+           frameMemo.SetMemoText(subMember.Col2,false,false);
+
+
+
          // ensure node is initialized. Needed when the node is free to call onFreeNode
          VstDetail.ReinitNode(ChildNode,false);
          VstDetail.MultiLine[ChildNode] := true ;

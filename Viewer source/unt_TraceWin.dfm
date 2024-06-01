@@ -2,8 +2,8 @@ object Frm_Trace: TFrm_Trace
   Left = 323
   Top = 184
   Caption = 'TTRACE'
-  ClientHeight = 323
-  ClientWidth = 564
+  ClientHeight = 324
+  ClientWidth = 568
   Color = clBtnFace
   DragKind = dkDock
   Font.Charset = DEFAULT_CHARSET
@@ -17,12 +17,14 @@ object Frm_Trace: TFrm_Trace
   object PanelTTraces: TPanel
     Left = 0
     Top = 0
-    Width = 564
-    Height = 323
+    Width = 568
+    Height = 324
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     OnCanResize = PanelTTracesCanResize
+    ExplicitWidth = 564
+    ExplicitHeight = 323
     object VSplitter: TSplitter
       Left = 216
       Top = 22
@@ -117,6 +119,8 @@ object Frm_Trace: TFrm_Trace
         OnMeasureItem = vstTraceMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+        ExplicitWidth = 200
+        ExplicitHeight = 301
         Columns = <
           item
             Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coShowDropMark, coVisible]
@@ -186,7 +190,7 @@ object Frm_Trace: TFrm_Trace
       TabOrder = 2
       ExplicitWidth = 564
       DesignSize = (
-        564
+        568
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -197,7 +201,7 @@ object Frm_Trace: TFrm_Trace
         OnClick = TracesInfoClick
       end
       object LabelLogFile: TLabel
-        Left = 479
+        Left = 483
         Top = 5
         Width = 60
         Height = 13
@@ -215,7 +219,7 @@ object Frm_Trace: TFrm_Trace
         ExplicitLeft = 487
       end
       object butClose: TBitBtn
-        Left = 541
+        Left = 545
         Top = 0
         Width = 22
         Height = 22
@@ -249,6 +253,7 @@ object Frm_Trace: TFrm_Trace
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 541
       end
     end
   end

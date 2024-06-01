@@ -1,8 +1,8 @@
 object FrmTail: TFrmTail
   Left = 357
   Top = 206
-  ClientHeight = 246
-  ClientWidth = 584
+  ClientHeight = 247
+  ClientWidth = 588
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,17 +15,15 @@ object FrmTail: TFrmTail
   object GroupPanel: TPanel
     Left = 0
     Top = 0
-    Width = 584
-    Height = 246
+    Width = 588
+    Height = 247
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 588
-    ExplicitHeight = 247
     object VSplitter: TSplitter
-      Left = 178
+      Left = 182
       Top = 22
-      Height = 224
+      Height = 225
       Align = alRight
       Visible = False
       ExplicitLeft = 162
@@ -34,8 +32,8 @@ object FrmTail: TFrmTail
     object VstTail: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 166
-      Height = 224
+      Width = 170
+      Height = 225
       Align = alClient
       BevelInner = bvNone
       Colors.BorderColor = clBlack
@@ -98,8 +96,8 @@ object FrmTail: TFrmTail
       OnMeasureItem = VstTailMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-      ExplicitWidth = 174
-      ExplicitHeight = 226
+      ExplicitWidth = 166
+      ExplicitHeight = 224
       Columns = <
         item
           Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible]
@@ -117,20 +115,18 @@ object FrmTail: TFrmTail
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 181
+      Left = 185
       Top = 22
       Width = 403
-      Height = 224
+      Height = 225
       Align = alRight
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
       Visible = False
-      ExplicitLeft = 185
-      ExplicitHeight = 225
       object SplitterH: TSplitter
         Left = 1
-        Top = 151
+        Top = 152
         Width = 401
         Height = 5
         Cursor = crVSplit
@@ -141,7 +137,7 @@ object FrmTail: TFrmTail
         Left = 1
         Top = 1
         Width = 401
-        Height = 150
+        Height = 151
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
@@ -162,6 +158,7 @@ object FrmTail: TFrmTail
         Colors.UnfocusedColor = clGray
         Colors.UnfocusedSelectionColor = 15385233
         Colors.UnfocusedSelectionBorderColor = 15385233
+        DefaultNodeHeight = 17
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -197,7 +194,7 @@ object FrmTail: TFrmTail
         OnMeasureItem = VstDetailMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-        ExplicitHeight = 152
+        ExplicitHeight = 150
         Columns = <
           item
             Color = 16117479
@@ -214,7 +211,7 @@ object FrmTail: TFrmTail
       end
       inline FrameMemo: TFrameMemo
         Left = 1
-        Top = 156
+        Top = 157
         Width = 401
         Height = 67
         Align = alBottom
@@ -238,16 +235,16 @@ object FrmTail: TFrmTail
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 584
+      Width = 588
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
-      ExplicitWidth = 588
+      ExplicitWidth = 584
       DesignSize = (
-        584
+        588
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -257,7 +254,7 @@ object FrmTail: TFrmTail
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 561
+        Left = 565
         Top = 0
         Width = 22
         Height = 20
@@ -291,10 +288,10 @@ object FrmTail: TFrmTail
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
-        ExplicitLeft = 569
+        ExplicitLeft = 561
       end
       object butReload: TBitBtn
-        Left = 506
+        Left = 510
         Top = 0
         Width = 52
         Height = 20
@@ -302,10 +299,10 @@ object FrmTail: TFrmTail
         Caption = 'Reload'
         TabOrder = 1
         OnClick = butReloadClick
-        ExplicitLeft = 514
+        ExplicitLeft = 506
       end
       object butClearContent: TBitBtn
-        Left = 396
+        Left = 400
         Top = 0
         Width = 97
         Height = 20
@@ -313,19 +310,19 @@ object FrmTail: TFrmTail
         Caption = 'Clear File Content'
         TabOrder = 2
         OnClick = butClearContentClick
-        ExplicitLeft = 404
+        ExplicitLeft = 396
       end
     end
     object PanelGutter: TPanel
       Left = 0
       Top = 22
       Width = 12
-      Height = 224
+      Height = 225
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
-      ExplicitHeight = 226
+      ExplicitHeight = 224
     end
   end
   object PopupTree: TPopupMenu
