@@ -38,6 +38,7 @@ inherited frame_Classic: Tframe_Classic
     Colors.UnfocusedColor = clGray
     Colors.UnfocusedSelectionColor = clGray
     Colors.UnfocusedSelectionBorderColor = clGray
+    DefaultNodeHeight = 17
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11

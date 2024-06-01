@@ -778,6 +778,7 @@ begin
    PageContainer.actClear        .Enabled := true ;
    PageContainer.actSaveToFile   .Enabled := true ;
    PageContainer.actViewTraceInfo.Enabled := true ;
+   PageContainer.actFocus        .Enabled := true ;
    PageContainer.actPause        .Enabled := true ;
    PageContainer.actCopy         .Enabled := true ;
    PageContainer.actDelete       .Enabled := true ;
@@ -788,6 +789,7 @@ begin
    PageContainer.actFindNext     .Enabled := true ;
 
    PageContainer.actViewTraceInfo.checked := PanelTraceInfo.Visible ;
+   PageContainer.actFocus        .checked := TraceConfig.AppDisplay_FocusToReceivedMessage; ;
    PageContainer.actPause        .checked := not TraceConfig.ods_Enabled ;
 end;
 

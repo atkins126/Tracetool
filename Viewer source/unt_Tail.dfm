@@ -1,8 +1,8 @@
 object FrmTail: TFrmTail
   Left = 357
   Top = 206
-  ClientHeight = 247
-  ClientWidth = 588
+  ClientHeight = 246
+  ClientWidth = 584
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,17 +15,17 @@ object FrmTail: TFrmTail
   object GroupPanel: TPanel
     Left = 0
     Top = 0
-    Width = 588
-    Height = 247
+    Width = 584
+    Height = 246
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 592
-    ExplicitHeight = 248
+    ExplicitWidth = 588
+    ExplicitHeight = 247
     object VSplitter: TSplitter
-      Left = 182
+      Left = 178
       Top = 22
-      Height = 225
+      Height = 224
       Align = alRight
       Visible = False
       ExplicitLeft = 162
@@ -34,8 +34,8 @@ object FrmTail: TFrmTail
     object VstTail: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 170
-      Height = 225
+      Width = 166
+      Height = 224
       Align = alClient
       BevelInner = bvNone
       Colors.BorderColor = clBlack
@@ -117,20 +117,20 @@ object FrmTail: TFrmTail
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 185
+      Left = 181
       Top = 22
       Width = 403
-      Height = 225
+      Height = 224
       Align = alRight
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
       Visible = False
-      ExplicitLeft = 189
-      ExplicitHeight = 226
+      ExplicitLeft = 185
+      ExplicitHeight = 225
       object SplitterH: TSplitter
         Left = 1
-        Top = 152
+        Top = 151
         Width = 401
         Height = 5
         Cursor = crVSplit
@@ -141,7 +141,7 @@ object FrmTail: TFrmTail
         Left = 1
         Top = 1
         Width = 401
-        Height = 151
+        Height = 150
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
@@ -214,13 +214,13 @@ object FrmTail: TFrmTail
       end
       inline FrameMemo: TFrameMemo
         Left = 1
-        Top = 157
+        Top = 156
         Width = 401
         Height = 67
         Align = alBottom
         TabOrder = 1
         ExplicitLeft = 1
-        ExplicitTop = 158
+        ExplicitTop = 157
         ExplicitWidth = 401
         ExplicitHeight = 67
         inherited SynMemo: TSynEdit
@@ -238,15 +238,16 @@ object FrmTail: TFrmTail
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 588
+      Width = 584
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 588
       DesignSize = (
-        588
+        584
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -256,7 +257,7 @@ object FrmTail: TFrmTail
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 565
+        Left = 561
         Top = 0
         Width = 22
         Height = 20
@@ -293,7 +294,7 @@ object FrmTail: TFrmTail
         ExplicitLeft = 569
       end
       object butReload: TBitBtn
-        Left = 510
+        Left = 506
         Top = 0
         Width = 52
         Height = 20
@@ -304,7 +305,7 @@ object FrmTail: TFrmTail
         ExplicitLeft = 514
       end
       object butClearContent: TBitBtn
-        Left = 400
+        Left = 396
         Top = 0
         Width = 97
         Height = 20
@@ -319,7 +320,7 @@ object FrmTail: TFrmTail
       Left = 0
       Top = 22
       Width = 12
-      Height = 225
+      Height = 224
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3

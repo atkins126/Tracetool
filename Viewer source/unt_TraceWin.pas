@@ -1834,6 +1834,7 @@ begin
    PageContainer.actViewTraceInfo.Enabled := true;
 
    PageContainer.actPrint.Enabled := true;
+   PageContainer.actFocus.Enabled := true;
    PageContainer.actPause.Enabled := not IsWatch; // pause is possible for trace windows. Not possible for watch windows
    PageContainer.actCopy.Enabled := true;
    PageContainer.actDelete.Enabled := true;
@@ -1845,6 +1846,7 @@ begin
 
    // tbnMembers.down := VstProperties.Visible ;
    PageContainer.actViewTraceInfo.Checked := PanelRight.Visible;
+   PageContainer.actFocus.Checked := TraceConfig.AppDisplay_FocusToReceivedMessage;
    PageContainer.actPause.Checked := self.IsPaused;
 
    // enable plugin item menu

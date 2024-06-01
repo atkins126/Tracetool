@@ -4,8 +4,8 @@ inherited FrmEventLog: TFrmEventLog
   Caption = 'FrmEventLog'
   ClientHeight = 378
   ClientWidth = 729
-  ExplicitWidth = 745
-  ExplicitHeight = 417
+  ExplicitWidth = 741
+  ExplicitHeight = 416
   TextHeight = 13
   object GroupPanel: TPanel
     Left = 0
@@ -16,8 +16,6 @@ inherited FrmEventLog: TFrmEventLog
     BevelOuter = bvNone
     Caption = 'GroupPanel'
     TabOrder = 0
-    ExplicitWidth = 733
-    ExplicitHeight = 379
     object VSplitter: TSplitter
       Left = 341
       Top = 22
@@ -129,8 +127,6 @@ inherited FrmEventLog: TFrmEventLog
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
-      ExplicitLeft = 348
-      ExplicitHeight = 357
       object SplitterH: TSplitter
         Left = 2
         Top = 193
@@ -229,7 +225,7 @@ inherited FrmEventLog: TFrmEventLog
         Align = alBottom
         TabOrder = 1
         ExplicitLeft = 2
-        ExplicitTop = 199
+        ExplicitTop = 198
         ExplicitWidth = 381
         ExplicitHeight = 156
         inherited SynMemo: TSynEdit
@@ -254,6 +250,7 @@ inherited FrmEventLog: TFrmEventLog
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 725
       DesignSize = (
         729
         22)
@@ -299,6 +296,7 @@ inherited FrmEventLog: TFrmEventLog
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 702
       end
       object butReload: TBitBtn
         Left = 638
@@ -309,6 +307,7 @@ inherited FrmEventLog: TFrmEventLog
         Caption = 'Reload (50)'
         TabOrder = 1
         OnClick = butReloadClick
+        ExplicitLeft = 634
       end
       object butGetAll: TBitBtn
         Left = 538
@@ -319,6 +318,7 @@ inherited FrmEventLog: TFrmEventLog
         Caption = 'Get All messages'
         TabOrder = 2
         OnClick = butGetAllClick
+        ExplicitLeft = 534
       end
     end
     object PanelGutter: TPanel
@@ -330,6 +330,7 @@ inherited FrmEventLog: TFrmEventLog
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
+      ExplicitHeight = 355
     end
   end
   object PopupTree: TPopupMenu

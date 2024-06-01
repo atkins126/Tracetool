@@ -21,10 +21,12 @@ object FrmPageContainer: TFrmPageContainer
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitWidth = 456
+    ExplicitHeight = 269
     object ToolBar: TToolBar
       Left = 0
       Top = 0
-      Width = 464
+      Width = 460
       Height = 36
       AutoSize = True
       ButtonHeight = 36
@@ -33,7 +35,7 @@ object FrmPageContainer: TFrmPageContainer
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
-      ExplicitWidth = 460
+      ExplicitWidth = 456
       object tbnClear: TToolButton
         Left = 0
         Top = 0
@@ -65,20 +67,25 @@ object FrmPageContainer: TFrmPageContainer
         ImageIndex = 3
         Style = tbsSeparator
       end
-      object tbnPause: TToolButton
+      object tbnFocus: TToolButton
         Left = 100
+        Top = 0
+        Action = actFocus
+      end
+      object tbnPause: TToolButton
+        Left = 123
         Top = 0
         Action = actPause
         AutoSize = True
       end
       object tbnTraceInfo: TToolButton
-        Left = 123
+        Left = 146
         Top = 0
         Action = actViewTraceInfo
         AutoSize = True
       end
       object SepBookmark: TToolButton
-        Left = 146
+        Left = 169
         Top = 0
         Width = 8
         Caption = 'SepBookmark'
@@ -86,36 +93,36 @@ object FrmPageContainer: TFrmPageContainer
         Style = tbsSeparator
       end
       object tbnInsertRow: TToolButton
-        Left = 154
+        Left = 177
         Top = 0
         Action = actInsert
       end
       object tbnToggleBookmark: TToolButton
-        Left = 177
+        Left = 200
         Top = 0
         Action = actToggleBookmark
         AutoSize = True
       end
       object tbnBookmarkPrevious: TToolButton
-        Left = 200
+        Left = 223
         Top = 0
         Action = actPreviousBookmark
         AutoSize = True
       end
       object tbnBookmarkNext: TToolButton
-        Left = 223
+        Left = 246
         Top = 0
         Action = actNextBookmark
         AutoSize = True
       end
       object tbnClearBookmark: TToolButton
-        Left = 246
+        Left = 269
         Top = 0
         Action = actClearBookmarks
         AutoSize = True
       end
       object SepSearch: TToolButton
-        Left = 269
+        Left = 292
         Top = 0
         Width = 8
         Caption = 'SepSearch'
@@ -123,31 +130,31 @@ object FrmPageContainer: TFrmPageContainer
         Style = tbsSeparator
       end
       object tbnSearch: TToolButton
-        Left = 277
+        Left = 300
         Top = 0
         Action = actSearch
         AutoSize = True
       end
       object tbnSearchPrevious: TToolButton
-        Left = 300
+        Left = 323
         Top = 0
         Action = actFindPrevious
         AutoSize = True
       end
       object tbnSearchNext: TToolButton
-        Left = 323
+        Left = 346
         Top = 0
         Action = actFindNext
         AutoSize = True
       end
       object tbnClearHighlight: TToolButton
-        Left = 346
+        Left = 369
         Top = 0
         Action = actClearHighlight
         AutoSize = True
       end
       object SepFilter: TToolButton
-        Left = 369
+        Left = 392
         Top = 0
         Width = 8
         Caption = 'SepFilter'
@@ -155,13 +162,13 @@ object FrmPageContainer: TFrmPageContainer
         Style = tbsSeparator
       end
       object tbnFilter: TToolButton
-        Left = 377
+        Left = 400
         Top = 0
         Action = actFilter
         AutoSize = True
       end
       object tbnClearFilter: TToolButton
-        Left = 400
+        Left = 423
         Top = 0
         Action = actClearFilter
         AutoSize = True
@@ -238,6 +245,13 @@ object FrmPageContainer: TFrmPageContainer
       Enabled = False
       Hint = 'View Properties'
       OnExecute = actViewPropertyExecute
+    end
+    object actFocus: TAction
+      Category = 'Edit'
+      Caption = '&Focus'
+      Hint = 'Focus to last received'
+      ImageIndex = 43
+      OnExecute = actFocusExecute
     end
     object actPause: TAction
       Category = 'Edit'

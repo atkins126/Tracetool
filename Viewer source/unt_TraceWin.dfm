@@ -2,8 +2,8 @@ object Frm_Trace: TFrm_Trace
   Left = 323
   Top = 184
   Caption = 'TTRACE'
-  ClientHeight = 324
-  ClientWidth = 568
+  ClientHeight = 323
+  ClientWidth = 564
   Color = clBtnFace
   DragKind = dkDock
   Font.Charset = DEFAULT_CHARSET
@@ -17,8 +17,8 @@ object Frm_Trace: TFrm_Trace
   object PanelTTraces: TPanel
     Left = 0
     Top = 0
-    Width = 568
-    Height = 324
+    Width = 564
+    Height = 323
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
@@ -117,8 +117,6 @@ object Frm_Trace: TFrm_Trace
         OnMeasureItem = vstTraceMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-        ExplicitLeft = 11
-        ExplicitTop = 2
         Columns = <
           item
             Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coShowDropMark, coVisible]
@@ -173,8 +171,8 @@ object Frm_Trace: TFrm_Trace
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
-      ExplicitLeft = 222
-      ExplicitTop = 24
+      ExplicitLeft = 217
+      ExplicitHeight = 301
     end
     object PanelTop: TPanel
       Left = 0
@@ -186,8 +184,9 @@ object Frm_Trace: TFrm_Trace
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 564
       DesignSize = (
-        568
+        564
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -198,7 +197,7 @@ object Frm_Trace: TFrm_Trace
         OnClick = TracesInfoClick
       end
       object LabelLogFile: TLabel
-        Left = 483
+        Left = 479
         Top = 5
         Width = 60
         Height = 13
@@ -216,7 +215,7 @@ object Frm_Trace: TFrm_Trace
         ExplicitLeft = 487
       end
       object butClose: TBitBtn
-        Left = 545
+        Left = 541
         Top = 0
         Width = 22
         Height = 22
@@ -250,7 +249,6 @@ object Frm_Trace: TFrm_Trace
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
-        ExplicitLeft = 541
       end
     end
   end

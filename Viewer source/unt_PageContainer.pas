@@ -101,6 +101,8 @@ type
     ToolButton1: TToolButton;
     tbnInsertRow: TToolButton;
     actInsert: TAction;
+    actFocus: TAction;
+    tbnFocus: TToolButton;
 
     procedure FormCreate(Sender: TObject);
     procedure actCopyExecute(Sender: TObject);
@@ -129,6 +131,7 @@ type
     procedure actClearFilterExecute(Sender: TObject);
     procedure actPrintExecute(Sender: TObject);
     procedure actInsertExecute(Sender: TObject);
+    procedure actFocusExecute(Sender: TObject);
   protected
     procedure CreateParams(var Params : TCreateParams) ; override ;
   private
@@ -188,6 +191,7 @@ begin
    DockingPagecontrol.container := self ;
    DockingPagecontrol.Parent := PanelPageControl ; // self ;
 end;
+
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.FormClose(Sender: TObject;  var Action: TCloseAction);
@@ -361,6 +365,18 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure TFrmPageContainer.actFocusExecute(Sender: TObject);
+begin
+   actFocus.Checked := not actFocus.Checked;
+   TraceConfig.AppDisplay_FocusToReceivedMessage := actFocus.Checked;
+
+   for var c := 0 to ContainerList.Count-1 do begin
+      var FrmPageContainer := TFrmPageContainer(ContainerList[c]) ;
+      FrmPageContainer.actFocus.Checked := TraceConfig.AppDisplay_FocusToReceivedMessage;
+   end ;
+
+   Frm_Tool.SaveSettings() ;
+end;
 
 procedure TFrmPageContainer.actPauseExecute(Sender: TObject);
 var
@@ -748,7 +764,7 @@ var
    ToolbarFilter   : boolean ;
    IsFirst : boolean ;
 begin
-
+   actFocus.Checked := TraceConfig.AppDisplay_FocusToReceivedMessage;
    ToolbarStandard := traceConfig.AppDisplay_ToolbarStandard ;
    ToolbarSearch   := traceConfig.AppDisplay_ToolbarSearch ;
    ToolbarBookmark := traceConfig.AppDisplay_ToolbarBookmark ;
@@ -849,6 +865,7 @@ begin
    container.actClear           .Enabled := false ;
    container.actSaveToFile      .Enabled := false ;
    container.actViewTraceInfo   .Enabled := false ;
+   container.actFocus           .Enabled := false ;
    container.actPause           .Enabled := false ;
    container.actCopy            .Enabled := false ;
    container.actDelete          .Enabled := false ;
@@ -858,6 +875,7 @@ begin
    container.actFindNext        .Enabled := false ;
    Container.actClearFileContent.Visible := false ;
    container.actViewTraceInfo   .checked := false ;
+   container.actFocus           .checked := TraceConfig.AppDisplay_FocusToReceivedMessage;
    container.actPause           .checked := false ;
    container.actCloseWin        .Enabled := true ;    // always enabled
 
