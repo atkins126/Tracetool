@@ -56,7 +56,9 @@ uses
   unt_TraceConfig in 'unt_TraceConfig.pas',
   unt_AddLine in 'unt_AddLine.pas' {Frm_AddLine},
   unt_detailPopup in 'unt_detailPopup.pas' {DetailPopupForm},
-  unt_FrameMemo in 'unt_FrameMemo.pas' {FrameMemo: TFrame};
+  unt_FrameMemo in 'unt_FrameMemo.pas' {FrameMemo: TFrame},
+  uWindowsEvents in 'uWindowsEvents.pas'
+  ;
 
 {$R *.res}
 

@@ -128,15 +128,13 @@ type
     destructor Destroy; override;
     procedure Open;
     procedure Close;
+    function GetNewerRecID: Integer;
+    function GetOldestRecID: Integer;
 
     function GetEventData (out len: DWORD): PAnsiChar;
 
-    function GetNewerRecID: Integer;
-    function GetOldestRecID: Integer;
     procedure ReadEvent (n : Integer);
 
-    property NewerRecID : Integer read GetNewerRecID;
-    property OldestRecID : Integer read GetOldestRecID;
     property EventCount : Integer read GetEventCount;
     property EventSource : string read GetEventSource;
     property EventComputer : string read GetEventComputer;
@@ -422,7 +420,6 @@ begin
   count := EventStringCount;  // 3
   GetMem (args, count * sizeof (PChar));  // 3 * 4
   try
-
     // create a pointer array on each strings. Used by FormatMessage method.
     pArgs := args;
     p1 := PAnsiChar (fCurrentRecord) + PEventLogRecord (fCurrentRecord)^.StringOffset ;  // p1 must be declared as pAnsiChar for correct incrementation
@@ -487,7 +484,6 @@ end;
 function TEventLog.GetEventComputer : string;
 var
    pAnsiStr : PAnsiChar;
-
 begin
    pAnsiStr := PAnsiChar(fCurrentRecord);
    Inc(pAnsiStr,sizeof(TEventLogRecord));  // To increment correctly pstr, he must be a PAnsiChar
@@ -510,7 +506,6 @@ function TEventLog.GetRecordNumber : DWORD;
 begin
   result := PEventLogRecord (fCurrentRecord)^.RecordNumber;
 end;
-
 
 //-------------------------------------------------------------------------------
 
@@ -655,7 +650,7 @@ end;
 constructor TEventLogThread.create(fFileHandle: THandle; comp : THandle);
 begin
    FreeOnTerminate := true ;
-   hCloseEvent    := CreateEvent( nil, True, False, nil );   // Manualreset = true, initial = false
+   hCloseEvent   := CreateEvent( nil, True, False, nil );   // Manualreset = true, initial = false
    hChangedEvent := CreateEvent( nil, false, False, nil );  // Manualreset = false, initial = false
    hEventHandle  := fFileHandle ;
    hComponentHandle := comp ;

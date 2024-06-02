@@ -13,11 +13,16 @@ unit unt_eventLog;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Clipbrd, xmldoc ,
-  Dialogs, unt_base, StdCtrls, Buttons, VirtualTrees, VirtualTrees.Types, Unt_Tool, pscMenu ,
-  ExtCtrls, ComCtrls,Eventlog, unt_tracewin, unt_PageContainer, unt_editor, vstSort,unt_filter,
-  Menus, untPrintPreview, Vcl.ToolWin, SynEdit, unt_FrameMemo,
-  VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Clipbrd, xmldoc , Menus,
+  Dialogs, unt_base, StdCtrls, Buttons,  ExtCtrls, ComCtrls, Vcl.ToolWin,
+  pscMenu ,
+  SynEdit,
+  VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL,
+  VirtualTrees, VirtualTrees.Types,
+  Eventlog, uWindowsEvents,
+  Unt_Tool,
+  unt_tracewin, unt_PageContainer, unt_editor, vstSort,unt_filter,
+  untPrintPreview, unt_FrameMemo ;
 
 type
 
@@ -123,15 +128,18 @@ type
   private
     fLogName : string ;
     fEventLog : TEventLog ;
+    fWindowsEventLogs: TRBWindowsEventLogs;
     LastModified : tDateTime ;
     LastRead : integer ;
     Sorter : TVstSort ;
     FirstChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
-    LastChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
+    LastChildOrder: integer;  // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
-    procedure OnEventLogMessage(Sender: TEventLog);
-    procedure AddLogToTree(Sender: TEventLog) ;
+
+    procedure OnEventLogMessage(eventLog: TEventLog);   // old
+
+    procedure AddLogToTree(eventLog: TEventLog) ;
     procedure LoadLast(LineToRead: integer);
     function CheckSearchRecord(EvntLogRec: PEvntLogRec): boolean;
 
@@ -265,35 +273,55 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TFrmEventLog.SetEventLog (LogName : string ; LineToRead : integer);
+var
+   node : PVirtualNode ;
+   TreeRec : PEvntLogRec ;
+   event: TRBWindowsEvent;
 begin
    fLogName := LogName ;
-   fEventLog := TEventLog.Create (self) ;  // free on form close
-   fEventLog.Log := fLogName ;
-   fEventLog.Open ;
-   fEventLog.OnChangeEventLog := OnEventLogMessage ;
-   LoadLast (LineToRead) ;
+
+   fWindowsEventLogs := TRBWindowsEventLogs.Create('');
+
+   //fWindowsEventLogs.Reader.PopulateEvents(jsonReader);
+   //jsonReader.SaveToFile('jsonoutput.json');
+
+   fWindowsEventLogs.Reader.GetWindowsEventLogs(150);
+   for event in fWindowsEventLogs.Reader do
+   begin
+      node := VstEvent.AddChild (nil);
+      VstEvent.ReinitNode(node,false);
+      TreeRec := VstEvent.GetNodeData(node);
+
+      TreeRec.MessageText := event.Message;
+   end;
+
+   //fEventLog := TEventLog.Create (self) ;  // free on form close
+   //fEventLog.Log := fLogName ;
+   //fEventLog.OnChangeEventLog := OnEventLogMessage ;
+   //fEventLog.Open ;
+   //LoadLast (LineToRead) ;
 end ;
 
 //------------------------------------------------------------------------------
 
+// called outside thread from user interface
 procedure TFrmEventLog.LoadLast (LineToRead : integer);
 var
-   c, begLoop , endLoop , OldestRecID : integer ;
+   c, begLoop , NewerRecId , OldestRecID : integer ;
 begin
 
    application.ProcessMessages ;
    SetCursor(Screen.Cursors[crHourGlass]);
    VstEvent.BeginUpdate ;
    try
-      OldestRecID := fEventLog.OldestRecID ;
-      endLoop := fEventLog.NewerRecID ;
+      OldestRecID := fEventLog.GetOldestRecID() ;
+      NewerRecId  := fEventLog.GetNewerRecID() ;
+      LastRead    := NewerRecId ;
+      begLoop     := NewerRecId - LineToRead +1 ;
 
-      LastRead := endLoop ;
-
-      begLoop := endLoop - LineToRead +1 ;
       if begLoop < OldestRecID then
          begLoop := OldestRecID ;
-      for c := begLoop to endLoop do begin
+      for c := begLoop to NewerRecId do begin
          //Frm_Trace.InternalTrace ('ReadEvent ' + inttostr (c));
          fEventLog.ReadEvent (c) ;
          AddLogToTree (fEventLog) ;
@@ -310,21 +338,22 @@ end ;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.OnEventLogMessage (Sender: TEventLog) ;
+// called by TEventLog Component when the thread finished read events
+procedure TFrmEventLog.OnEventLogMessage (eventLog: TEventLog) ;
 var
-   c , endLoop: integer ;
+   c , NewerRecId: integer ;
 begin
    if self.IsPaused then
       exit ;
 
-   endLoop := sender.NewerRecID ;
+   NewerRecId := eventLog.GetNewerRecID() ;
 
-   for c := LastRead+1 to endLoop do begin
+   for c := LastRead+1 to NewerRecId do begin
       // TFrm_Trace.InternalTrace ('ReadEvent ' + inttostr (c));
-      sender.ReadEvent (c) ;
-      AddLogToTree (sender) ;
+      eventLog.ReadEvent (c) ;
+      AddLogToTree (eventLog) ;
    end ;
-   LastRead := endLoop ;
+   LastRead := NewerRecId ;
    LastModified := now ;
    // autosort if at least one column in sort
    if Sorter.SortColumns.Count <> 0 then
@@ -349,7 +378,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.AddLogToTree (Sender: TEventLog) ;
+procedure TFrmEventLog.AddLogToTree (eventLog: TEventLog) ;
 var
    node : PVirtualNode ;
    TreeRec : PEvntLogRec ;
@@ -365,7 +394,7 @@ var
       OneAnsiChar : AnsiChar ;
       Dump : TMember ;
    begin
-      AnsiPtr := Sender.GetEventData (datalen) ; // out datalen  . REturn PAnsiChar
+      AnsiPtr := eventLog.GetEventData (datalen) ; // out datalen  . REturn PAnsiChar
       if datalen <> 0 then begin
          Dump := TMember.Create ('Data') ;
          TreeRec.Members.SubMembers.Add(Dump) ;
@@ -407,7 +436,7 @@ var
       p : integer ;
       TypePropValue, TypeName,PropName , PropValue : string ;
    begin
-      Messages := getStrings (pchar(TreeRec.MessageText), length(TreeRec.MessageText));
+      Messages := getStrings (pchar(TreeRec.MessageText), length(TreeRec.MessageText));       // will be free later
       if Messages.Count <= 1 then begin  // single line
          TreeRec.Members.SubMembers.Add(TMember.Create ('Text', TreeRec.MessageText)) ;
       end else begin
@@ -426,7 +455,7 @@ var
                   TypePropValue := Trim( Messages.Strings[c]) ;
                   p := Pos (' ',TypePropValue) ;
                   if p = 0 then begin
-                     TreeRec.MessageText := Sender.EventMessageText ;
+                     TreeRec.MessageText := eventLog.EventMessageText ;
                      IsEifLike := false ;
                      member.free ;
                      break ;
@@ -435,7 +464,7 @@ var
                   TypePropValue := copy (TypePropValue, p+1 , 1000) ;
                   p := pos ('=', TypePropValue) ;
                   if p = 0 then begin
-                     TreeRec.MessageText := Sender.EventMessageText ;
+                     TreeRec.MessageText := eventLog.EventMessageText ;
                      IsEifLike := false ;
                      member.free ;
                      break ;
@@ -472,7 +501,7 @@ begin
    if TraceConfig.AppDisplay_FocusToReceivedMessage then
       NodeToFocus := node ;
 
-   case Sender.EventType of
+   case eventLog.EventType of
       EVENTLOG_SUCCESS           : begin EventType := 'SUCCESS' ;       TreeRec.EventIcon := -1 ; end ;
       EVENTLOG_AUDIT_SUCCESS     : begin EventType := 'AUDIT_SUCCESS' ; TreeRec.EventIcon := -1 ; end ;
       EVENTLOG_AUDIT_FAILURE     : begin EventType := 'AUDIT_FAILURE' ; TreeRec.EventIcon := -1 ; end ;
@@ -482,23 +511,23 @@ begin
    end ;
 
    TreeRec.Members := TMember.Create () ;
-   TreeRec.Time           := DateTimeToStr(Sender.EventTime) ;
-   TreeRec.Source         := Sender.EventSource ;
-   TreeRec.MessageText    := Sender.EventMessageText ;
-   TreeRec.EventRecordNum := Sender.EventRecordNumber ;
+   TreeRec.Time           := DateTimeToStr(eventLog.EventTime) ;
+   TreeRec.Source         := eventLog.EventSource ;
+   TreeRec.MessageText    := eventLog.EventMessageText ;
+   TreeRec.EventRecordNum := eventLog.EventRecordNumber ;
    LastChildOrder := TreeRec.EventRecordNum ;
 
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Time'     , DateTimeToStr(Sender.EventTime))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Source'   , Sender.EventSource )) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Time'     , DateTimeToStr(eventLog.EventTime))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Source'   , eventLog.EventSource )) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('EventType', eventtype)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Computer' , Sender.EventComputer)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('id'       , inttostr(Sender.EventId and $ffff))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('User'     , Sender.EventUser)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Category' , inttostr(Sender.EventCategory))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('MessageHandler', Sender.EventMessageHandler));
-   TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(Sender.EventRecordNumber)));
-   Adddump ;
-   AddMessage ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Computer' , eventLog.EventComputer)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('id'       , inttostr(eventLog.EventId and $ffff))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('User'     , eventLog.EventUser)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Category' , inttostr(eventLog.EventCategory))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('MessageHandler', eventLog.EventMessageHandler));
+   TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(eventLog.EventRecordNumber)));
+   Adddump() ;
+   AddMessage() ;
    // check if the node can be displayed according the filters
    if Filter <> nil then
       Filter.CheckNode(node) ;
