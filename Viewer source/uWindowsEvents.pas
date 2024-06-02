@@ -35,7 +35,7 @@ type
     property CategoryString:  string           read fCategoryString   write fCategoryString;
     property ComputerName:    string           read fComputerName     write fComputerName;
     property TypeString:      string           read fTypeString       write fTypeString;
-    property EventType:       integer          read fEventCode        write fEventCode;
+    property EventType:       integer          read fEventType        write fEventType;
     property EventCode:       integer          read fEventCode        write fEventCode;
     property EventIdentifier: integer          read fEventIdentifier  write fEventIdentifier;
     property RecordNumber:    integer          read fRecordNumber     write fRecordNumber;
@@ -161,7 +161,7 @@ begin
 
   // Value of the lower 16-bits of the EventIdentifier property.
   // It is present to match the value displayed in the Windows Event Viewer.
-  fEventCode    := integer(aEvent.EventCode);
+  fEventCode := integer(aEvent.EventCode);
 
   // Event message as it appears in the Windows event log.
   // This is a standard message with zero or more insertion strings supplied by the source of the Windows event.
@@ -288,8 +288,7 @@ begin
     if fApplicationName <> '' then
       eventQuery :=
           'SELECT * FROM Win32_NTLogEvent ' +
-          'Where SourceName = "' + fApplicationName + '" ' +
-          'AND Logfile = "Application" ' +
+          'Where Logfile = "' + fApplicationName + '" ' +
           'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"'
     else
       eventQuery :=
