@@ -13,7 +13,7 @@ unit unt_eventLog;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Clipbrd, xmldoc , Menus,
+  Windows, Messages, SysUtils, StrUtils, Variants, Classes, Graphics, Controls, Forms, Clipbrd, xmldoc , Menus,
   Dialogs, unt_base, StdCtrls, Buttons,  ExtCtrls, ComCtrls, Vcl.ToolWin,
   pscMenu ,
   SynEdit,
@@ -127,7 +127,7 @@ type
 
   private
     fLogName : string ;
-    fEventLog : TEventLog ;
+    //fEventLog : TEventLog ;
     fWindowsEventLogs: TRBWindowsEventLogs;
     LastModified : tDateTime ;
     LastRead : integer ;
@@ -144,6 +144,7 @@ type
 
     //procedure LoadLast(LineToRead: integer);
     function CheckSearchRecord(EvntLogRec: PEvntLogRec): boolean;
+    procedure AddWaitingMessage;
 
   public
     Gutter: TImage;
@@ -278,8 +279,11 @@ end;
 procedure TFrmEventLog.SetEventLog (LogName : string ; LineToRead : integer);
 begin
    fLogName := LogName ;
-   fWindowsEventLogs := TRBWindowsEventLogs.Create(LogName);  //
-   fWindowsEventLogs.Reader.GetWindowsEventLogs(150);
+
+   AddWaitingMessage() ;
+   fWindowsEventLogs := TRBWindowsEventLogs.Create(LogName);
+   fWindowsEventLogs.Reader.GetWindowsEventLogs(LineToRead);
+   VstEvent.Clear;
    for var event in fWindowsEventLogs.Reader do
       AddLogToTree(event);
    freeAndNil(fWindowsEventLogs);
@@ -290,6 +294,24 @@ begin
    //fEventLog.Open ;
    //LoadLast (LineToRead) ;
 end ;
+
+procedure TFrmEventLog.AddWaitingMessage();
+var
+   node : PVirtualNode ;
+   TreeRec : PEvntLogRec ;
+begin
+   node := VstEvent.AddChild (nil);
+   VstEvent.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
+   TreeRec := VstEvent.GetNodeData(node);
+
+   if TraceConfig.AppDisplay_FocusToReceivedMessage then
+      NodeToFocus := node ;
+
+   TreeRec.EventIcon := -1 ;
+
+   TreeRec.Source := 'Loading...';
+
+end;
 
 procedure TFrmEventLog.AddLogToTree (eventLog: TRBWindowsEvent) ;
 var
@@ -427,16 +449,19 @@ begin
    LastChildOrder := TreeRec.EventRecordNum ;
 
    TreeRec.Members := TMember.Create () ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Time'     , DateTimeToStr(eventLog.TimeWritten))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Category' , eventLog.Category + ' : ' + eventLog.CategoryString)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Source'   , eventLog.SourceName )) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('EventType', eventLog.TypeString)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('EventCode', inttostr(eventLog.EventCode))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Message'  , eventLog.Message)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Computer' , eventLog.ComputerName)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('id'       , inttostr(eventLog.EventIdentifier ))) ;  // and $ffff
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Time written'  , DateTimeToStr(eventLog.TimeWritten))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Time Generate' , DateTimeToStr(eventLog.TimeGenerated))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Category'      , eventLog.Category + ' : ' + eventLog.CategoryString)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Source'        , eventLog.SourceName )) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('EventType'     , eventLog.TypeString)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('EventCode'     , inttostr(eventLog.EventCode))) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Message'       , eventLog.Message)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Computer'      , eventLog.ComputerName)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('id'            , inttostr(eventLog.EventIdentifier ))) ;  // and $ffff
    TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(eventLog.RecordNumber)));
-   TreeRec.Members.SubMembers.Add(TMember.Create ('User'     , eventLog.User)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('User'          , eventLog.User)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Log File'      , eventLog.LogFile)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Other'         , eventLog.EventData)) ;
 
    //TreeRec.Members.SubMembers.Add(TMember.Create ('MessageHandler', eventLog.EventMessageHandler));
 
@@ -1070,7 +1095,9 @@ end;
 procedure TFrmEventLog.CloseWin;
 begin
    //fEventLog.Close ;  // stop monitoring
-   EventForm.Delete (EventForm.IndexOf(fLogName)) ;
+    if not ContainsText(fLogName,' ') then
+       EventForm.Delete (EventForm.IndexOf(fLogName)) ;
+
    self.close ;                                 // close the form
 end;
 

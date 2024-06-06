@@ -28,6 +28,7 @@ type
     fUser:             string;
     fSourceName:       string;
     fTimeWritten:      TDateTime;   // TimeGenerated is same as TimeWritten
+    fTimeGenerated:    TDateTime;
     fInsertionStrings: tInsertionArray;
     fDataArray :       tDataArray;
   public
@@ -45,6 +46,7 @@ type
     property User:            string           read fUser             write fUser;
     property SourceName:      string           read fSourceName       write fSourceName;
     property TimeWritten:     TdateTime        read fTimeWritten      write fTimeWritten;
+    property TimeGenerated:   TdateTime        read fTimeGenerated    write fTimeGenerated;
     property InsertionStrings: tInsertionArray read fInsertionStrings write fInsertionStrings;
     property DataArray:        tDataArray      read fDataArray        write fDataArray;
 
@@ -91,7 +93,7 @@ type
 
 implementation
 
-uses SysUtils, ComObj, ActiveX, System.Variants, DateUtils;
+uses SysUtils, StrUtils, ComObj, ActiveX, System.Variants, DateUtils;
 
 { TRBWindowsEvent }
 
@@ -147,8 +149,17 @@ begin
   end;
 
   // The time when the event is generated.
-  //if not VarIsNull(aEvent.TimeGenerated) then
-  //   fTimeGenerated := string (aEvent.TimeGenerated);  // 20240602053251.031166-000
+  if not VarIsNull(aEvent.TimeGenerated) then begin
+     var dateStr : string := aEvent.TimeGenerated ;      // '20240602101605.176003-000'
+     var fs: TFormatSettings;
+     fs := TFormatSettings.Create;
+     fs.DateSeparator := '-';
+     fs.ShortDateFormat := 'yyyyMMdd';
+     fs.TimeSeparator := ':';
+     fs.ShortTimeFormat := 'hhmmss.zzz';
+     fs.LongTimeFormat := 'hhmmss.zzz';
+     fTimeGenerated := StrToDateTime (dateStr,fs);       // 02-06-24 10:16:05:176
+  end;
 
   // Identifier of the event.
   // This is specific to the source that generated the event log entry and is used, together with SourceName,
@@ -268,8 +279,9 @@ procedure TRBWindowsEventLogsReader.GetWindowsEventLogs (MaxNumberOfEntries: int
 const
   wbemForwardOnly = 32;
   wbemReturnImmediately = 16;
+  wbemFlagReturnWhenComplete = 0;
 var
-  SWbemLocator: OLEVariant;
+  //SWbemLocator: OLEVariant;
   WMIService: OLEVariant;
   WbemObjectSet: OLEVariant;
   WbemObject: OLEVariant;
@@ -277,29 +289,59 @@ var
   iValue: LongWord;
   iCount: integer;
   event: TRBWindowsEvent;
+
+  function GetWMIObject(const objectName: String): IDispatch;
+  var
+    chEaten: Integer;
+    BindCtx: IBindCtx;
+    Moniker: IMoniker;
+  begin
+    OleCheck(CreateBindCtx(0, bindCtx));
+    OleCheck(MkParseDisplayName(BindCtx, StringToOleStr(objectName), chEaten, Moniker));
+    OleCheck(Moniker.BindToObject(BindCtx, nil, IDispatch, Result));
+  end;
 begin
   try
     Clear();
     iCount := 0;
-    SWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
-    WMIService := SWbemLocator.ConnectServer('localhost', 'root\CIMV2', '', '');
+    // https://www.codeproject.com/Articles/42571/WMI-Windows-Event-Logs-and-User-Privileges
+    // https://learn.microsoft.com/en-us/windows/win32/wmisdk/swbemlocator-connectserver
+    // https://learn.microsoft.com/fr-be/windows/win32/wmisdk/privilege-constants?redirectedfrom=MSDN
+    //WMIService := GetWMIObject('winmgmts:\\localhost\root\cimv2'); //CreateOleObject('winmgmts:{(Security)}');
+    WMIService := GetWMIObject('winmgmts:');   // {impersonationLevel=impersonate}
+    //WMIService.Security_.Privileges.AddAsString('SeSecurityPrivilege');  // SePrivilegeSecurity:7
+    //WMIService.Security_.Privileges.AddAsString('SeSystemProfilePrivilege'); // SeSystemProfilePrivilege:10
+    //WMIService.Security_.Privileges.AddAsString('SeSystemtimePrivilege');
+
+//
+//    SWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
+//    WMIService := SWbemLocator.ConnectServer(
+//      'localhost',   // server
+//      'root\CIMV2',  // namespace
+//      '',            // user
+//      '',           // password
+//      '',           // strLocale
+//      '',           // strAuthority
+//      0);           // iSecurityFlags           {impersonationLevel=impersonate,(Security)} ???
+//                    // objwbemNamedValueSet
 
     var eventQuery:string;
-    if fApplicationName <> '' then
+    if ContainsText(fApplicationName,' ') then
+      eventQuery := fApplicationName
+    else if fApplicationName <> '' then
       eventQuery :=
-          'SELECT * FROM Win32_NTLogEvent ' +
-          'Where Logfile = "' + fApplicationName + '" ' +
-          'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"'
-    else
-      eventQuery :=
-          'SELECT * FROM Win32_NTLogEvent ' +
-          'Where Logfile = "Application" ' +
-          'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"';
+          'SELECT * FROM Win32_NTLogEvent '
+          + 'Where Logfile = "' + fApplicationName + '" '
+          + 'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"'  ;
 
+    // https://learn.microsoft.com/en-us/windows/win32/wmisdk/swbemservices-execquery
+    // https://learn.microsoft.com/en-us/windows/win32/wmisdk/querying-with-wql
     WbemObjectSet := WMIService.ExecQuery(
-       EventQuery,
-       'WQL',
-       wbemReturnImmediately + wbemForwardOnly);
+       EventQuery,    //  String that contains the text of the query
+       'WQL',         //String that contains the query language to be used.
+       wbemReturnImmediately + wbemForwardOnly); // wbemReturnImmediately + wbemForwardOnly);    // wbemFlagReturnWhenComplete
+
+    //err := WbemObjectSet.Err;
 
     oEnum := IUnknown(WbemObjectSet._NewEnum) as IEnumvariant;
     while oEnum.Next(1, WbemObject, iValue) = 0 do begin

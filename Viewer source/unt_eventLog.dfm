@@ -92,8 +92,6 @@ inherited FrmEventLog: TFrmEventLog
       OnMeasureItem = VstEventMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-      ExplicitWidth = 325
-      ExplicitHeight = 355
       Columns = <
         item
           Position = 0
@@ -197,7 +195,6 @@ inherited FrmEventLog: TFrmEventLog
         OnMeasureItem = VstDetailMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-        ExplicitHeight = 190
         Columns = <
           item
             Color = 16117479
