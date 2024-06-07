@@ -24,12 +24,9 @@ type
     butOk: TButton;
     butCancel: TButton;
     Label1: TLabel;
-    Label2: TLabel;
-    EditQuery: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure AnyRadioButtonClick(Sender: TObject);
-    procedure EditQueryChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -54,24 +51,6 @@ uses registry, EventLog , Unt_Tool;
 procedure TFrmSelectEvent.AnyRadioButtonClick(Sender: TObject);
 begin
    butOk.Enabled := true;
-end;
-
-procedure TFrmSelectEvent.EditQueryChange(Sender: TObject);
-var
-   c : integer ;
-   RadioButton: TRadioButton;
-begin
-   if trim(editQuery.Text) <> '' then begin
-      butOk.Enabled := true;
-      exit;
-   end;
-
-   butOk.Enabled := false ;
-   for c := 0 to eventFiles.Count - 1 do begin
-      RadioButton := TRadioButton (eventFiles.Objects [c]) ;
-      if (RadioButton.Checked) then
-         butOk.Enabled := true ;
-   end ;
 end;
 
 procedure TFrmSelectEvent.FormCreate(Sender: TObject);

@@ -23,14 +23,13 @@ type
     fEventIdentifier:  integer;
     fRecordNumber:     integer;
     fMessage:          string;
-    fEventData:        string;
     fLogFile:          string;
     fUser:             string;
     fSourceName:       string;
     fTimeWritten:      TDateTime;   // TimeGenerated is same as TimeWritten
     fTimeGenerated:    TDateTime;
-    fInsertionStrings: tInsertionArray;
-    fDataArray :       tDataArray;
+    fInsertionStrings: tInsertionArray;   // array of string
+    fDataArray :       tDataArray;        // array of integer
   public
     property Category:        string           read fCategory         write fCategory;
     property CategoryString:  string           read fCategoryString   write fCategoryString;
@@ -40,8 +39,7 @@ type
     property EventCode:       integer          read fEventCode        write fEventCode;
     property EventIdentifier: integer          read fEventIdentifier  write fEventIdentifier;
     property RecordNumber:    integer          read fRecordNumber     write fRecordNumber;
-    property Message:         string           read fMessage          write fMessage;
-    property EventData:       string           read fEventData        write fEventData;
+    property Msg:             string           read fMessage          write fMessage;
     property LogFile:         string           read fLogFile          write fLogFile;
     property User:            string           read fUser             write fUser;
     property SourceName:      string           read fSourceName       write fSourceName;
@@ -49,6 +47,7 @@ type
     property TimeGenerated:   TdateTime        read fTimeGenerated    write fTimeGenerated;
     property InsertionStrings: tInsertionArray read fInsertionStrings write fInsertionStrings;
     property DataArray:        tDataArray      read fDataArray        write fDataArray;
+    //property EventData:       string           read fEventData        write fEventData;
 
     procedure PopulateFromOleVariant(aEvent: OLEVariant);
   end;
@@ -101,10 +100,17 @@ uses SysUtils, StrUtils, ComObj, ActiveX, System.Variants, DateUtils;
 
 procedure TRBWindowsEvent.PopulateFromOleVariant(aEvent: OLEVariant);
 var
-  insertionArray: array of String;
-  dataArray: array of integer;
+  localInsertionArray: array of String;
+  localDataArray: array of integer;
   i: integer;
 begin
+  // Identifies the event within the Windows event log file. This is specific to the log file and is used together with the log file name to uniquely identify an instance of this class.
+
+  // Record numbers are always unique; they are not reset to 1 when an event log is cleared.
+  // As a result, the highest record number also indicates the number of records that have
+  // been written to the event log since the operating system was installed
+  fRecordNumber := integer(aEvent.RecordNumber);
+
   //Classification of the event as determined by the source.
   // This subcategory is source-specific.
   fCategory := string (aEvent.Category);                // '0'
@@ -145,7 +151,8 @@ begin
      fs.ShortTimeFormat := 'hhmmss.zzz';
      fs.LongTimeFormat := 'hhmmss.zzz';
      fTimeWritten := StrToDateTime (dateStr,fs);       // 02-06-24 10:16:05:176
-     //var datestr2 := FormatDateTime('yyyy-MM-dd hh:mm:ss.zzz',fTimeWritten);
+     // Time is UTC. convert to local time
+     fTimeWritten := TTimeZone.Local.ToLocalTime(fTimeWritten);
   end;
 
   // The time when the event is generated.
@@ -159,6 +166,8 @@ begin
      fs.ShortTimeFormat := 'hhmmss.zzz';
      fs.LongTimeFormat := 'hhmmss.zzz';
      fTimeGenerated := StrToDateTime (dateStr,fs);       // 02-06-24 10:16:05:176
+     // Time is UTC. convert to local time
+     fTimeGenerated := TTimeZone.Local.ToLocalTime(fTimeGenerated);
   end;
 
   // Identifier of the event.
@@ -179,39 +188,45 @@ begin
   // The insertion strings are inserted into the standard message in a predefined format.
   // If there are no insertion strings or there is a problem inserting the insertion strings,
   // only the standard message will be present in this field.
-  fMessage := string (aEvent.Message);
-
-  // Identifies the event within the Windows event log file. This is specific to the log file and is used together with the log file name to uniquely identify an instance of this class.
-
-  // Record numbers are always unique; they are not reset to 1 when an event log is cleared.
-  // As a result, the highest record number also indicates the number of records that have
-  // been written to the event log since the operating system was installed
-  fRecordNumber := integer(aEvent.RecordNumber);
+  if not VarIsNull(aEvent.Message) then
+     fMessage := string (aEvent.Message)
+  else
+     fMessage := '';
 
   // Name of Windows event log file.
   // Together with RecordNumber, this is used to uniquely identify an instance of this class.
   fLogFile := string (aEvent.LogFile);             // Name of Windows event log file
 
   // List of the insertion strings that accompanied the report of the Windows event.
-  // fInsertionStrings : tInsertionArray
   if not VarIsNull(aEvent.InsertionStrings) then
   begin
-    insertionArray := aEvent.InsertionStrings;
-    for i := VarArrayLowBound(insertionArray, 1) to VarArrayHighBound(insertionArray, 1) do
-    begin
-      fEventData := fEventData + ',' + insertionArray[i];   // ',2124-05-09T05:32:50Z,RulesEngine'
-    end;
+     localInsertionArray := aEvent.InsertionStrings;
+     var low: integer := VarArrayLowBound(localInsertionArray, 1);
+     var high: integer := VarArrayHighBound(localInsertionArray, 1);
+     setLength (fInsertionStrings,High+1-low);
+     var index:integer := 0;
+
+     for i := low to High do
+     begin
+        fInsertionStrings[index] := localInsertionArray[i];
+        inc(index);
+     end;
   end;
 
   // List of the binary data that accompanied the report of the Windows event. (uint8 array)
-  // fDataArray : tDataArray;
   if not VarIsNull(aEvent.Data) then
   begin
-    DataArray := aEvent.Data;
-    for i := VarArrayLowBound(DataArray, 1) to VarArrayHighBound(DataArray, 1) do
-    begin
-      fEventData := fEventData + ',' + inttostr(DataArray[i]);  // ,2,1,0,9
-    end;
+     localDataArray := aEvent.Data;
+     var low: integer := VarArrayLowBound(localDataArray, 1);
+     var high: integer := VarArrayHighBound(localDataArray, 1);
+     setLength (fDataArray,High+1-low);
+     var index:integer := 0;
+
+     for i := VarArrayLowBound(localDataArray, 1) to VarArrayHighBound(localDataArray, 1) do
+     begin
+        fDataArray[index] := localDataArray[i];
+        inc(index);
+     end;
   end;
 
 end;
@@ -271,7 +286,7 @@ var
 begin
   event := TRBWindowsEvent.Create;
   event.Category := 'Error';
-  event.Message := aErrorMessage;
+  event.Msg := aErrorMessage;
   Add(event);
 end;
 
@@ -280,77 +295,50 @@ const
   wbemForwardOnly = 32;
   wbemReturnImmediately = 16;
   wbemFlagReturnWhenComplete = 0;
-var
-  //SWbemLocator: OLEVariant;
-  WMIService: OLEVariant;
-  WbemObjectSet: OLEVariant;
-  WbemObject: OLEVariant;
-  oEnum: IEnumvariant;
-  iValue: LongWord;
-  iCount: integer;
-  event: TRBWindowsEvent;
 
-  function GetWMIObject(const objectName: String): IDispatch;
-  var
-    chEaten: Integer;
-    BindCtx: IBindCtx;
-    Moniker: IMoniker;
-  begin
-    OleCheck(CreateBindCtx(0, bindCtx));
-    OleCheck(MkParseDisplayName(BindCtx, StringToOleStr(objectName), chEaten, Moniker));
-    OleCheck(Moniker.BindToObject(BindCtx, nil, IDispatch, Result));
-  end;
 begin
   try
     Clear();
-    iCount := 0;
+    var iCount := 0;
     // https://www.codeproject.com/Articles/42571/WMI-Windows-Event-Logs-and-User-Privileges
     // https://learn.microsoft.com/en-us/windows/win32/wmisdk/swbemlocator-connectserver
     // https://learn.microsoft.com/fr-be/windows/win32/wmisdk/privilege-constants?redirectedfrom=MSDN
-    //WMIService := GetWMIObject('winmgmts:\\localhost\root\cimv2'); //CreateOleObject('winmgmts:{(Security)}');
-    WMIService := GetWMIObject('winmgmts:');   // {impersonationLevel=impersonate}
-    //WMIService.Security_.Privileges.AddAsString('SeSecurityPrivilege');  // SePrivilegeSecurity:7
-    //WMIService.Security_.Privileges.AddAsString('SeSystemProfilePrivilege'); // SeSystemProfilePrivilege:10
-    //WMIService.Security_.Privileges.AddAsString('SeSystemtimePrivilege');
-
-//
-//    SWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
-//    WMIService := SWbemLocator.ConnectServer(
-//      'localhost',   // server
-//      'root\CIMV2',  // namespace
-//      '',            // user
-//      '',           // password
-//      '',           // strLocale
-//      '',           // strAuthority
-//      0);           // iSecurityFlags           {impersonationLevel=impersonate,(Security)} ???
-//                    // objwbemNamedValueSet
-
-    var eventQuery:string;
-    if ContainsText(fApplicationName,' ') then
-      eventQuery := fApplicationName
-    else if fApplicationName <> '' then
-      eventQuery :=
-          'SELECT * FROM Win32_NTLogEvent '
-          + 'Where Logfile = "' + fApplicationName + '" '
-          + 'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"'  ;
-
     // https://learn.microsoft.com/en-us/windows/win32/wmisdk/swbemservices-execquery
     // https://learn.microsoft.com/en-us/windows/win32/wmisdk/querying-with-wql
-    WbemObjectSet := WMIService.ExecQuery(
-       EventQuery,    //  String that contains the text of the query
-       'WQL',         //String that contains the query language to be used.
+
+    var BindCtx: IBindCtx;
+    OleCheck(CreateBindCtx(0, bindCtx));
+
+    var Moniker: IMoniker;
+    var chEaten: Integer;
+    OleCheck(MkParseDisplayName(BindCtx, StringToOleStr('winmgmts:'), chEaten, Moniker));    // 'winmgmts:\\localhost\root\cimv2'  // {impersonationLevel=impersonate}
+
+    var dispatch: IDispatch;
+    OleCheck(Moniker.BindToObject(BindCtx, nil, IDispatch, dispatch));
+
+    var WMIService: OLEVariant := dispatch;
+
+    var eventQuery :=
+       'SELECT * FROM Win32_NTLogEvent '
+       + 'Where Logfile = "' + fApplicationName + '" '
+       + 'AND TimeGenerated >= "' + DateTimeToStr(IncDay(Now(), -10)) + '"'  ;
+
+    var WbemObjectSet: OLEVariant := WMIService.ExecQuery(
+       EventQuery,    // text of the query
+       'WQL',         // the query language to be used.
        wbemReturnImmediately + wbemForwardOnly); // wbemReturnImmediately + wbemForwardOnly);    // wbemFlagReturnWhenComplete
 
-    //err := WbemObjectSet.Err;
+    var WbemObject: OLEVariant;
+    var iValue: LongWord;
+    var oEnum: IEnumvariant := IUnknown(WbemObjectSet._NewEnum) as IEnumvariant;
 
-    oEnum := IUnknown(WbemObjectSet._NewEnum) as IEnumvariant;
     while oEnum.Next(1, WbemObject, iValue) = 0 do begin
-       event := TRBWindowsEvent.Create;
+       var event := TRBWindowsEvent.Create;
        event.PopulateFromOleVariant(WbemObject);
        Add(event);
        WbemObject := Unassigned;
        inc(iCount);
-       if iCount > MaxNumberOfEntries then
+       if (MaxNumberOfEntries <> -1) and (iCount > MaxNumberOfEntries) then
           Break;
     end;
   except
@@ -360,22 +348,5 @@ begin
       AddErrorMessage(E.Classname + ':' + E.Message);
   end;
 end;
-
-
-//procedure TJSONReaderOutput.AddEventLog(aEventLog: TRBWindowsEvent);
-//var
-//  JSON_Object: TJSONObject;
-//begin
-//  JSON_Object := TJSONObject.Create;
-//  JSON_Object.AddPair('category', aEventLog.Category);
-//  JSON_Object.AddPair('computerName', aEventLog.ComputerName);
-//  JSON_Object.AddPair('eventCode', aEventLog.EventCode.ToString);
-//  JSON_Object.AddPair('message', aEventLog.Message);
-//  JSON_Object.AddPair('recordNumber', aEventLog.RecordNumber.ToString);
-//  JSON_Object.AddPair('logFile', aEventLog.LogFile);
-//  JSON_Object.AddPair('eventData', aEventLog.EventData);
-//
-//  fJSON_Array.Add(JSON_Object);
-//end;
 
 end.

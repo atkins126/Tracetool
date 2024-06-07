@@ -16,11 +16,13 @@ inherited FrmEventLog: TFrmEventLog
     BevelOuter = bvNone
     Caption = 'GroupPanel'
     TabOrder = 0
+    OnCanResize = GroupPanelCanResize
     object VSplitter: TSplitter
       Left = 341
       Top = 22
       Height = 356
       Align = alRight
+      OnCanResize = VSplitterCanResize
       ExplicitLeft = 196
       ExplicitHeight = 149
     end
@@ -100,13 +102,13 @@ inherited FrmEventLog: TFrmEventLog
         item
           Position = 1
           Text = 'Time'
-          Width = 115
+          Width = 100
         end
         item
           MaxWidth = 1000
           Position = 2
           Text = 'Source'
-          Width = 150
+          Width = 130
         end
         item
           Color = 16705515
@@ -299,26 +301,24 @@ inherited FrmEventLog: TFrmEventLog
         ExplicitLeft = 702
       end
       object butReload: TBitBtn
-        Left = 638
-        Top = 0
-        Width = 65
-        Height = 20
+        Left = 595
+        Top = 1
+        Width = 109
+        Height = 22
         Anchors = [akTop, akRight]
-        Caption = 'Reload (50)'
+        Caption = 'Reload 500 (10 days)'
         TabOrder = 1
         OnClick = butReloadClick
-        ExplicitLeft = 634
       end
       object butGetAll: TBitBtn
-        Left = 538
-        Top = 0
-        Width = 97
-        Height = 20
+        Left = 441
+        Top = 1
+        Width = 149
+        Height = 22
         Anchors = [akTop, akRight]
-        Caption = 'Get All messages'
+        Caption = 'Get All messages (10 days)'
         TabOrder = 2
         OnClick = butGetAllClick
-        ExplicitLeft = 534
       end
     end
     object PanelGutter: TPanel

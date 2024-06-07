@@ -106,7 +106,7 @@ object frmPlugin: TfrmPlugin
   object butRemove: TButton
     Left = 13
     Top = 304
-    Width = 145
+    Width = 156
     Height = 25
     Caption = 'Remove from configuration'
     TabOrder = 7

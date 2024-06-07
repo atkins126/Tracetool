@@ -119,8 +119,6 @@ object Frm_Trace: TFrm_Trace
         OnMeasureItem = vstTraceMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-        ExplicitWidth = 200
-        ExplicitHeight = 301
         Columns = <
           item
             Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coShowDropMark, coVisible]

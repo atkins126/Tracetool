@@ -2040,7 +2040,6 @@ end;
 procedure TFrm_Tool.actEventlogExecute(Sender: TObject);
 var
    EVLog : TFrmEventLog;  // not (yet) stored in a list of event log forms
-   c : integer ;
    RadioButton: TRadioButton;
 begin
    FrmSelectEvent.ShowModal ;
@@ -2054,22 +2053,15 @@ begin
    EVLog.Show ;
    EVLog.SetActivePage() ;
 
-   if FrmSelectEvent.EditQuery.Text <> '' then begin
-      EVLog.Caption := 'EventLog::' + FrmSelectEvent.EditQuery.Text ;
-      EVLog.SetEventLog (FrmSelectEvent.EditQuery.Text,10000) ;
-   end else begin
-
-     // search for selected radiobutton
-      for c := 0 to eventFiles.Count - 1 do begin
-         RadioButton := TRadioButton (eventFiles.Objects [c]) ;
-         if RadioButton.Checked  then begin
-
-            EventForm.AddObject (eventFiles.Strings[c], EVLog) ;
-            EVLog.Caption := 'EventLog::' + eventFiles.Strings[c] ;
-            EVLog.SetEventLog (eventFiles.Strings[c],500) ;
-         end ;
+   // search for selected radiobutton
+   for var c := 0 to eventFiles.Count - 1 do begin
+      RadioButton := TRadioButton (eventFiles.Objects [c]) ;
+      if RadioButton.Checked  then begin
+         EventForm.AddObject (eventFiles.Strings[c], EVLog) ;
+         EVLog.Caption := 'EventLog::' + eventFiles.Strings[c] ;
+         EVLog.SetEventLog (eventFiles.Strings[c],500) ;
       end ;
-   end;
+   end ;
 end;
 
 //------------------------------------------------------------------------------

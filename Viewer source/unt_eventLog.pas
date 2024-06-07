@@ -19,7 +19,7 @@ uses
   SynEdit,
   VirtualTrees.BaseAncestorVCL, VirtualTrees.BaseTree, VirtualTrees.AncestorVCL,
   VirtualTrees, VirtualTrees.Types,
-  Eventlog, uWindowsEvents,
+  uWindowsEvents,
   Unt_Tool,
   unt_tracewin, unt_PageContainer, unt_editor, vstSort,unt_filter,
   untPrintPreview, unt_FrameMemo ;
@@ -124,10 +124,13 @@ type
       Column: TColumnIndex; Shift: TShiftState);
     procedure VstDetailFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
+    procedure GroupPanelCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
+    procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
 
   private
     fLogName : string ;
-    //fEventLog : TEventLog ;
     fWindowsEventLogs: TRBWindowsEventLogs;
     LastModified : tDateTime ;
     LastRead : integer ;
@@ -137,19 +140,14 @@ type
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
 
-    //procedure OnEventLogMessage(eventLog: TEventLog);
-
-    // procedure AddLogToTree(eventLog: TEventLog); overload;
     procedure AddLogToTree(eventLog: TRBWindowsEvent); //overload;
-
-    //procedure LoadLast(LineToRead: integer);
     function CheckSearchRecord(EvntLogRec: PEvntLogRec): boolean;
     procedure AddWaitingMessage;
-
   public
     Gutter: TImage;
     IsPaused : boolean ;
     NodeToFocus : PVirtualNode ;
+    rightPercent : extended;
     procedure SetEventLog(LogName: string; LineToRead: integer);
 
   public // TFrmBase
@@ -198,6 +196,14 @@ procedure TFrmEventLog.FormCreate(Sender: TObject);
 begin
    inherited ;
    FrameMemo.Height := 120 ;
+
+   if PanelTraceInfo.Width < 50 then
+      PanelTraceInfo.Width := 50;
+
+   var accept : boolean;
+   var size := PanelTraceInfo.Width;
+   VSplitterCanResize(self,size,accept); // calculated once left and right percent
+
    ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
 
    vst := VstEvent ;
@@ -280,6 +286,7 @@ procedure TFrmEventLog.SetEventLog (LogName : string ; LineToRead : integer);
 begin
    fLogName := LogName ;
 
+   VstEvent.Clear;
    AddWaitingMessage() ;
    fWindowsEventLogs := TRBWindowsEventLogs.Create(LogName);
    fWindowsEventLogs.Reader.GetWindowsEventLogs(LineToRead);
@@ -287,15 +294,10 @@ begin
    for var event in fWindowsEventLogs.Reader do
       AddLogToTree(event);
    freeAndNil(fWindowsEventLogs);
-
-   //fEventLog := TEventLog.Create (self) ;  // free on form close
-   //fEventLog.Log := fLogName ;
-   //fEventLog.OnChangeEventLog := OnEventLogMessage ;
-   //fEventLog.Open ;
-   //LoadLast (LineToRead) ;
 end ;
 
 procedure TFrmEventLog.AddWaitingMessage();
+
 var
    node : PVirtualNode ;
    TreeRec : PEvntLogRec ;
@@ -308,125 +310,64 @@ begin
       NodeToFocus := node ;
 
    TreeRec.EventIcon := -1 ;
-
    TreeRec.Source := 'Loading...';
-
 end;
 
 procedure TFrmEventLog.AddLogToTree (eventLog: TRBWindowsEvent) ;
 var
-   node : PVirtualNode ;
    TreeRec : PEvntLogRec ;
+const
+   Punctuation:string = ' ,.;:!@#$%^&*()_-=+<>?/';
+   procedure AddDump ;
+   begin
+      var datalen := length(eventLog.DataArray);
+      if datalen = 0 then
+         exit;
+       var Dump := TMember.Create ('Data') ;
+       TreeRec.Members.SubMembers.Add(Dump) ;
+       var loop1 := 0;
+       while loop1 <= integer(datalen)-1 do begin
+          var loop2 := 0;
+          var beginLine := loop1;
+          var hexa_representation := '';
+          var Str_representation := '';
+          while (loop1 <= datalen-1) and (loop2 < 16) do begin
+             var oneByte := eventLog.DataArray[loop1];
+             hexa_representation := hexa_representation + intTohex (integer(oneByte),2) + ' ' ;
+
+             var OneAnsiChar := AnsiChar(oneByte);
+             if (CharIsAlphaNum (OneAnsiChar)) or (Pos(string(OneAnsiChar), Punctuation) > 0) then
+                Str_representation := Str_representation + string(OneAnsiChar)
+             else
+                Str_representation := Str_representation + '.' ;
+
+             inc (loop1) ;
+             inc (loop2) ;
+          end ;
+          if hexa_representation <> '' then
+             dump.SubMembers.Add(TMember.Create (inttohex (beginLine,6) , hexa_representation , Str_representation)) ;
+       end ;
+   end ;
+
+   procedure AddMessage ;
+   begin
+      var datalen := length(eventLog.InsertionStrings);
+      if datalen = 0 then
+         exit;
+       var member: TMember := TMember.Create ('Insertion strings') ;
+       TreeRec.Members.SubMembers.Add(member) ;
+
+       for var loop1:integer := 0 to datalen-1 do begin
+          var oneLine := eventLog.InsertionStrings[loop1];
+          if eventLog.Msg = '' then
+             TreeRec.MessageText := TreeRec.MessageText + oneLine + ' ';
+
+          member.SubMembers.Add(TMember.Create (oneLine));
+       end;
+   end ;
+
 begin
-
-//   procedure AddDump ;
-//   var
-//      c,e, beginLine : integer ;
-//      hexa_representation : string ;
-//      Str_representation : string ;
-//      datalen : DWORD ;
-//      AnsiPtr : PAnsiChar ;
-//      OneAnsiChar : AnsiChar ;
-//      Dump : TMember ;
-//   begin
-//      AnsiPtr := eventLog.GetEventData (datalen) ; // out datalen  . REturn PAnsiChar
-//      if datalen <> 0 then begin
-//         Dump := TMember.Create ('Data') ;
-//         TreeRec.Members.SubMembers.Add(Dump) ;
-//         c := 0 ;
-//         while c <= integer(datalen)-1 do begin
-//            e := 0 ;
-//
-//            beginLine := c ;
-//            hexa_representation := '' ;
-//            Str_representation := '' ;
-//            while (c <= integer(datalen)-1) and (e < 16) do begin
-//               OneAnsiChar := AnsiPtr^ ;
-//               hexa_representation := hexa_representation + intTohex (integer(OneAnsiChar),2) + ' ' ;
-//
-//               if ord(OneAnsiChar) = 255 then
-//                  OneAnsiChar := chr(0) ;
-//
-//               if CharIsAlphaNum (OneAnsiChar) then
-//                  Str_representation := Str_representation + string(OneAnsiChar)
-//               else
-//                  Str_representation := Str_representation + '.' ;
-//
-//               inc (e) ;
-//               inc (c) ;
-//               Inc (AnsiPtr) ;
-//            end ;
-//            if hexa_representation <> '' then
-//               dump.SubMembers.Add(TMember.Create (inttohex (beginLine,6) , hexa_representation , Str_representation)) ;
-//         end ;
-//      end ;
-//   end ;
-//
-//   procedure AddMessage ;
-//   var
-//      member : TMember ;
-//      Messages : TStringList ;
-//      IsEifLike : boolean ;
-//      c : integer ;
-//      p : integer ;
-//      TypePropValue, TypeName,PropName , PropValue : string ;
-//   begin
-//      Messages := getStrings (pchar(TreeRec.MessageText), length(TreeRec.MessageText));       // will be free later
-//      if Messages.Count <= 1 then begin  // single line
-//         TreeRec.Members.SubMembers.Add(TMember.Create ('Text', TreeRec.MessageText)) ;
-//      end else begin
-//         // multline. check if it is a "EIF" like structure :
-//         // className
-//         // {
-//         //    Type prop=value
-//         // }
-//         IsEifLike := false ;
-//         if Messages.Count >= 4 then begin
-//            if (Messages.Strings[1] = '{') and (Messages.Strings[Messages.Count-1] = '}') then begin
-//               IsEifLike := true ;
-//               TreeRec.MessageText := Messages.Strings[0] ;
-//               member :=  TMember.Create (Messages.Strings[0]) ;
-//               for c := 2 to Messages.Count-2 do begin
-//                  TypePropValue := Trim( Messages.Strings[c]) ;
-//                  p := Pos (' ',TypePropValue) ;
-//                  if p = 0 then begin
-//                     TreeRec.MessageText := eventLog.EventMessageText ;
-//                     IsEifLike := false ;
-//                     member.free ;
-//                     break ;
-//                  end ;
-//                  TypeName := copy (TypePropValue, 1 , p-1) ;
-//                  TypePropValue := copy (TypePropValue, p+1 , 1000) ;
-//                  p := pos ('=', TypePropValue) ;
-//                  if p = 0 then begin
-//                     TreeRec.MessageText := eventLog.EventMessageText ;
-//                     IsEifLike := false ;
-//                     member.free ;
-//                     break ;
-//                  end ;
-//                  PropName := trim(copy (TypePropValue, 1 , p-1)) ;
-//                  PropValue := TrimLeft(copy (TypePropValue, p+1 , 1000)) ;
-//                  member.SubMembers.Add(TMember.Create(TypeName,PropName,PropValue)) ;
-//                  if PropName='Message' then
-//                     TreeRec.MessageText := copy (PropValue,2,length(PropValue)-2) ;
-//               end ;
-//               if IsEifLike then
-//                  TreeRec.Members.SubMembers.Add(member);
-//            end ;
-//         end ;
-//         if IsEifLike = false then begin  // multiline, but not EIF structure
-//            member :=  TMember.Create ('Text') ;
-//            for c := 0 to Messages.Count-1 do
-//               member.SubMembers.Add(TMember.Create(Messages.Strings[c])) ;
-//
-//            //member.SubMembers.Add(TMember.Create(TreeRec.MessageText)) ;
-//            TreeRec.Members.SubMembers.Add(member);
-//         end ;
-//      end ;
-//      Messages.Free ;
-//   end ;
-
-   node := VstEvent.AddChild (nil);
+   var node := VstEvent.AddChild (nil);
    VstEvent.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
    TreeRec := VstEvent.GetNodeData(node);
 
@@ -443,268 +384,50 @@ begin
 
    TreeRec.Time           := DateTimeToStr(eventLog.TimeWritten) ;
    TreeRec.Source         := eventLog.SourceName ;
-   TreeRec.MessageText    := eventLog.Message ;
+   TreeRec.MessageText    := eventLog.Msg ;
    TreeRec.EventRecordNum := eventLog.RecordNumber ;
 
    LastChildOrder := TreeRec.EventRecordNum ;
 
-   TreeRec.Members := TMember.Create () ;
+   TreeRec.Members := TMember.Create () ;       // Who clear TreeRec.Members ???
+   TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(eventLog.RecordNumber)));
    TreeRec.Members.SubMembers.Add(TMember.Create ('Time written'  , DateTimeToStr(eventLog.TimeWritten))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Time Generate' , DateTimeToStr(eventLog.TimeGenerated))) ;
+   if eventLog.TimeWritten <> eventLog.TimeGenerated then
+      TreeRec.Members.SubMembers.Add(TMember.Create ('Time Generate' , DateTimeToStr(eventLog.TimeGenerated))) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('Category'      , eventLog.Category + ' : ' + eventLog.CategoryString)) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('Source'        , eventLog.SourceName )) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('EventType'     , eventLog.TypeString)) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('EventCode'     , inttostr(eventLog.EventCode))) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Message'       , eventLog.Message)) ;
+   TreeRec.Members.SubMembers.Add(TMember.Create ('Message'       , eventLog.Msg)) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('Computer'      , eventLog.ComputerName)) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('id'            , inttostr(eventLog.EventIdentifier ))) ;  // and $ffff
-   TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(eventLog.RecordNumber)));
    TreeRec.Members.SubMembers.Add(TMember.Create ('User'          , eventLog.User)) ;
    TreeRec.Members.SubMembers.Add(TMember.Create ('Log File'      , eventLog.LogFile)) ;
-   TreeRec.Members.SubMembers.Add(TMember.Create ('Other'         , eventLog.EventData)) ;
 
+   //TreeRec.Members.SubMembers.Add(TMember.Create ('Other'         , eventLog.EventData)) ;
    //TreeRec.Members.SubMembers.Add(TMember.Create ('MessageHandler', eventLog.EventMessageHandler));
 
-   //Adddump() ;
-
-   //AddMessage() ;
+   Adddump() ;
+   AddMessage() ;
 
    // check if the node can be displayed according the filters
    if Filter <> nil then
       Filter.CheckNode(node) ;
-
 end ;
-
-//------------------------------------------------------------------------------
-
-// called outside thread from user interface
-//procedure TFrmEventLog.LoadLast (LineToRead : integer);
-//var
-//   c, begLoop , NewerRecId , OldestRecID : integer ;
-//begin
-//
-//   application.ProcessMessages ;
-//   SetCursor(Screen.Cursors[crHourGlass]);
-//   VstEvent.BeginUpdate ;
-//   try
-//      OldestRecID := fEventLog.GetOldestRecID() ;
-//      NewerRecId  := fEventLog.GetNewerRecID() ;
-//      LastRead    := NewerRecId ;
-//      begLoop     := NewerRecId - LineToRead +1 ;
-//
-//      if begLoop < OldestRecID then
-//         begLoop := OldestRecID ;
-//      for c := begLoop to NewerRecId do begin
-//         //Frm_Trace.InternalTrace ('ReadEvent ' + inttostr (c));
-//         fEventLog.ReadEvent (c) ;
-//         AddLogToTree (fEventLog) ;
-//      end ;
-//      // autosort if at least one column in sort
-//      if Sorter.SortColumns.Count <> 0 then
-//         Sorter.sort (nil) ;
-//
-//   finally
-//      VstEvent.EndUpdate ;
-//      SetCursor(Screen.Cursors[crDefault]);
-//   end ;
-//end ;
-
-//------------------------------------------------------------------------------
-
-//// called by TEventLog Component when the thread finished read events
-//procedure TFrmEventLog.OnEventLogMessage (eventLog: TEventLog) ;
-//var
-//   c , NewerRecId: integer ;
-//begin
-//   if self.IsPaused then
-//      exit ;
-//
-//   NewerRecId := eventLog.GetNewerRecID() ;
-//
-//   for c := LastRead+1 to NewerRecId do begin
-//      // TFrm_Trace.InternalTrace ('ReadEvent ' + inttostr (c));
-//      eventLog.ReadEvent (c) ;
-//      AddLogToTree (eventLog) ;
-//   end ;
-//   LastRead := NewerRecId ;
-//   LastModified := now ;
-//   // autosort if at least one column in sort
-//   if Sorter.SortColumns.Count <> 0 then
-//      Sorter.sort (nil) ;
-//end ;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmEventLog.butReloadClick(Sender: TObject);
 begin
-   VstEvent.Clear ;
-   //LoadLast(50);
+   SetEventLog (fLogName, 500);
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmEventLog.butGetAllClick(Sender: TObject);
 begin
-   VstEvent.Clear ;
-   //LoadLast(fEventLog.EventCount);
+   SetEventLog (fLogName, -1);
 end;
-
-//------------------------------------------------------------------------------
-
-//procedure TFrmEventLog.AddLogToTree (eventLog: TEventLog) ;
-//var
-//   node : PVirtualNode ;
-//   TreeRec : PEvntLogRec ;
-//   EventType : string ;
-//
-//   procedure AddDump ;
-//   var
-//      c,e, beginLine : integer ;
-//      hexa_representation : string ;
-//      Str_representation : string ;
-//      datalen : DWORD ;
-//      AnsiPtr : PAnsiChar ;
-//      OneAnsiChar : AnsiChar ;
-//      Dump : TMember ;
-//   begin
-//      AnsiPtr := eventLog.GetEventData (datalen) ; // out datalen  . REturn PAnsiChar
-//      if datalen <> 0 then begin
-//         Dump := TMember.Create ('Data') ;
-//         TreeRec.Members.SubMembers.Add(Dump) ;
-//         c := 0 ;
-//         while c <= integer(datalen)-1 do begin
-//            e := 0 ;
-//
-//            beginLine := c ;
-//            hexa_representation := '' ;
-//            Str_representation := '' ;
-//            while (c <= integer(datalen)-1) and (e < 16) do begin
-//               OneAnsiChar := AnsiPtr^ ;
-//               hexa_representation := hexa_representation + intTohex (integer(OneAnsiChar),2) + ' ' ;
-//
-//               if ord(OneAnsiChar) = 255 then
-//                  OneAnsiChar := chr(0) ;
-//
-//               if CharIsAlphaNum (OneAnsiChar) then
-//                  Str_representation := Str_representation + string(OneAnsiChar)
-//               else
-//                  Str_representation := Str_representation + '.' ;
-//
-//               inc (e) ;
-//               inc (c) ;
-//               Inc (AnsiPtr) ;
-//            end ;
-//            if hexa_representation <> '' then
-//               dump.SubMembers.Add(TMember.Create (inttohex (beginLine,6) , hexa_representation , Str_representation)) ;
-//         end ;
-//      end ;
-//   end ;
-//
-//   procedure AddMessage ;
-//   var
-//      member : TMember ;
-//      Messages : TStringList ;
-//      IsEifLike : boolean ;
-//      c : integer ;
-//      p : integer ;
-//      TypePropValue, TypeName,PropName , PropValue : string ;
-//   begin
-//      Messages := getStrings (pchar(TreeRec.MessageText), length(TreeRec.MessageText));       // will be free later
-//      if Messages.Count <= 1 then begin  // single line
-//         TreeRec.Members.SubMembers.Add(TMember.Create ('Text', TreeRec.MessageText)) ;
-//      end else begin
-//         // multline. check if it is a "EIF" like structure :
-//         // className
-//         // {
-//         //    Type prop=value
-//         // }
-//         IsEifLike := false ;
-//         if Messages.Count >= 4 then begin
-//            if (Messages.Strings[1] = '{') and (Messages.Strings[Messages.Count-1] = '}') then begin
-//               IsEifLike := true ;
-//               TreeRec.MessageText := Messages.Strings[0] ;
-//               member :=  TMember.Create (Messages.Strings[0]) ;
-//               for c := 2 to Messages.Count-2 do begin
-//                  TypePropValue := Trim( Messages.Strings[c]) ;
-//                  p := Pos (' ',TypePropValue) ;
-//                  if p = 0 then begin
-//                     TreeRec.MessageText := eventLog.EventMessageText ;
-//                     IsEifLike := false ;
-//                     member.free ;
-//                     break ;
-//                  end ;
-//                  TypeName := copy (TypePropValue, 1 , p-1) ;
-//                  TypePropValue := copy (TypePropValue, p+1 , 1000) ;
-//                  p := pos ('=', TypePropValue) ;
-//                  if p = 0 then begin
-//                     TreeRec.MessageText := eventLog.EventMessageText ;
-//                     IsEifLike := false ;
-//                     member.free ;
-//                     break ;
-//                  end ;
-//                  PropName := trim(copy (TypePropValue, 1 , p-1)) ;
-//                  PropValue := TrimLeft(copy (TypePropValue, p+1 , 1000)) ;
-//                  member.SubMembers.Add(TMember.Create(TypeName,PropName,PropValue)) ;
-//                  if PropName='Message' then
-//                     TreeRec.MessageText := copy (PropValue,2,length(PropValue)-2) ;
-//               end ;
-//               if IsEifLike then
-//                  TreeRec.Members.SubMembers.Add(member);
-//            end ;
-//         end ;
-//         if IsEifLike = false then begin  // multiline, but not EIF structure
-//            member :=  TMember.Create ('Text') ;
-//            for c := 0 to Messages.Count-1 do
-//               member.SubMembers.Add(TMember.Create(Messages.Strings[c])) ;
-//
-//            //member.SubMembers.Add(TMember.Create(TreeRec.MessageText)) ;
-//            TreeRec.Members.SubMembers.Add(member);
-//         end ;
-//      end ;
-//      Messages.Free ;
-//   end ;
-//
-//begin
-//
-//   node := VstEvent.AddChild (nil) ;
-//   // ensure node is initialized. Needed when the node is free to call onFreeNode
-//   VstEvent.ReinitNode(node,false);
-//   TreeRec := VstEvent.GetNodeData(node) ;
-//
-//   if TraceConfig.AppDisplay_FocusToReceivedMessage then
-//      NodeToFocus := node ;
-//
-//   case eventLog.EventType of
-//      EVENTLOG_SUCCESS           : begin EventType := 'SUCCESS' ;       TreeRec.EventIcon := -1 ; end ;
-//      EVENTLOG_AUDIT_SUCCESS     : begin EventType := 'AUDIT_SUCCESS' ; TreeRec.EventIcon := -1 ; end ;
-//      EVENTLOG_AUDIT_FAILURE     : begin EventType := 'AUDIT_FAILURE' ; TreeRec.EventIcon := -1 ; end ;
-//      EVENTLOG_ERROR_TYPE        : begin EventType := 'ERROR' ;         TreeRec.EventIcon := CST_ICO_ERROR ; end ;
-//      EVENTLOG_WARNING_TYPE      : begin EventType := 'WARNING' ;       TreeRec.EventIcon := CST_ICO_WARNING ; end ;
-//      EVENTLOG_INFORMATION_TYPE  : begin EventType := 'INFORMATION';    TreeRec.EventIcon := CST_ICO_INFO ; end ;
-//   end ;
-//
-//   TreeRec.Members := TMember.Create () ;
-//   TreeRec.Time           := DateTimeToStr(eventLog.EventTime) ;
-//   TreeRec.Source         := eventLog.EventSource ;
-//   TreeRec.MessageText    := eventLog.EventMessageText ;
-//   TreeRec.EventRecordNum := eventLog.EventRecordNumber ;
-//   LastChildOrder := TreeRec.EventRecordNum ;
-//
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('Time'     , DateTimeToStr(eventLog.EventTime))) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('Source'   , eventLog.EventSource )) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('EventType', eventtype)) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('Computer' , eventLog.EventComputer)) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('id'       , inttostr(eventLog.EventId and $ffff))) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('User'     , eventLog.EventUser)) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('Category' , inttostr(eventLog.EventCategory))) ;
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('MessageHandler', eventLog.EventMessageHandler));
-//   TreeRec.Members.SubMembers.Add(TMember.Create ('EventRecordNum', inttostr(eventLog.EventRecordNumber)));
-//   Adddump() ;
-//   AddMessage() ;
-//   // check if the node can be displayed according the filters
-//   if Filter <> nil then
-//      Filter.CheckNode(node) ;
-//end ;
 
 //------------------------------------------------------------------------------
 
@@ -729,8 +452,6 @@ var
          if subMember.Col1 = 'Text' then
            frameMemo.SetMemoText(subMember.Col2,false,false);
 
-
-
          // ensure node is initialized. Needed when the node is free to call onFreeNode
          VstDetail.ReinitNode(ChildNode,false);
          VstDetail.MultiLine[ChildNode] := true ;
@@ -743,6 +464,7 @@ begin
    if Node <> nil then
       Sender.ScrollIntoView (Node,false,false);     // center and horizontally false
 
+   VstDetail.clear ;
    frameMemo.SetMemoText('',false,false);
    // get first then second. If second is not nil then it's multiselect : disable info panel
    FirstSelect := VstEvent.GetNextSelected (nil) ;
@@ -750,10 +472,11 @@ begin
       exit ;
 
    SecondSelect := VstEvent.GetNextSelected (FirstSelect) ;
-   if SecondSelect <> nil then
-      exit ;
-
-   VstDetail.clear ;
+   if SecondSelect <> nil then begin
+       VstDetail.Clear;
+       VstDetail.AddChild(nil); // the Get Text will draw itself number of row selected
+       exit;
+   end;
    EvntLogRec := TVirtualStringTree (Sender).GetNodeData(FirstSelect) ; // node
 
    // TraceInfo panel
@@ -1023,6 +746,16 @@ begin
      SelectedCompoNode := VstEvent.GetFirstSelected ;
      if SelectedCompoNode = nil then
         exit ;
+
+     var SecondSelect := VstEvent.GetNextSelected (SelectedCompoNode) ;
+     if SecondSelect <> nil then begin
+         var selection := inttostr(VstEvent.SelectedCount) + ' lines selected';
+         case Column of
+            0 : CellText := selection ;
+            else  CellText := '' ;
+         end ;
+         exit;
+     end;
 
      //ptr :=  ;
 
@@ -1507,6 +1240,7 @@ begin
    end ;
 end;
 
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -1970,6 +1704,24 @@ var
 begin
    EvntLogRec := VstEvent.GetNodeData(Node) ;
    result := EvntLogRec.Members ;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrmEventLog.VSplitterCanResize(Sender: TObject;
+  var NewSize: Integer; var Accept: Boolean);
+begin
+   rightPercent := NewSize / (GroupPanel.Width - vsplitter.width);
+   if (Width - NewSize < 105) then
+      NewSize := Width - 105;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrmEventLog.GroupPanelCanResize(Sender: TObject; var NewWidth,  NewHeight: Integer; var Resize: Boolean);
+begin
+   PanelTraceInfo.Width := Round(GroupPanel.Width * rightPercent);
+
 end;
 
 //------------------------------------------------------------------------------
