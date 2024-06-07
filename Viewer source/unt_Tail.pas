@@ -139,6 +139,10 @@ type
       Column: TColumnIndex; Shift: TShiftState);
     procedure VstDetailFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
+    procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
+    procedure GroupPanelCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
   private
     Sorter : TVstSort ;
     FirstChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
@@ -159,6 +163,7 @@ type
   public   // directory monitor
     Gutter: TImage;
     NodeToFocus : PVirtualNode ;
+    rightPercent : extended;
     IsPaused : boolean ;
     DirMon : TDirMon;
     lastpos : Longint  ;
@@ -243,6 +248,13 @@ begin
    inherited ;
    FrameMemo.Height := 120 ;
    ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
+
+   if PanelTraceInfo.Width < 50 then
+      PanelTraceInfo.Width := 50;
+   var accept : boolean;
+   var size := PanelTraceInfo.Width;
+   VSplitterCanResize(self,size,accept); // calculated once left and right percent
+
 
    vst := VstTail ;
    with TPSCMenu.create (self) do begin
@@ -1751,6 +1763,20 @@ begin
       PanelTraceInfo.Visible := false ;
       VSplitter.Visible := false ;
    end ;
+end;
+
+procedure TFrmTail.VSplitterCanResize(Sender: TObject;  var NewSize: Integer; var Accept: Boolean);
+begin
+   rightPercent := NewSize / (GroupPanel.Width - vsplitter.width);
+   if (Width - NewSize < 105) then
+      NewSize := Width - 105;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrmTail.GroupPanelCanResize(Sender: TObject; var NewWidth,  NewHeight: Integer; var Resize: Boolean);
+begin
+   PanelTraceInfo.Width := Round(GroupPanel.Width * rightPercent);
 end;
 
 //------------------------------------------------------------------------------

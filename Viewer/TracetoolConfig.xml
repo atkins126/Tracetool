@@ -18,7 +18,7 @@
 		<ApplicationTitle Value="socket: 8090 / 4502,  Http : 85, WebSocket:8091"/>
 		<Left Value="104"/>
 		<Top Value="104"/>
-		<Width Value="1020"/>
+		<Width Value="963"/>
 		<Height Value="783"/>
 		<StayOnTop Value="false"/>
 		<ShowOnstartup Value="true"/>
@@ -36,7 +36,7 @@
 		<DisableInternalLog Value="false"/>
 	</AppDisplay>
 	<Framework>
-		<ShowMembers Value="false"/>
+		<ShowMembers Value="true"/>
 		<AutoClear Value="false"/>
 		<MaxNode Value="20"/>
 		<MinNode Value="10"/>
@@ -62,7 +62,7 @@
 		</Orphans>
 	</Framework>
 	<Ods>
-		<Enabled Value="false"/>
+		<Enabled Value="true"/>
 		<AutoClear Value="true"/>
 		<MaxNode Value="2000"/>
 		<MinNode Value="1000"/>

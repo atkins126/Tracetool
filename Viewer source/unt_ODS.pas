@@ -146,6 +146,10 @@ type
       Column: TColumnIndex; Shift: TShiftState);
     procedure VstDetailFocusChanged(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex);
+    procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
+    procedure PanelOdsCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
 
   private
     Sorter : TVstSort ;
@@ -159,6 +163,7 @@ type
     ODSThread : TODSThread ;
     NodeToFocus : PVirtualNode ;
     LastModified : tDateTime ;
+    rightPercent : extended;
   public // TFrmBase
     procedure Print ; override ;
     procedure ClearWin ; override ;
@@ -211,6 +216,12 @@ begin
    inherited ;
    FrameMemo.Height := 120 ;
    ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
+
+   if PanelTraceInfo.Width < 50 then
+      PanelTraceInfo.Width := 50;
+   var accept : boolean;
+   var size := PanelTraceInfo.Width;
+   VSplitterCanResize(self,size,accept); // calculated once left and right percent
 
    vst := VstDebugString ;
    with TPSCMenu.create (self) do begin
@@ -821,12 +832,25 @@ begin
    end ;
 end;
 
+procedure TFrm_ODS.VSplitterCanResize(Sender: TObject;  var NewSize: Integer; var Accept: Boolean);
+begin
+   rightPercent := NewSize / (PanelOds.Width - vsplitter.width);
+   if (Width - NewSize < 105) then
+      NewSize := Width - 105;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrm_ODS.PanelOdsCanResize(Sender: TObject; var NewWidth,  NewHeight: Integer; var Resize: Boolean);
+begin
+   PanelTraceInfo.Width := Round(PanelOds.Width * rightPercent);
+end;
+
 //------------------------------------------------------------------------------
 
 procedure TFrm_ODS.ViewProperty;
 begin
   inherited;
-
 end;
 
 //------------------------------------------------------------------------------

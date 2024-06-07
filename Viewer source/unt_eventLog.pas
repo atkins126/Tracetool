@@ -197,14 +197,13 @@ begin
    inherited ;
    FrameMemo.Height := 120 ;
 
+   ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
+
    if PanelTraceInfo.Width < 50 then
       PanelTraceInfo.Width := 50;
-
    var accept : boolean;
    var size := PanelTraceInfo.Width;
    VSplitterCanResize(self,size,accept); // calculated once left and right percent
-
-   ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
 
    vst := VstEvent ;
    with TPSCMenu.create (self) do begin
@@ -1708,8 +1707,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VSplitterCanResize(Sender: TObject;
-  var NewSize: Integer; var Accept: Boolean);
+procedure TFrmEventLog.VSplitterCanResize(Sender: TObject;  var NewSize: Integer; var Accept: Boolean);
 begin
    rightPercent := NewSize / (GroupPanel.Width - vsplitter.width);
    if (Width - NewSize < 105) then
@@ -1721,7 +1719,6 @@ end;
 procedure TFrmEventLog.GroupPanelCanResize(Sender: TObject; var NewWidth,  NewHeight: Integer; var Resize: Boolean);
 begin
    PanelTraceInfo.Width := Round(GroupPanel.Width * rightPercent);
-
 end;
 
 //------------------------------------------------------------------------------

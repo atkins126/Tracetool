@@ -21,12 +21,14 @@ object Frm_ODS: TFrm_ODS
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    OnCanResize = PanelOdsCanResize
     object VSplitter: TSplitter
       Left = 196
       Top = 22
       Height = 225
       Align = alRight
       Visible = False
+      OnCanResize = VSplitterCanResize
       ExplicitLeft = 176
       ExplicitHeight = 264
     end
