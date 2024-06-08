@@ -11,7 +11,7 @@ uses
 
 type
 
-  TVstSelector = class
+  TVstSelector = class (TComponent)
   private
      fTree : TVirtualStringTree;
      fOldOnKeyDown :        TKeyEvent;
@@ -38,7 +38,7 @@ type
     Selecting          : boolean;
     SelectingWithMouse : boolean;
 
-    constructor Create(Tree : TVirtualStringTree);
+    procedure Init (Tree : TVirtualStringTree);
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
     procedure ResetSelection();
     procedure CopySelectedCells (CopyStrings: TStringList;TextQualifier : string; TextSeparator: string);
@@ -50,14 +50,22 @@ implementation
 
 { TVstSelector }
 
-constructor TVstSelector.Create(Tree: TVirtualStringTree);
+procedure TVstSelector.Init(Tree: TVirtualStringTree);
 begin
    fTree := Tree;
+
+   fTree.TreeOptions.PaintOptions := fTree.TreeOptions.PaintOptions
+      - [toHideSelection];          // show a grayed selection when the tree lose the focus
 
    fTree.TreeOptions.SelectionOptions := fTree.TreeOptions.SelectionOptions
       + [toDisableDrawSelection]    // Prevent user from selecting with the selection rectangle in multiselect mode.
       + [toExtendedFocus]           // Entries other than in the main column can be selected, edited etc.
+      + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
       - [toMultiselect];            // Allow more than one node to be selected.
+
+   fTree.TreeOptions.MiscOptions := fTree.TreeOptions.MiscOptions
+      - [toReportMode]              // Tree behaves like TListView in report mode.
+      + [toGridExtensions];         // Use some special enhancements to simulate and support grid behavior.
 
    fOldOnKeyDown          := Tree.OnKeyDown;
    fOldOnKeyAction        := Tree.OnKeyAction;
