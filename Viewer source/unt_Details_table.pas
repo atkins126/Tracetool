@@ -435,14 +435,11 @@ end;
 //------------------------------------------------------------------------------
 
 procedure Tframe_table.copySelected;
-var
-   CopyText: PChar;
 begin
-
    var CopyStrings := TStringList.Create;
    try
       VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
-      CopyText := CopyStrings.GetText;
+      var CopyText: PChar := CopyStrings.GetText;
       Clipboard.SetTextBuf(CopyText);
       StrDispose(CopyText);
    finally
