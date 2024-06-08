@@ -9,6 +9,7 @@ uses
   unt_TraceWin ,
   unt_utility,
   vstSort,
+  VstSelector,
   unt_tool,
   System.Generics.Collections,
   System.TypInfo,
@@ -37,41 +38,31 @@ type
     procedure VstTableFreeNode(Sender: TBaseVirtualTree;Node: PVirtualNode);
     procedure VstTableMeasureItem(Sender: TBaseVirtualTree;TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
     procedure VstTablePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType);
-    procedure VstTableKeyAction(Sender: TBaseVirtualTree;var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
     procedure VstTableGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
     procedure VstTableChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure VstTableColumnClick(Sender: TBaseVirtualTree; Column: TColumnIndex; Shift: TShiftState);
-    procedure VstTableFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure VstTableBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    procedure VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,      Y: Integer);
-    procedure VstTableMouseDown(Sender: TObject; Button: TMouseButton;      Shift: TShiftState; X, Y: Integer);
-    procedure VstTableMouseUp(Sender: TObject; Button: TMouseButton;      Shift: TShiftState; X, Y: Integer);
-    procedure VstTableKeyDown(Sender: TObject; var Key: Word;      Shift: TShiftState);
+    procedure VstTableFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
-    function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
     Sorter: TVstSort;
+    VstSelector: TVstSelector;
+
     Constructor Create(AOwner: TComponent);  override ;
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override;
     procedure copySelected() ; override;
 
+
   end;
 
 var
   frame_table: Tframe_table;
 
-  StartSelectedColumn: integer;
-  EndSelectedColumn: integer;
-  StartSelectedNode : PVirtualNode;
-  EndSelectedNode : PVirtualNode;
-
-  Selecting: boolean;
-  SelectingWithMouse : boolean;
 
 implementation
 
@@ -93,6 +84,9 @@ begin
    Sorter.tree := VstTable;
    Sorter.UtilityImages := Frm_Tool.UtilityImages;
    Sorter.canUnsort := true;
+
+   // multiple selection handler
+   VstSelector := TVstSelector.Create(VstTable);
 
    // redirect some events to the sorter
    VstTable.onHeaderClick := Sorter.onHeaderClick;
@@ -266,119 +260,11 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableKeyDown(Sender: TObject; var Key: Word;  Shift: TShiftState);
-begin
-   if (not Selecting) and (Key = VK_SHIFT) then  begin
-      Selecting := true;
-      SelectingWithMouse := false;
-   end;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstTableMouseDown(Sender: TObject;  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-   HitInfo: THitInfo;
-begin
-   vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
-
-   if (ssShift in Shift) then begin
-      // mouse down With Shift : extend selection 
-      EndSelectedColumn  := HitInfo.HitColumn;
-      EndSelectedNode    := HitInfo.HitNode;
-      // Selecting not changed 
-   
-   end else begin
-      // mouse down without Shift: start selection
-
-      if (HitInfo.HitNode <> nil) then begin
-         StartSelectedColumn := HitInfo.HitColumn;
-         EndSelectedColumn   := HitInfo.HitColumn;
-         StartSelectedNode   := HitInfo.HitNode;
-         EndSelectedNode     := HitInfo.HitNode;
-         Selecting := true;
-         SelectingWithMouse := true;      
-      end;
-   end;
-   // refresh on both mouse down and mouse up
-   vstTable.Refresh;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstTableMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
-var
-   HitInfo: THitInfo;
-   //DetailRec : PTableRec ;
-   CellText: string;
-begin
-   // VstTableMouseMove not called if toDisableDrawSelection is false
-
-   if (SelectingWithMouse = false)  then
-      exit;
-
-   vstTable.GetHitTestInfoAt(X, Y, True, HitInfo, []);
-   if HitInfo.HitNode = nil then
-      exit;
-
-   if StartSelectedColumn = -1 then begin
-      VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-      StartSelectedColumn := HitInfo.HitColumn;
-      EndSelectedColumn   := HitInfo.HitColumn;
-      StartSelectedNode   := HitInfo.HitNode;
-      EndSelectedNode     := HitInfo.HitNode;
-   end else begin
-      if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
-         VstTableGetText(vstTable, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-         //DetailRec := VstTable.GetNodeData(HitInfo.HitNode) ;
-         //TFrm_Trace.InternalTrace('MouseMove, last, row: ' + inttostr(DetailRec.OriginalOrder) + ', column: ' + inttostr(HitInfo.HitColumn) + ', text: "' + celltext + '"') ;
-         vstTable.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
-         EndSelectedColumn := HitInfo.HitColumn;
-         EndSelectedNode   := HitInfo.HitNode;
-         vstTable.Refresh;
-      end;
-   end;
-end;
-
-//------------------------------------------------------------------------------
-procedure Tframe_table.VstTableMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-   Selecting := false;
-   SelectingWithMouse := false;      
-   vstTable.Refresh;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-begin
-   if (selecting) and not (ssShift in Shift) then begin
-      Selecting := false;
-      SelectingWithMouse := false;
-      StartSelectedColumn := VstTable.FocusedColumn;
-      EndSelectedColumn   := VstTable.FocusedColumn;
-      StartSelectedNode   := VstTable.GetFirstSelected;
-      EndSelectedNode     := VstTable.GetFirstSelected;      
-      vstTable.Refresh;
-   end;
-end;
-
-//------------------------------------------------------------------------------
-
 procedure Tframe_table.VstTableFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 var
    DetailRec : PTableRec ;
    CellText: String;
 begin
-
-   if not Selecting then begin
-      StartSelectedColumn := Column;      
-      StartSelectedNode   := Node;
-   end;
-   
-   EndSelectedColumn  := Column;
-   EndSelectedNode    := Node;
-
    DetailRec := Sender.GetNodeData(Node) ;
    if DetailRec = nil then
       exit ;
@@ -387,63 +273,6 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-
-function Tframe_table.IsSelected( Node: PVirtualNode; ColumnIndexToCheck:integer) : boolean;
-var
-  LoopEnd : PVirtualNode;
-  loopNode : PVirtualNode ;
-  startPosition, EndPosition, PositionToCheck: integer;
-begin
-   result := false;
-
-   // todo :
-   // StartSelectedColumn 1 => index 0
-   // LastSelectedColumn 0 => index 3
-   // 0..3
-
-   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
-      exit;
-   
-   PositionToCheck := VstTable.Header.Columns[ColumnIndexToCheck].Position;
-
-   if VstTable.Header.Columns[StartSelectedColumn].Position <= VstTable.Header.Columns[EndSelectedColumn].Position then begin
-     startPosition := VstTable.Header.Columns[StartSelectedColumn].Position;
-     endPosition   := VstTable.Header.Columns[EndSelectedColumn].Position;
-   end else begin  // reverse selection
-     startPosition := VstTable.Header.Columns[EndSelectedColumn].Position;
-     endPosition   := VstTable.Header.Columns[StartSelectedColumn].Position;
-   end;
-
-   if (PositionToCheck < startPosition) or (PositionToCheck > endPosition) then
-       exit;
-
-   if (node = StartSelectedNode) or (node = EndSelectedNode) then begin
-      result := true;
-      exit;
-   end;
-
-   // start and last are the same node. Looping over LastSelectedNode will always found nodes
-   if (StartSelectedNode = EndSelectedNode ) then
-      exit;
-
-   if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
-      loopNode := StartSelectedNode;
-      loopEnd  := EndSelectedNode;
-   end else begin
-      loopNode := EndSelectedNode ;
-      loopEnd  := StartSelectedNode;
-   end;
-
-   while loopNode <> nil do begin
-      if (node = loopNode) then begin
-         result := true;
-         exit;
-      end;
-      loopNode := loopNode.NextSibling;
-      if (loopNode = loopEnd) or (loopNode = nil) then
-         break;
-   end;
-end;
 
 procedure Tframe_table.VstTableBeforeCellPaint(Sender: TBaseVirtualTree;   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
@@ -454,16 +283,6 @@ begin
       if (MatchSearch (DetailRec.Columns[Column]) <> 0) then
          DrawHighlight (TargetCanvas, CellRect,false) ;
    end;
-
-   if (IsSelected(node,Column) = false) then
-      exit ;
-
-   if VstTable.Focused then
-     TargetCanvas.Brush.Color := VstTable.Colors.FocusedSelectionColor
-   else
-     TargetCanvas.Brush.Color := VstTable.Colors.UnfocusedSelectionColor;
-   TargetCanvas.Brush.Style := bsSolid;
-   TargetCanvas.FillRect(CellRect);
 end;
 
 //------------------------------------------------------------------------------
@@ -472,20 +291,11 @@ procedure Tframe_table.VstTablePaintText(Sender: TBaseVirtualTree;  const Target
 //var
 //   DetailRec : PTableRec ;
 begin
-//   DetailRec := Sender.GetNodeData(Node) ;
+   //DetailRec := Sender.GetNodeData(Node) ;
 
    // force font
    //TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
-
-//   if (IsSelected(node,Column) = false) then
-//      exit ;
-//
-//   if VstTable.Focused then
-//      TargetCanvas.Font.Color := clHighlightText
-//   else
-//      TargetCanvas.Font.Color := VstTable.Font.Color;
 end;
-
 
 //------------------------------------------------------------------------------
 
@@ -559,10 +369,7 @@ var
    DetailRec : PTableRec ;
 begin
 
-  StartSelectedColumn := -1;
-  EndSelectedColumn   := -1;
-  StartSelectedNode   := nil;
-  EndSelectedNode     := nil;
+   VstSelector.ResetSelection();
 
    VstTable.Clear ;
    if Sorter.SortColumns.Count > 1 then  
@@ -656,7 +463,7 @@ var
          
          for OrderedIndex := 0 to length(orderedList)-1 do begin // VstTable.header.Columns.Count-1 do begin
             ColumnIndex :=  orderedList[OrderedIndex];
-            if IsSelected(TestNode,ColumnIndex) then begin
+            if vstSelector.IsSelected(TestNode,ColumnIndex) then begin
                 hasSelectionInNode := true;
                 //col := VstTable.header.Columns[c] ;
                 CellText := DetailRec.Columns[ColumnIndex] ;

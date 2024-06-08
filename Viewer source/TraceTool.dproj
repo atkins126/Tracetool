@@ -249,6 +249,7 @@
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
         <DCCReference Include="uWindowsEvents.pas"/>
+        <DCCReference Include="VstSelector.pas"/>
         <None Include="FastMM4Options.inc">
             <ContainerId>File</ContainerId>
         </None>
@@ -315,8 +316,20 @@
             </Platforms>
             <Deployment Version="4">
                 <DeployFile LocalName="..\Viewer\TraceTool.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="..\Viewer\TraceTool.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>TraceTool.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="..\Viewer\TraceTool.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployFile LocalName="FastMM4Options.inc" Configuration="Debug" Class="ProjectFile"/>
+                <DeployFile LocalName="FastMM4Options.inc" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="FastMM4Options.inc" Configuration="Release" Class="ProjectFile"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="OSX32">
