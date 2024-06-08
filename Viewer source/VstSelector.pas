@@ -41,6 +41,7 @@ type
     constructor Create(Tree : TVirtualStringTree);
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
     procedure ResetSelection();
+    procedure CopySelectedCells (CopyStrings: TStringList;TextQualifier : string; TextSeparator: string);
 
   end;
 
@@ -139,19 +140,17 @@ begin
 end;
 
 procedure TVstSelector.VstMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-var
-   HitInfo: THitInfo;
-   CellText: string;
 begin
    // MouseMove not called if toDisableDrawSelection is false
 
    if (SelectingWithMouse = false)  then
       exit;
 
+   var HitInfo: THitInfo;
    fTree.GetHitTestInfoAt(X, Y, True, HitInfo, []);
    if HitInfo.HitNode = nil then
       exit;
-
+   var CellText: string;
    if StartSelectedColumn = -1 then begin
       fTree.OnGetText(fTree, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
       StartSelectedColumn := HitInfo.HitColumn;
@@ -278,6 +277,59 @@ begin
   EndSelectedNode     := nil;
 end;
 
+procedure TVstSelector.CopySelectedCells (CopyStrings: TStringList;TextQualifier : string; TextSeparator: string);
+var
+   orderedList : Array of integer;
+   ColumnIndex : integer ;
+
+   procedure CopyDetail (TestNode : PVirtualNode);
+   var
+      node : PVirtualNode ;
+      NewLine: string;
+      OrderedIndex: integer ;
+      CellText :string ;
+   begin
+
+      var rec := fTree.GetNodeData(TestNode) ;
+      if rec <> nil then begin
+
+         NewLine := '' ;
+         var hasSelectionInNode : boolean := false;
+
+         // ordered column.
+
+         for OrderedIndex := 0 to length(orderedList)-1 do begin // VstTable.header.Columns.Count-1 do begin
+            ColumnIndex :=  orderedList[OrderedIndex];
+            if IsSelected(TestNode,ColumnIndex) then begin
+                hasSelectionInNode := true;
+
+                fTree.OnGetText(fTree, TestNode, ColumnIndex, ttNormal, CellText);
+                if NewLine = '' then
+                   NewLine := TextQualifier + CellText + TextQualifier
+                else
+                   NewLine := NewLine + TextSeparator  + TextQualifier + CellText + TextQualifier ;
+
+            end;
+         end ;
+         if hasSelectionInNode then
+            CopyStrings.Add(NewLine);
+      end ;
+
+      // multi select
+      node := TestNode.FirstChild ;
+      while Node <> nil do begin
+         CopyDetail (node) ;
+         node := node.NextSibling ;
+      end ;
+   end ;
+begin
+
+   SetLength(orderedList, fTree.header.Columns.Count);
+   for ColumnIndex := 0 to fTree.header.Columns.Count-1 do
+      orderedList[fTree.header.Columns[ColumnIndex].Position] := ColumnIndex ;
+
+   CopyDetail (fTree.RootNode);
+end;
 
 
 end.

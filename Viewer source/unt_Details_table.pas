@@ -436,76 +436,18 @@ end;
 
 procedure Tframe_table.copySelected;
 var
-   CopyStrings : TStringList ;
    CopyText: PChar;
-   DetailRec : PTableRec ;
-   orderedList : Array of integer;
-   ColumnIndex : integer ;
-
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      NewLine: string;
-      OrderedIndex: integer ;
-      //ColumnIndex : integer ;
-      CellText :string ;
-      //col : TVirtualTreeColumn ;
-   begin
-
-      DetailRec := VstTable.GetNodeData(TestNode) ;
-      //if VstTable.Selected [TestNode] then begin
-      if DetailRec <> nil then begin
-            
-         NewLine := '' ;
-         var hasSelectionInNode : boolean := false;
-
-         // ordered column.
-         
-         for OrderedIndex := 0 to length(orderedList)-1 do begin // VstTable.header.Columns.Count-1 do begin
-            ColumnIndex :=  orderedList[OrderedIndex];
-            if vstSelector.IsSelected(TestNode,ColumnIndex) then begin
-                hasSelectionInNode := true;
-                //col := VstTable.header.Columns[c] ;
-                CellText := DetailRec.Columns[ColumnIndex] ;
-                if NewLine = '' then
-                   NewLine := TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier
-                else
-                   NewLine := NewLine + TraceConfig.TextExport_Separator  + TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier ;
-
-            end;
-         end ;
-         if hasSelectionInNode then         
-            CopyStrings.Add(NewLine);
-      end ;
-
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
-      end ;
-   end ;
 begin
 
-   CopyStrings := TStringList.Create;
+   var CopyStrings := TStringList.Create;
    try
-      SetLength(orderedList, VstTable.header.Columns.Count);
-
-      for ColumnIndex := 0 to VstTable.header.Columns.Count-1 do 
-         orderedList[VstTable.header.Columns[ColumnIndex].Position] := ColumnIndex ;
-      
-      CopyDetail (VstTable.RootNode);
+      VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
       CopyText := CopyStrings.GetText;
+      Clipboard.SetTextBuf(CopyText);
+      StrDispose(CopyText);
    finally
       CopyStrings.Free ;
    end ;
-
-   try
-      Clipboard.SetTextBuf(CopyText);
-   finally
-      StrDispose(CopyText);
-   end;
-
 end;
 
 //------------------------------------------------------------------------------
