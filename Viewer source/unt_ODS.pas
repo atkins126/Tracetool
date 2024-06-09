@@ -254,7 +254,7 @@ begin
    VstDebugString.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
    VstDebugString.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
    VstDebugString.NodeDataSize := sizeof (TODSRec) ;
-   VstDebugString.Header.MainColumn := 3 ;
+   VstDebugString.Header.MainColumn := 0 ;
    VstDebugString.Header.AutoSizeIndex := -1 ;  // auto
 
    VstDebugString.Header.Options := VstDebugString.Header.Options

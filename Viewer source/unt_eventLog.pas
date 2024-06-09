@@ -236,7 +236,7 @@ begin
    VstEvent.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
    VstEvent.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
    VstEvent.NodeDataSize := sizeof (TEvntLogRec) ;
-   VstEvent.Header.MainColumn := 2 ;
+   VstEvent.Header.MainColumn := 0 ;
    VstEvent.Header.AutoSizeIndex := -1 ;  // auto
 
    VstEvent.Header.Options := VstEvent.Header.Options

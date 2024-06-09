@@ -442,7 +442,7 @@ begin
    vstTrace.NodeDataSize := sizeof(TTreeRec);
 
    // set the main column
-   vstTrace.Header.MainColumn := 3;
+   vstTrace.Header.MainColumn := 0;
    vstTrace.Header.AutoSizeIndex := -1; // auto
 
    vstTrace.Header.options := vstTrace.Header.options

@@ -259,7 +259,6 @@ begin
    var size := PanelTraceInfo.Width;
    VSplitterCanResize(self,size,accept); // calculated once left and right percent
 
-
    vst := VstTail ;
    with TPSCMenu.create (self) do begin
       DimLevel := 0 ;    // don't gray icon

@@ -123,8 +123,12 @@ begin
       exit ;
 
    // no sort. Nothing to draw
-   if SortColumns.Count = 0 then
-      exit ;
+   try
+     if SortColumns.Count = 0 then
+        exit ;
+   except
+      exit;
+   end;
 
    // check if the column is in the SortColumns
    ColumnIndex := PaintInfo.Column.Index ;
