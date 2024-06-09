@@ -21,7 +21,7 @@ type
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override ;
-    procedure copySelected() ; override;
+    function copySelected():boolean ; override;
   end;
 
 var
@@ -62,12 +62,13 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_BitmapDetails.copySelected;
+function Tframe_BitmapDetails.copySelected : boolean;
 var
    wFormat:word;
    wHandle:THandle;
    wPalette:HPalette;
 begin
+   result := true;
    ImageViewer.Picture.SaveToClipboardFormat (wformat,whandle,wpalette);
    ClipBoard.SetAsHandle(wFormat,wHandle);
 end;

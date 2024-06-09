@@ -235,7 +235,7 @@ var
   BaseList        : TObjectList ;    // all TFrmBase form (Trace, tail, ods, eventlog)
   FormTraceList   : TObjectList ;    // all trace form . not owner
   TailList        : TObjectList ;    // all Tail
-  ContainerList   : TObjectList ;
+  ContainerList   : TObjectList ;    // TFrmPageContainer
   ConnectionList  : TObjectList ;
   ScriptMessages  : TStringList ;
   CriticalSection : TCriticalSection ;   // protect the MessageStack and the number of socket connection
@@ -655,6 +655,9 @@ begin
    FrmInternalTraces.Name := 'FrmInternalTraces' ;
    FrmInternalTraces.ID := 'ERRID' ;
    FrmInternalTraces.Caption := 'Internal Trace' ;
+
+   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstTrace=' +  inttostr(integer(FrmInternalTraces.vstTrace)));
+   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstDetail=' +  inttostr(integer(FrmInternalTraces.VstDetail)));
 
    if TraceConfig.DebugMode then begin
       FrmInternalTraces.Visible := true ;

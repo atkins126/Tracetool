@@ -21,7 +21,8 @@ interface
       Dialogs, StdCtrls, ExtCtrls, VirtualTrees, VirtualTrees.Types, Menus, XMLDoc, XMLIntf,
       pscMenu, math, printers,
       ComCtrls, ToolWin, ImgList, TrayIcon, ActnList, clipbrd, SyncObjs,
-      Contnrs, SynEdit, unt_tool,
+      Contnrs, SynEdit,
+      unt_tool, VstSelector,
       Application6, // the generated delphi code for the XML schema (Application6.xsd)
       unt_base, DebugOptions, Buttons, Unt_linkedList, unt_utility,
       MSXML2_TLB,
@@ -192,6 +193,7 @@ interface
          BitmapFrame: TFrame;
          //XmlFrame: TFrame;
          TreeDetailFrame: TFrame;
+         //VstSelector: TVstSelector;
          VstDetail: TVirtualStringTree;
          VstDetailHaschildren: boolean;
 
@@ -249,20 +251,20 @@ interface
 
       public // TFrmBase
          procedure Print; override;
-         procedure ClearWin; override; // CST_ACTION_CLEAR_ALL
-         procedure SaveWin; override; // CST_ACTION_SAVE
-         procedure PauseWin; override; // CST_ACTION_PAUSE
-         procedure ViewTraceInfo; override; // CST_ACTION_VIEW_INFO
-         procedure ViewProperty; override; // CST_ACTION_VIEW_PROP
-         procedure CopySelected; override; // CST_ACTION_COPY
+         procedure ClearWin; override;              // CST_ACTION_CLEAR_ALL
+         procedure SaveWin; override;               // CST_ACTION_SAVE
+         procedure PauseWin; override;              // CST_ACTION_PAUSE
+         procedure ViewTraceInfo; override;         // CST_ACTION_VIEW_INFO
+         procedure ViewProperty; override;          // CST_ACTION_VIEW_PROP
+         function  CopySelected: boolean; override; // CST_ACTION_COPY  Return true if element is focused
          procedure CopyCurrentCell; override;
-         procedure DeleteSelected; override; // CST_ACTION_DELETE
-         procedure SelectAll; override; // CST_ACTION_SELECT_ALL
-         procedure CloseWin; override; // CST_ACTION_CLOSE_WIN
-         procedure ResizeColumns; override; // CST_ACTION_RESIZE_COLS
-         procedure CheckAutoClear; override; // no action
-         procedure PageControlChange(); override; // no action
-         procedure TimerInfo; override; // DoPlugTimer()
+         procedure DeleteSelected; override;        // CST_ACTION_DELETE
+         procedure SelectAll; override;             // CST_ACTION_SELECT_ALL
+         procedure CloseWin; override;              // CST_ACTION_CLOSE_WIN
+         procedure ResizeColumns; override;         // CST_ACTION_RESIZE_COLS
+         procedure CheckAutoClear; override;        // no action
+         procedure PageControlChange(); override;   // no action
+         procedure TimerInfo; override;             // DoPlugTimer()
          procedure RefreshView; override;
          procedure ShowFilter; override;
          procedure ApplyFont; override;
@@ -315,8 +317,7 @@ begin
    Result.DockToMainPanel();
    Result.getPageContainer().actViewTraceInfo.Checked := false;
    Result.ViewTraceInfo;
-   if Result.getPageContainer().DockingPagecontrol.GetVisibleClientCount()
-      = 1 then
+   if Result.getPageContainer().DockingPagecontrol.GetVisibleClientCount() = 1 then
       Result.SetActivePage;
 
    Result.IsMultiColTree := true;
@@ -356,7 +357,6 @@ end;
 procedure TFrm_Trace.FormCreate(Sender: TObject);
 var
    res: TPlugResource;
-   temp_Classic: Tframe_Classic;
    accept : boolean;
    size : integer;
 begin
@@ -488,16 +488,15 @@ begin
       - [toEditable]                // don't allow edition. Code is used to detect double click
       - [toCheckSupport];           // no checkboxes
 
+   //if assigned (FrmInternalTraces) then
+   //   FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + Caption +  ', vstTrace=' +  inttostr(integer(vstTrace)));
 
-   // vstTrace.OnDrawNode := DrawNode ;
+   TreeDetailFrame := Tframe_Classic.Create(self);
+   Tframe_Classic(TreeDetailFrame).Splitter.Visible := false; // no spliter for main detail
+   VstDetail := Tframe_Classic(TreeDetailFrame).VstDetail;    // shortcut
 
-   // ---------------------------------------------------------------------------
-
-   temp_Classic := Tframe_Classic.Create(self);
-   TreeDetailFrame := temp_Classic;
-   temp_Classic.Splitter.Visible := false; // no spliter for main detail
-   VstDetail := temp_Classic.VstDetail;    // shortcut
-//   SynMemo := temp_Classic.SynMemo;        // shortcut
+   //if assigned (FrmInternalTraces) then
+   //   FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + Caption +  ', VstDetail=' +  inttostr(integer(VstDetail)));
 
    ApplyFont(); // set font name and size for the 2 trees (from XMLConfig)
    ShowLog(); // change the LabelLogFile caption
@@ -2239,11 +2238,10 @@ end;
 
 // ------------------------------------------------------------------------------
 
-// CTRL C : Copy selected
-procedure TFrm_Trace.CopySelected;
+// CTRL C : Copy selected. Return true if element is focused
+function TFrm_Trace.CopySelected : boolean;
 var
    CopyStrings: TStrings;
-   CopyText: pchar;
    NewLine: String;
    IsFirst: boolean;
    TreeRec: PTreeRec;
@@ -2434,12 +2432,25 @@ begin
 end;
 
 begin
+   result := false;
    CopyStrings := TStringList.Create;
    TreeIndentation := StrRepeat(' ', TraceConfig.TextExport_TreeIndentation);
    SetCursor(Screen.Cursors[crHourGlass]);
+
+//    if vstTrace.Focused then
+//       FrmInternalTraces.InternalTrace('TFrm_Trace.CopySelected vstTrace ' + inttostr(integer(vstTrace)) + ' Focused')
+//    else
+//       FrmInternalTraces.InternalTrace('TFrm_Trace.CopySelected vstTrace ' + inttostr(integer(vstTrace)) + ' not Focused');
+//
+//    if VstDetail.Focused then
+//       FrmInternalTraces.InternalTrace('TFrm_Trace.CopySelected VstDetail ' + inttostr(integer(VstDetail)) + ' Focused')
+//    else
+//       FrmInternalTraces.InternalTrace('TFrm_Trace.CopySelected VstDetail ' + inttostr(integer(VstDetail)) + ' not Focused');
+
    try
 
       if vstTrace.Focused then begin
+
          SelectedNode := vstTrace.GetFirstSelected;
          if SelectedNode = nil then
             exit;
@@ -2455,30 +2466,28 @@ begin
          // add node starting from the invisible root node (recursive)
          CheckIfNodeSelected(vstTrace.RootNode);
 
-         CopyText := CopyStrings.GetText;
+         var CopyText: pchar := CopyStrings.GetText;
          try
             Clipboard.SetTextBuf(CopyText);
          finally
             StrDispose(CopyText);
          end;
-      end
-      else if VstDetail.Focused then begin
-         CopyDetail(VstDetail, CopyStrings, VstDetail.RootNode);
-
-         CopyText := CopyStrings.GetText;
-         try
-            Clipboard.SetTextBuf(CopyText);
-         finally
-            StrDispose(CopyText);
-         end;
-      end
-      else begin
+         result := true;
+      end else if VstDetail.Focused then begin
+         // reroute CTRL-C to the focused component (TreeDetailFrame)
+         Tframe_Classic(TreeDetailFrame).CopySelected();
+         result := true;
+      end else begin
 
          // reroute CTRL-C to the focused component
+         // FrmInternalTraces.InternalTrace('TFrm_Trace.CopySelected loop ' + inttostr(CurrentViewers.Count) + ' viewers' );
          for c := 0 to CurrentViewers.Count - 1 do begin
             viewer := Tframe_BaseDetails(CurrentViewers.Items[c]);
+            // FrmInternalTraces.InternalTrace('viewer [' + inttostr(c) + '] ' + viewer.ClassName + ' focused : ' + BoolToStr(viewer.HasFocus()));
+
             if viewer.HasFocus() then begin
                viewer.CopySelected();
+               result := true;
                exit;
             end;
          end;

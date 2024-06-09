@@ -216,48 +216,47 @@ end;
 // CTRL C : Copy selected
 
 procedure TFrmPageContainer.actCopyExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
-   if DockingPagecontrol.ActivePage = nil then
-      exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
-   Base.CopySelected ;
+   // The CTRL-C key is send to a container. This is perhaps not the 'active' container
+
+   for var c := 0 to ContainerList.Count -1 do begin
+      var container := TFrmPageContainer (ContainerList [c]);
+      if container.DockingPagecontrol.ActivePage <> nil then begin
+         var Base := TFrmBase (container.DockingPagecontrol.ActivePage.controls[0]) ;
+         //FrmInternalTraces.InternalTrace('actCopyExecute loop container with active page :' +  container.DockingPagecontrol.ActivePage.Caption);
+         if (Base.CopySelected) then
+            exit;
+      end;
+   end;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actCopyCurrentCellExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.CopyCurrentCell ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actClearExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.ClearWin ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actPrintExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.Print ;
 end;
 
@@ -307,12 +306,10 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actSaveToFileExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.SaveWin ;
 end;
 
@@ -320,24 +317,21 @@ end;
 // Delete key : deleted selected
 
 procedure TFrmPageContainer.actDeleteExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
+
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.DeleteSelected ;
 end;
 
 //------------------------------------------------------------------------------
 // CTRL X : Cut
 procedure TFrmPageContainer.actCutExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.CopySelected ;
    Base.DeleteSelected ;
 end;
@@ -345,22 +339,18 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actClearFileContentExecute(Sender: TObject);
-var
-   Tail : TFrmTail ;
 begin
-   Tail := TFrmTail (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Tail := TFrmTail (DockingPagecontrol.ActivePage.controls[0]) ;
    Tail.ClearFileContent ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actViewPropertyExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.ViewProperty ;
 end;
 
@@ -379,50 +369,42 @@ begin
 end;
 
 procedure TFrmPageContainer.actPauseExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
    actPause.Checked := not actPause.Checked;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.PauseWin ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actViewTraceInfoExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
    actViewTraceInfo.Checked := not actViewTraceInfo.Checked ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.ViewTraceInfo ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actResizeColsExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.ResizeColumns ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actCloseWinExecute(Sender: TObject);
-var
-   Base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
-   Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var Base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    Base.CloseWin ;
 end;
 
@@ -431,13 +413,11 @@ end;
 // Filter
 
 procedure TFrmPageContainer.actFilterExecute(Sender: TObject);
-var
-   base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
 
-   base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    base.ShowFilter ;
 end;
 
@@ -445,13 +425,11 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TFrmPageContainer.actClearFilterExecute(Sender: TObject);
-var
-   base : TFrmBase ;
 begin
    if DockingPagecontrol.ActivePage = nil then
       exit ;
 
-   base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
+   var base := TFrmBase (DockingPagecontrol.ActivePage.controls[0]) ;
    if base.Filter = nil then
       exit ;
    base.Filter.ResetFilter ;
@@ -462,7 +440,6 @@ end;
 // Search : CTRL-F
 procedure TFrmPageContainer.actSearchExecute(Sender: TObject);
 var
-   Base : TFrmBase ;
    c : integer ;
    oldModalResult : integer ;
    oldSearch : string ;
@@ -495,7 +472,7 @@ begin
 
    // reset highlight : refresh the differents gutters
    for c := 0 to BaseList.Count -1 do begin
-      Base := TFrmBase (BaseList[c]) ;
+      var Base := TFrmBase (BaseList[c]) ;
       Base.RefreshView ;
    end ;
 end;

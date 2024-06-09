@@ -156,7 +156,7 @@ type
     procedure SaveWin ; override ;
     procedure PauseWin ; override ;
     procedure ViewTraceInfo ; override ;
-    procedure CopySelected ; override ;
+    function  CopySelected: boolean; override ;
     procedure CopyCurrentCell ; override ;
     procedure DeleteSelected ; override ;
     procedure SelectAll ; override ;
@@ -992,9 +992,9 @@ end;
 
 //------------------------------------------------------------------------------
 
-// copy time, source, first line of MessageText
+// copy time, source, first line of MessageText. Return true if element is focused
 
-procedure TFrmEventLog.CopySelected;
+function TFrmEventLog.CopySelected: boolean;
 var
    CopyStrings: TStrings;
    CopyText: PChar;
@@ -1067,13 +1067,17 @@ var
    end ;
 
 begin
+   result := false;
    // reroute CTRL-C to the focused component if it's not the master tree
    if (VstDetail.Focused = false) and (VstEvent.Focused = false) then begin
       focusedComponent := GetFocus ;
-      if focusedComponent <> 0 then
+      if focusedComponent <> 0 then begin
          SendMessage(focusedComponent, WM_COPY, 0, 0);
+         result := false;
+      end ;
       exit ;
    end ;
+   result := true;
 
    if VstEvent.GetFirstSelected = nil then
       exit ;

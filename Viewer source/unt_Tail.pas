@@ -206,7 +206,7 @@ type
     procedure PauseWin ; override ;
     procedure ViewTraceInfo ; override ;
     procedure ViewProperty ; override ;
-    procedure CopySelected ; override ;
+    function  CopySelected: boolean; override ;
     procedure CopyCurrentCell ; override ;
     procedure DeleteSelected ; override ;
     procedure SelectAll ; override ;
@@ -1870,8 +1870,8 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-// CTRL C : Copy selected
-procedure TFrmTail.CopySelected;
+// CTRL C : Copy selected. Return true if element is focused
+function TFrmTail.CopySelected : boolean;
 var
    CopyStrings: TStrings;
    CopyText: PChar;
@@ -1968,13 +1968,17 @@ var
    end ;
 
 begin
+   result := false;
    // reroute CTRL-C to the focused component if it's not the master tree
    if (VstDetail.Focused = false) and (VstTail.Focused = false) then begin
       focusedComponent := GetFocus ;
-      if focusedComponent <> 0 then
+      if focusedComponent <> 0 then begin
          SendMessage(focusedComponent, WM_COPY, 0, 0);
+         result := false;
+      end;
       exit ;
    end ;
+   result := true;
 
    if VstTail.GetFirstSelected = nil then
       exit ;

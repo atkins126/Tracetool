@@ -55,8 +55,7 @@ type
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override;
-    procedure copySelected() ; override;
-
+    function copySelected():boolean ; override;
 
   end;
 
@@ -86,7 +85,8 @@ begin
    Sorter.canUnsort := true;
 
    // multiple selection handler
-   VstSelector := TVstSelector.Create(VstTable);
+   VstSelector := TVstSelector.Create(self);   // self is owner
+   VstSelector.Init(VstTable);
 
    // redirect some events to the sorter
    VstTable.onHeaderClick := Sorter.onHeaderClick;
@@ -434,8 +434,9 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.copySelected;
+function Tframe_table.copySelected: boolean;
 begin
+   result := VstTable.Focused();
    var CopyStrings := TStringList.Create;
    try
       VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);

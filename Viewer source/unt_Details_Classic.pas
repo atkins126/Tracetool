@@ -6,8 +6,9 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, unt_Details_base, VirtualTrees, VirtualTrees.Types, Menus , clipbrd,
   unt_Editor,           // TMoveMemoEditLink, const
-  unt_TraceWin ,
-  unt_search ,
+  unt_TraceWin,
+  VstSelector,
+  unt_search,
   unt_tool,             // VstEditor, IVstEditor, TMember
   unt_utility, Vcl.ExtCtrls, SynEdit, SynEditHighlighter, SynHighlighterXML,
   SynEditCodeFolding, SynHighlighterJSON, Vcl.ToolWin, Vcl.ComCtrls,
@@ -65,20 +66,21 @@ type
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
+    VstSelector: TVstSelector;
     Constructor Create(AOwner: TComponent);  override ;
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override;
-    procedure copySelected() ; override;
+    function copySelected():boolean ; override;
   end;
 
 var
-  frame_Classic: Tframe_Classic;
+  _frame_Classic: Tframe_Classic;
 
 implementation
 
 uses
-   unt_TraceConfig, unt_detailPopup ;
+   unt_TraceConfig, unt_detailPopup;
 
 {$R *.dfm}
 
@@ -133,6 +135,10 @@ begin
    VstDetail.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
    VstDetail.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
    VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+
+   // multiple selection handler
+   VstSelector := TVstSelector.Create(self);   // self is owner
+   VstSelector.Init(VstDetail);
 end;
 
 procedure Tframe_Classic.FrameMemoCanResize(Sender: TObject; var NewWidth,
@@ -492,24 +498,21 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_Classic.copySelected;
-var
-   CopyStrings : TStringList ;
-   CopyText: PChar;
+function Tframe_Classic.copySelected: boolean;
 begin
-   CopyStrings := TStringList.Create;
+   result := VstDetail.Focused;
+   var CopyStrings := TStringList.Create;
    try
-      CopyDetail (VstDetail, CopyStrings, VstDetail.RootNode);
-      CopyText := CopyStrings.GetText;
+      //CopyDetail (VstDetail, CopyStrings, VstDetail.RootNode);
+
+      VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+      var CopyText: PChar := CopyStrings.GetText;
+      Clipboard.SetTextBuf(CopyText);
+      StrDispose(CopyText);
    finally
       CopyStrings.Free ;
    end ;
 
-   try
-      Clipboard.SetTextBuf(CopyText);
-   finally
-      StrDispose(CopyText);
-   end;
 end;
 
 //------------------------------------------------------------------------------

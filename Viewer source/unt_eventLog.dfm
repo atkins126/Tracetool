@@ -2,25 +2,27 @@ inherited FrmEventLog: TFrmEventLog
   Left = 314
   Top = 235
   Caption = 'FrmEventLog'
-  ClientHeight = 378
-  ClientWidth = 729
+  ClientHeight = 377
+  ClientWidth = 725
   ExplicitWidth = 741
   ExplicitHeight = 416
   TextHeight = 13
   object GroupPanel: TPanel
     Left = 0
     Top = 0
-    Width = 729
-    Height = 378
+    Width = 725
+    Height = 377
     Align = alClient
     BevelOuter = bvNone
     Caption = 'GroupPanel'
     TabOrder = 0
     OnCanResize = GroupPanelCanResize
+    ExplicitWidth = 729
+    ExplicitHeight = 378
     object VSplitter: TSplitter
-      Left = 341
+      Left = 337
       Top = 22
-      Height = 356
+      Height = 355
       Align = alRight
       OnCanResize = VSplitterCanResize
       ExplicitLeft = 196
@@ -29,8 +31,8 @@ inherited FrmEventLog: TFrmEventLog
     object VstEvent: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 329
-      Height = 356
+      Width = 325
+      Height = 355
       Align = alClient
       BevelInner = bvNone
       Colors.BorderColor = clBlack
@@ -120,18 +122,20 @@ inherited FrmEventLog: TFrmEventLog
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 344
+      Left = 340
       Top = 22
       Width = 385
-      Height = 356
+      Height = 355
       Align = alRight
       BevelInner = bvLowered
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
+      ExplicitLeft = 344
+      ExplicitHeight = 356
       object SplitterH: TSplitter
         Left = 2
-        Top = 193
+        Top = 192
         Width = 381
         Height = 5
         Cursor = crVSplit
@@ -142,7 +146,7 @@ inherited FrmEventLog: TFrmEventLog
         Left = 2
         Top = 2
         Width = 381
-        Height = 191
+        Height = 190
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
@@ -221,7 +225,7 @@ inherited FrmEventLog: TFrmEventLog
       end
       inline FrameMemo: TFrameMemo
         Left = 2
-        Top = 198
+        Top = 197
         Width = 381
         Height = 156
         Align = alBottom
@@ -245,16 +249,15 @@ inherited FrmEventLog: TFrmEventLog
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 729
+      Width = 725
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
-      ExplicitWidth = 725
       DesignSize = (
-        729
+        725
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -264,7 +267,7 @@ inherited FrmEventLog: TFrmEventLog
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 706
+        Left = 702
         Top = 0
         Width = 22
         Height = 20
@@ -298,10 +301,9 @@ inherited FrmEventLog: TFrmEventLog
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
-        ExplicitLeft = 702
       end
       object butReload: TBitBtn
-        Left = 595
+        Left = 591
         Top = 1
         Width = 109
         Height = 22
@@ -311,7 +313,7 @@ inherited FrmEventLog: TFrmEventLog
         OnClick = butReloadClick
       end
       object butGetAll: TBitBtn
-        Left = 441
+        Left = 437
         Top = 1
         Width = 149
         Height = 22
@@ -325,12 +327,11 @@ inherited FrmEventLog: TFrmEventLog
       Left = 0
       Top = 22
       Width = 12
-      Height = 356
+      Height = 355
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
-      ExplicitHeight = 355
     end
   end
   object PopupTree: TPopupMenu

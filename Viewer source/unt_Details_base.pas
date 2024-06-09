@@ -20,7 +20,7 @@ type
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); virtual; abstract;
     procedure SelectAll() ; virtual; abstract;
     function HasFocus : boolean ; virtual; abstract;
-    procedure copySelected() ; virtual; abstract;
+    function copySelected():boolean ; virtual; abstract; // Return true if element is focused
   end;
 
   procedure CopyDetail (Vst : TVirtualStringTree; CopyStrings: TStrings ; TestNode : PVirtualNode);
