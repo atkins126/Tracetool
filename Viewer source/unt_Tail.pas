@@ -18,7 +18,10 @@ interface
 uses
   system.Contnrs , system.types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, pscMenu ,
   Dialogs, ExtCtrls, VirtualTrees, VirtualTrees.Types, StdCtrls, ComCtrls , dirmon, ToolWin, unt_TraceWin,
-  Buttons, Clipbrd, unt_base , unt_pageContainer ,  unt_editor , VstSort,unt_filter, unt_tool,
+  Buttons, Clipbrd, unt_base , unt_pageContainer ,  unt_editor ,
+  VstSort,
+  VstSelector,
+  unt_filter, unt_tool,
   generics.collections,
   Menus, untPrintPreview, unt_FrameMemo, VirtualTrees.BaseAncestorVCL,
   VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
@@ -144,14 +147,13 @@ type
     procedure GroupPanelCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
   private
-    Sorter : TVstSort ;
     FirstChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
     LastChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
     function AddTrace(PtrBeg,PtrEnd: PAnsiChar; Ontop,IsNotCompleted : boolean): pVirtualNode;
     function getDelimitedStringsfromLine (SourceBegin : pAnsiChar; SourceEnd : pAnsiChar = nil) : TStringList ; overload ;
-    function getDelimitedStringsfromWLine (SourceBegin : pChar; SourceEnd : pChar = nil) : TStringList ; overload ;
+    function getDelimitedStringsfromWLine (SourceBegin : pWideChar; SourceEnd : pWideChar = nil) : TStringList ; overload ;
     procedure readFirstLine ;
     function GotoBeginLine(source, bufferBegin: PAnsiChar): PAnsiChar;
     function GotoEndOfPreviousLine(source, bufferBegin: PAnsiChar): PAnsiChar;
@@ -161,6 +163,8 @@ type
     procedure AddRedComment(comment: string);
     { Private declarations }
   public   // directory monitor
+    Sorter : TVstSort ;
+    VstSelector: TVstSelector;
     Gutter: TImage;
     NodeToFocus : PVirtualNode ;
     rightPercent : extended;
@@ -186,8 +190,8 @@ type
     DetectTitleOnFirstLine      : boolean ;
     IsFixedColumns              : boolean ;
     FixedColCount               : integer ;
-    TextQualifier               : ansiChar ;
-    ColSeparator                : ansiChar ;
+    TextQualifier               : AnsiString ;
+    ColSeparator                : AnsiString ;
     // ColCount : integer ;
 
   public
@@ -220,7 +224,7 @@ type
     procedure ApplyFont ; override ;
     procedure InsertRow ; override;
     function  getMembers(Node : PVirtualNode) : TMember ; override ;
-    function  SearchNext(start:boolean) : boolean ;        override ;
+    function  SearchNext(start:boolean) : boolean ;       override ;
     function  SearchPrevious (atEnd:boolean) : boolean ;  override ;
   end;
 
@@ -265,6 +269,7 @@ begin
    // initialize sort
    FirstChildOrder := -1 ;
    LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
+
    Sorter := TVstSort.create (self) ;
    Sorter.tree := VstTail ;
    Sorter.UtilityImages := Frm_Tool.UtilityImages ;
@@ -284,11 +289,12 @@ begin
    VstTail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
    VstTail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
    VstTail.NodeDataSize := sizeof (TTailRec) ;
+
    VstTail.TreeOptions.AutoOptions      := Frm_Trace.vstTrace.TreeOptions.AutoOptions ;
    VstTail.TreeOptions.SelectionOptions := Frm_Trace.vstTrace.TreeOptions.SelectionOptions ;
    VstTail.TreeOptions.MiscOptions      := Frm_Trace.vstTrace.TreeOptions.MiscOptions ;
    VstTail.TreeOptions.PaintOptions     := Frm_Trace.vstTrace.TreeOptions.PaintOptions
-                                           - [toShowRoot] ; // don't show Root
+      - [toShowRoot] ; // don't show Root
 
    VstTail.Header.Options := VstTail.Header.Options
       + [hoColumnResize]     // resizing columns is allowed
@@ -304,21 +310,23 @@ begin
       - [hoShowImages]       // show images
       - [hoShowSortGlyphs] ; // show sort glyphs
 
-
    VstDetail.NodeDataSize := sizeof (TDetailRec) ;
    VstDetail.Header.MainColumn := 0 ;
    VstDetail.Header.AutoSizeIndex := -1 ;     // 2
    VstDetail.Header.Columns.Items[0].text := '' ;   // header must be visible to enable resize !
    VstDetail.Header.Columns.Items[1].text := '' ;
-   VstDetail.Header.Options               := Frm_Trace.VstDetail.Header.Options ;
-   VstDetail.TreeOptions.AutoOptions      := Frm_Trace.VstDetail.TreeOptions.AutoOptions ;
-   VstDetail.TreeOptions.PaintOptions     := Frm_Trace.VstDetail.TreeOptions.PaintOptions ;
-   VstDetail.TreeOptions.SelectionOptions := Frm_Trace.VstDetail.TreeOptions.SelectionOptions ;
-   VstDetail.TreeOptions.MiscOptions      := Frm_Trace.VstDetail.TreeOptions.MiscOptions ;
+   VstDetail.Header.Options                       := Frm_Trace.VstDetail.Header.Options ;
+   VstDetail.TreeOptions.AutoOptions              := Frm_Trace.VstDetail.TreeOptions.AutoOptions ;
+   VstDetail.TreeOptions.PaintOptions             := Frm_Trace.VstDetail.TreeOptions.PaintOptions ;
+   VstDetail.TreeOptions.SelectionOptions         := Frm_Trace.VstDetail.TreeOptions.SelectionOptions ;
+   VstDetail.TreeOptions.MiscOptions              := Frm_Trace.VstDetail.TreeOptions.MiscOptions ;
    VstDetail.Colors.UnfocusedColor                := Frm_Trace.vstTrace.Colors.UnfocusedColor ;
    VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
    VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
 
+   // multiple selection handler
+   VstSelector := TVstSelector.Create(self);   // self is owner
+   VstSelector.Init(VstDetail);
 
    DirMon := TDirMon.Create (self);  // owned by form
    DirMon.OnCreated := DirMon1Created ;
@@ -539,6 +547,7 @@ var
    PtrBeg,ptrEnd : pAnsiChar ;
 begin
    result := TStringList.create ;
+   var sep : AnsiChar :=  ColSeparator[1];
 
    ptrEnd := SourceBegin ;
    if TextQualifier = '' then begin
@@ -559,7 +568,7 @@ begin
          if (ptrEnd^ = ColSeparator) then begin       // separator
             ptrEnd^ := #0 ;
             result.Add(String(PtrBeg)) ;
-            ptrEnd^ := ColSeparator ;                 // restore separator
+            ptrEnd^ := sep;                 // restore separator
             inc (ptrEnd) ;
             PtrBeg := ptrEnd ;
          end else begin
@@ -637,6 +646,14 @@ begin
    if SourceBegin = nil then
       exit ;
 
+   var sep : WideChar;
+   if (Length(ColSeparator) >= 1) then
+     sep := WideChar(ColSeparator[1]);
+
+   var textQualif : WideChar;
+   if (Length(TextQualifier) >= 1) then
+     textQualif := WideChar(TextQualifier[1]);
+
    ptrEnd := SourceBegin ;
    if TextQualifier = '' then begin
       PtrBeg := ptrEnd ;
@@ -654,11 +671,11 @@ begin
             break ;
          end ;
 
-         if (ptrEnd^ = char(ColSeparator)) then begin       // separator
+         if (ptrEnd^ = sep) then begin       // separator
             ptrEnd^ := #0 ;
             result.Add(String(PtrBeg)) ;
 
-            ptrEnd^ := char(ColSeparator) ;    // restore separator
+            ptrEnd^ := sep ;    // restore separator
             inc (ptrEnd) ;
             PtrBeg := ptrEnd ;
          end else begin
@@ -679,7 +696,7 @@ begin
             if (ptrEnd^ = #0) then begin                          // empty line ?
                result.Add(String(PtrBeg)) ;
                exit ;
-            end else if (ptrEnd^ = char(TextQualifier)) then begin      // TextQualifier Q1
+            end else if (ptrEnd^ = textQualif) then begin      // TextQualifier Q1
                inc (ptrEnd) ;
                PtrBeg := ptrEnd ;
                break ;
@@ -696,7 +713,7 @@ begin
             if (ptrEnd^ = #0) then begin                          // empty line ?
                result.Add(String(PtrBeg)) ;
                exit ;
-            end else if (ptrEnd^ = char(TextQualifier)) then begin      // TextQualifier Q2
+            end else if (ptrEnd^ = textQualif) then begin      // TextQualifier Q2
                ptrEnd^ := #0 ;
                result.Add(String(PtrBeg)) ;
                inc (ptrEnd) ;
@@ -712,7 +729,7 @@ begin
                exit ;
             end else if (ptrEnd^ = ' ') then begin                // space before TextQualifier Q1
                inc (ptrEnd) ;
-            end else if (ptrEnd^ = char(ColSeparator)) then begin       // TextQualifier Q2
+            end else if (ptrEnd^ = Sep) then begin               // TextQualifier Q2
                inc (ptrEnd) ;
                break ;
             end else begin                                      // bad line , restart steps from here
@@ -1208,7 +1225,6 @@ begin
 
    if TraceConfig.AppDisplay_FocusToReceivedMessage then
       NodeToFocus := result ;
-
 
    TailRec := VstTail.GetNodeData(result) ;
 
@@ -1873,7 +1889,7 @@ end;
 // CTRL C : Copy selected. Return true if element is focused
 function TFrmTail.CopySelected : boolean;
 var
-   CopyStrings: TStrings;
+   CopyStrings: TStringList;
    CopyText: PChar;
    NewLine: string;
    IsFirst : boolean ;
@@ -1944,28 +1960,28 @@ var
       end ;
    end ;
 
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      DetailRec : PDetailRec ;
-   begin
-      if VstDetail.Selected [TestNode] then begin
-
-         DetailRec := VstDetail.GetNodeData(TestNode) ;
-         NewLine := TraceConfig.TextExport_TextQualifier + DetailRec.Col1 + TraceConfig.TextExport_TextQualifier  +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col2 + TraceConfig.TextExport_TextQualifier +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col3 + TraceConfig.TextExport_TextQualifier  ;
-
-         CopyStrings.Add(NewLine);
-      end ;
-
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
-      end ;
-   end ;
+//   procedure CopyDetail (TestNode : PVirtualNode);
+//   var
+//      node : PVirtualNode ;
+//      DetailRec : PDetailRec ;
+//   begin
+//      if VstDetail.Selected [TestNode] then begin
+//
+//         DetailRec := VstDetail.GetNodeData(TestNode) ;
+//         NewLine := TraceConfig.TextExport_TextQualifier + DetailRec.Col1 + TraceConfig.TextExport_TextQualifier  +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col2 + TraceConfig.TextExport_TextQualifier +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col3 + TraceConfig.TextExport_TextQualifier  ;
+//
+//         CopyStrings.Add(NewLine);
+//      end ;
+//
+//      // multi select
+//      node := TestNode.FirstChild ;
+//      while Node <> nil do begin
+//         CopyDetail (node) ;
+//         node := node.NextSibling ;
+//      end ;
+//   end ;
 
 begin
    result := false;
@@ -1988,7 +2004,9 @@ begin
    try
 
       if VstDetail.Focused then begin
-         CopyDetail (VstDetail.RootNode);
+         //CopyDetail (VstDetail.RootNode);
+        VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+
       end else begin
          // add title if needed.
          if TraceConfig.TextExport_GenerateColumnHeader then begin

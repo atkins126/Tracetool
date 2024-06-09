@@ -358,11 +358,11 @@ begin
    result.IsFixedColumns             := rbFixedcol.Checked and result.ShowManycolumns ;
    result.FixedColCount              := StrToIntDef(editColNumber.Text,1) ;
 
-   if ComboQualifier.ItemIndex = 0 then
-      result.TextQualifier := AnsiChar(chr(0))
-   else if ComboQualifier.ItemIndex = 1 then
+   if ComboQualifier.ItemIndex <= 0 then        // no quote
+      result.TextQualifier := ''
+   else if ComboQualifier.ItemIndex = 1 then    // single quote
       result.TextQualifier := ''''
-   else if ComboQualifier.ItemIndex = 2 then
+   else if ComboQualifier.ItemIndex = 2 then    // multi quote
       result.TextQualifier := '"' ;
 
    if trim(EditSeparator.text) = '' then

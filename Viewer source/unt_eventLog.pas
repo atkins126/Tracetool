@@ -21,7 +21,10 @@ uses
   VirtualTrees, VirtualTrees.Types,
   uWindowsEvents,
   Unt_Tool,
-  unt_tracewin, unt_PageContainer, unt_editor, vstSort,unt_filter,
+  unt_tracewin, unt_PageContainer, unt_editor,
+  vstSort,
+  VstSelector,
+  unt_filter,
   untPrintPreview, unt_FrameMemo ;
 
 type
@@ -134,7 +137,6 @@ type
     fWindowsEventLogs: TRBWindowsEventLogs;
     LastModified : tDateTime ;
     LastRead : integer ;
-    Sorter : TVstSort ;
     FirstChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
     LastChildOrder: integer;  // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
@@ -145,6 +147,8 @@ type
     procedure AddWaitingMessage;
   public
     Gutter: TImage;
+    Sorter : TVstSort ;
+    VstSelector: TVstSelector;
     IsPaused : boolean ;
     NodeToFocus : PVirtualNode ;
     rightPercent : extended;
@@ -214,6 +218,7 @@ begin
    // initialize sort
    FirstChildOrder := -1;
    LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
+
    Sorter := TVstSort.create (self) ;
    Sorter.tree := VstEvent ;
    Sorter.UtilityImages := Frm_Tool.UtilityImages ;
@@ -233,15 +238,16 @@ begin
    VstEvent.NodeDataSize := sizeof (TEvntLogRec) ;
    VstEvent.Header.MainColumn := 2 ;
    VstEvent.Header.AutoSizeIndex := -1 ;  // auto
+
    VstEvent.Header.Options := VstEvent.Header.Options
       - [hoDrag]              // columns cannot be moved
       + [hoOwnerDraw]         // needed for sort : header items with the owner draw style can be drawn by the application via event
       + [hoDblClickResize] ;  // allows a column to resize itself to its largest entry
 
-   VstEvent.TreeOptions.AutoOptions      := Frm_ODS.VstDebugString.TreeOptions.AutoOptions ;
-   VstEvent.TreeOptions.PaintOptions     := Frm_ODS.VstDebugString.TreeOptions.PaintOptions ;
-   VstEvent.TreeOptions.SelectionOptions := Frm_ODS.VstDebugString.TreeOptions.SelectionOptions ;
-   VstEvent.TreeOptions.MiscOptions      := Frm_ODS.VstDebugString.TreeOptions.MiscOptions ;
+   VstEvent.TreeOptions.AutoOptions      := Frm_Trace.vstTrace.TreeOptions.AutoOptions ;
+   VstEvent.TreeOptions.PaintOptions     := Frm_Trace.vstTrace.TreeOptions.PaintOptions ;
+   VstEvent.TreeOptions.SelectionOptions := Frm_Trace.vstTrace.TreeOptions.SelectionOptions ;
+   VstEvent.TreeOptions.MiscOptions      := Frm_Trace.vstTrace.TreeOptions.MiscOptions ;
 
    {$IFDEF WIN64}
      VstDetail.NodeDataSize := 16 ;
@@ -264,6 +270,10 @@ begin
    VstDetail.Colors.UnfocusedColor                := Frm_Trace.vstTrace.Colors.UnfocusedColor ;
    VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
    VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+
+   // multiple selection handler
+   VstSelector := TVstSelector.Create(self);   // self is owner
+   VstSelector.Init(VstDetail);
 
    LastModified := now ;
    LastRead := -1 ;
@@ -996,7 +1006,7 @@ end;
 
 function TFrmEventLog.CopySelected: boolean;
 var
-   CopyStrings: TStrings;
+   CopyStrings: TStringList;
    CopyText: PChar;
    NewLine: string;
    IsFirst : boolean ;
@@ -1043,28 +1053,28 @@ var
       end ;
    end ;
 
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      Member : TMember  ;
-   begin
-      if VstDetail.Selected [TestNode] then begin
-
-         Member := TMember (TObject (VstDetail.GetNodeData(TestNode)^)) ; 
-         NewLine := TraceConfig.TextExport_TextQualifier + Member.Col1 + TraceConfig.TextExport_TextQualifier  +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + Member.Col2 + TraceConfig.TextExport_TextQualifier +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + Member.Col3 + TraceConfig.TextExport_TextQualifier  ;
-
-         CopyStrings.Add(NewLine);
-      end ;
-
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
-      end ;
-   end ;
+//   procedure CopyDetail (TestNode : PVirtualNode);
+//   var
+//      node : PVirtualNode ;
+//      Member : TMember  ;
+//   begin
+//      if VstDetail.Selected [TestNode] then begin
+//
+//         Member := TMember (TObject (VstDetail.GetNodeData(TestNode)^)) ;
+//         NewLine := TraceConfig.TextExport_TextQualifier + Member.Col1 + TraceConfig.TextExport_TextQualifier  +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + Member.Col2 + TraceConfig.TextExport_TextQualifier +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + Member.Col3 + TraceConfig.TextExport_TextQualifier  ;
+//
+//         CopyStrings.Add(NewLine);
+//      end ;
+//
+//      // multi select
+//      node := TestNode.FirstChild ;
+//      while Node <> nil do begin
+//         CopyDetail (node) ;
+//         node := node.NextSibling ;
+//      end ;
+//   end ;
 
 begin
    result := false;
@@ -1087,7 +1097,9 @@ begin
    try
 
       if VstDetail.Focused then begin
-         CopyDetail (VstDetail.RootNode);
+         //CopyDetail (VstDetail.RootNode);
+         VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+
       end else begin
          // add title if needed.
          if TraceConfig.TextExport_GenerateColumnHeader then begin

@@ -257,24 +257,29 @@ begin
    if (StartSelectedNode = EndSelectedNode ) then
       exit;
 
-   if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
-      loopNode := StartSelectedNode;
-      loopEnd  := EndSelectedNode;
-   end else begin
-      loopNode := EndSelectedNode ;
-      loopEnd  := StartSelectedNode;
-   end;
+   try
 
-   while loopNode <> nil do begin
-      if (node = loopNode) then begin
-         result := true;
-         exit;
-      end;
-      loopNode := loopNode.NextSibling;
-      if (loopNode = loopEnd) or (loopNode = nil) then
-         break;
-   end;
+       if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
+          loopNode := StartSelectedNode;
+          loopEnd  := EndSelectedNode;
+       end else begin
+          loopNode := EndSelectedNode ;
+          loopEnd  := StartSelectedNode;
+       end;
 
+       while loopNode <> nil do begin
+          if (node = loopNode) then begin
+             result := true;
+             exit;
+          end;
+          loopNode := loopNode.NextSibling;       // sometimes generated exception here :(
+          if (loopNode = loopEnd) or (loopNode = nil) then
+             break;
+       end;
+
+   except
+
+   end;
 end;
 
 procedure TVstSelector.ResetSelection;

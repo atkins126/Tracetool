@@ -11,12 +11,10 @@ object FrmSelectTail: TFrmSelectTail
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   DesignSize = (
     580
     501)
-  PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
     Left = 16
@@ -37,7 +35,7 @@ object FrmSelectTail: TFrmSelectTail
   object ComboColumnsStyle: TComboBox
     Left = 96
     Top = 8
-    Width = 472
+    Width = 468
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akTop, akRight]
@@ -47,9 +45,10 @@ object FrmSelectTail: TFrmSelectTail
       'Show Approximative time and lines'
       'Show lines only'
       'Multi columns')
+    ExplicitWidth = 464
   end
   object butSelect: TBitBtn
-    Left = 539
+    Left = 535
     Top = 185
     Width = 25
     Height = 25
@@ -83,15 +82,17 @@ object FrmSelectTail: TFrmSelectTail
       00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
     TabOrder = 3
     OnClick = butSelectClick
+    ExplicitLeft = 531
   end
   object EditFileName: TEdit
     Left = 32
     Top = 187
-    Width = 498
+    Width = 494
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 2
     OnKeyUp = EditFileNameKeyUp
+    ExplicitWidth = 490
   end
   object butOpen: TButton
     Left = 40
@@ -103,9 +104,10 @@ object FrmSelectTail: TFrmSelectTail
     ModalResult = 1
     TabOrder = 8
     OnClick = butOpenClick
+    ExplicitTop = 467
   end
   object butCancel: TButton
-    Left = 455
+    Left = 451
     Top = 468
     Width = 75
     Height = 25
@@ -114,6 +116,8 @@ object FrmSelectTail: TFrmSelectTail
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 9
+    ExplicitLeft = 447
+    ExplicitTop = 467
   end
   object rbSingleFile: TRadioButton
     Left = 16
@@ -138,25 +142,29 @@ object FrmSelectTail: TFrmSelectTail
   object FavoriteFiles: TCheckListBox
     Left = 32
     Top = 232
-    Width = 530
+    Width = 526
     Height = 169
-    OnClickCheck = FavoriteFilesClickCheck
     Anchors = [akLeft, akTop, akRight, akBottom]
-    ItemHeight = 13
+    ItemHeight = 17
     Items.Strings = (
       'File1'
       'File2'
       'File3')
     TabOrder = 5
+    OnClickCheck = FavoriteFilesClickCheck
     OnDblClick = FavoriteFilesDblClick
+    ExplicitWidth = 522
+    ExplicitHeight = 168
   end
   object Panel4: TPanel
     Left = 4
     Top = 456
-    Width = 571
+    Width = 567
     Height = 2
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 10
+    ExplicitTop = 455
+    ExplicitWidth = 563
   end
   object ButAddfile: TButton
     Left = 128
@@ -167,6 +175,7 @@ object FrmSelectTail: TFrmSelectTail
     Caption = 'Add favorite file'
     TabOrder = 6
     OnClick = ButAddfileClick
+    ExplicitTop = 406
   end
   object butDeletefile: TButton
     Left = 272
@@ -177,6 +186,7 @@ object FrmSelectTail: TFrmSelectTail
     Caption = 'Delete selected favorite file'
     TabOrder = 7
     OnClick = butDeletefileClick
+    ExplicitTop = 406
   end
   object Panel5: TPanel
     Left = 14
@@ -232,11 +242,12 @@ object FrmSelectTail: TFrmSelectTail
   object Panel6: TPanel
     Left = 295
     Top = 45
-    Width = 269
+    Width = 265
     Height = 113
     Anchors = [akLeft, akTop, akRight]
     BevelInner = bvLowered
     TabOrder = 12
+    ExplicitWidth = 261
     object LabelTxtQualifier: TLabel
       Left = 8
       Top = 88

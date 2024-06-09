@@ -78,15 +78,6 @@ begin
 
    TraceWin := TFrm_Trace(owner);
 
-   // initialize sort
-   Sorter := TVstSort.Create(self);
-   Sorter.tree := VstTable;
-   Sorter.UtilityImages := Frm_Tool.UtilityImages;
-   Sorter.canUnsort := true;
-
-   // multiple selection handler
-   VstSelector := TVstSelector.Create(self);   // self is owner
-   VstSelector.Init(VstTable);
 
    // redirect some events to the sorter
    VstTable.onHeaderClick := Sorter.onHeaderClick;
@@ -109,7 +100,7 @@ begin
       + [toAutoSpanColumns]           // Large entries continue into next columns
       - [toDisableAutoscrollOnFocus]  // Disable scrolling a column entirely into view if it gets focused.
       + [toDisableAutoscrollOnEdit];  // Do not center a node horizontally when it is edited.
- 
+
    VstTable.TreeOptions.PaintOptions := TraceWin.vstTrace.TreeOptions.PaintOptions
       - [toUseBlendedImages]        // Don't use blended images
       - [toShowTreeLines]           // don't Display tree lines to show hierarchy of nodes.
@@ -125,7 +116,7 @@ begin
       - [toMultiselect]             // Allow more than one node to be selected.
       + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
       - [toFullRowSelect];          // selection highlight the whole line
- 
+
    VstTable.TreeOptions.MiscOptions := TraceWin.vstTrace.TreeOptions.MiscOptions
       - [toReportMode]              // Tree behaves like TListView in report mode.
       + [toFullRepaintOnResize]     // Fully invalidate the tree when its window is resized (CS_HREDRAW/CS_VREDRAW).
@@ -135,12 +126,22 @@ begin
       + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
       - [toVariableNodeHeight]      // variable node height
       - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
-      - [toEditable]                // don't allow edition. Code is used to detect double click 
+      - [toEditable]                // don't allow edition. Code is used to detect double click
       - [toCheckSupport];           // no checkboxes
 
    VstTable.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
    VstTable.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
    VstTable.Colors.UnfocusedSelectionBorderColor := TraceWin.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+
+   // initialize sort
+   Sorter := TVstSort.Create(self);
+   Sorter.tree := VstTable;
+   Sorter.UtilityImages := Frm_Tool.UtilityImages;
+   Sorter.canUnsort := true;
+
+   // multiple selection handler
+   VstSelector := TVstSelector.Create(self);   // self is owner
+   VstSelector.Init(VstTable);
 end;
 
 //------------------------------------------------------------------------------
