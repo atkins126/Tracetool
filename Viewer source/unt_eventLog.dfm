@@ -94,11 +94,14 @@ inherited FrmEventLog: TFrmEventLog
       OnMeasureItem = VstEventMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-      ExplicitWidth = 325
-      ExplicitHeight = 355
+      ExplicitLeft = 11
+      ExplicitTop = 24
       Columns = <
         item
+          Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible]
           Position = 0
+          Spacing = 1
+          Style = vsOwnerDraw
           Width = 20
         end
         item

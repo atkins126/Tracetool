@@ -1162,12 +1162,13 @@ begin
    //   ikState,
    //   ikOverlay
    //);
+   if IsMultiColTree then
+      exit;
 
    if (Kind = ikOverlay) or (Kind = ikState) then
       exit; // Return a defined overlay here
 
-   if IsMultiColTree then
-      exit;
+   // Normal and selected
 
    if Column = 3 then begin
       TreeRec := Sender.GetNodeData(Node);

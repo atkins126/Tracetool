@@ -658,19 +658,10 @@ end;
 procedure TFrmEventLog.VstEventGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: TImageIndex);
-var
-   EvntLogRec : PEvntLogRec ;
 begin
    ImageIndex := -1 ;
-
-   if (Kind = ikOverlay) or (Kind = ikState) then
-      exit; // Return a defined overlay here
-
-   if Column <> 0 then
-      exit ;
-
-   EvntLogRec := Sender.GetNodeData(Node) ;
-   ImageIndex := EvntLogRec.EventIcon ;
+   // the Image is displayed by the tree and need 36 pixels
+   // See AfterCellPaint to draw on column 0 (no space left)
 end;
 
 //------------------------------------------------------------------------------
@@ -1667,29 +1658,31 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventAfterCellPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  CellRect: TRect);
-var
-   CellText: String ;
-   //EvntLogRec : PEvntLogRec ;
-   middle : integer ;
+procedure TFrmEventLog.VstEventAfterCellPaint(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellRect: TRect);
 begin
-   //EvntLogRec := VstEvent.GetNodeData(Node) ;
-   VstEventGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
-   if IsSeparator(CellText) then begin
-      TargetCanvas.Pen.Color := clBlack;
-      middle := CellRect.Bottom div 2 ;
-      if copy (trim(CellText),1,1) = '-' then begin
-         TargetCanvas.MoveTo(0, middle);
-         TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle );
-      end else begin // '='
-         TargetCanvas.MoveTo(0, middle - 1);
-         TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle - 1 );
-         TargetCanvas.MoveTo(0, middle + 1);
-         TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle + 1 );
-      end ;
-   end ;
+   // draw the level icon (warning/error/debug/...) here.
+   // This cannot be done using the OnGetImageIndex because it take too much space
+   if (Column = 0) then begin
+      var EvntLogRec: PEvntLogRec := Sender.GetNodeData(Node);
+      var ImageIndex: Integer := EvntLogRec.EventIcon ;
+      Frm_Tool.ImageList1.Draw(TargetCanvas, 0, 0, ImageIndex);
+   end else begin
+      var CellText: String ;
+     VstEventGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
+     if IsSeparator(CellText) then begin
+        TargetCanvas.Pen.Color := clBlack;
+        var middle := CellRect.Bottom div 2 ;
+        if copy (trim(CellText),1,1) = '-' then begin
+           TargetCanvas.MoveTo(0, middle);
+           TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle);
+        end else begin // '='
+           TargetCanvas.MoveTo(0, middle - 1);
+           TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle - 1);
+           TargetCanvas.MoveTo(0, middle + 1);
+           TargetCanvas.LineTo(TargetCanvas.ClipRect.Right, middle + 1);
+        end ;
+     end ;
+   end;
 end;
 
 //------------------------------------------------------------------------------
