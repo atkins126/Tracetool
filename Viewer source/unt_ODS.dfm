@@ -235,6 +235,12 @@ object Frm_ODS: TFrm_ODS
         inherited PanelTop: TPanel
           Width = 385
           ExplicitWidth = 385
+          inherited LabelSelect: TLabel
+            Width = 56
+            Height = 13
+            ExplicitWidth = 56
+            ExplicitHeight = 13
+          end
         end
       end
     end

@@ -159,6 +159,7 @@ type
     //procedure ODS (var Msg : TMessage);  message WM_ODS ;
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
     function CheckSearchRecord(ODSRec: PODSRec): boolean;
   public
     Gutter: TImage;
@@ -285,6 +286,7 @@ begin
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
+   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 
    LastModified := now ;
    if TraceConfig.Ods_Enabled = true then begin
@@ -1753,6 +1755,11 @@ begin
    if Column = 0 then
       if node.Parent = VstDetail.RootNode then
          TargetCanvas.font.Style := [fsBold] ;
+end;
+
+procedure TFrm_ODS.VstDetailSelectorSelectionChanged(Sender: TVstSelector;  selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
 end;
 
 //------------------------------------------------------------------------------

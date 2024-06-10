@@ -143,7 +143,6 @@ begin
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
    VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
-
 end;
 
 //------------------------------------------------------------------------------

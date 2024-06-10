@@ -263,7 +263,6 @@ procedure Tframe_Classic.VstDetailSelectorSelectionChanged( Sender: TVstSelector
 begin
    //TFrm_Trace.InternalTrace('VstDetailSelectorSelectionChanged') ;
    frameMemo.LabelSelect.Caption := selectionAsText;
-
 end;
 
 procedure Tframe_Classic.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);

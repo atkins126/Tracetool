@@ -94,8 +94,6 @@ inherited FrmEventLog: TFrmEventLog
       OnMeasureItem = VstMainMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-      ExplicitLeft = 11
-      ExplicitTop = 24
       Columns = <
         item
           Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible]
@@ -244,6 +242,12 @@ inherited FrmEventLog: TFrmEventLog
         inherited PanelTop: TPanel
           Width = 381
           ExplicitWidth = 381
+          inherited LabelSelect: TLabel
+            Width = 56
+            Height = 13
+            ExplicitWidth = 56
+            ExplicitHeight = 13
+          end
         end
       end
     end

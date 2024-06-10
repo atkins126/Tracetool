@@ -58,7 +58,9 @@ type
 
 implementation
 
-uses unt_traceWin;
+uses
+   System.types,
+   unt_traceWin;
 
 { TVstSelector }
 
@@ -268,7 +270,6 @@ end;
 function TVstSelector.GetSelectionAsText() : string;
 var
   RowCount, ColCount : integer ;
-  ColsAsString : string;
   startColPosition, EndColPosition: integer;
   LoopEnd : PVirtualNode;
   loopNode : PVirtualNode ;
@@ -288,7 +289,6 @@ begin
        EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
      end;
      ColCount := EndColPosition - startColPosition + 1;
-     ColsAsString := '(' + intToStr(startColPosition) + '..' + intToStr(EndColPosition) + ')';
 
      if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
         loopNode := StartSelectedNode;
@@ -305,7 +305,7 @@ begin
   except
 
   end;
-  result := inttostr(RowCount) + ' * ' + ColsAsString;
+  result := inttostr(RowCount) + ' * ' +inttostr(ColCount);
 end;
 
 function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;

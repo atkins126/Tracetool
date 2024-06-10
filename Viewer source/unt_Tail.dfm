@@ -228,6 +228,12 @@ object FrmTail: TFrmTail
         inherited PanelTop: TPanel
           Width = 401
           ExplicitWidth = 401
+          inherited LabelSelect: TLabel
+            Width = 56
+            Height = 13
+            ExplicitWidth = 56
+            ExplicitHeight = 13
+          end
         end
       end
     end

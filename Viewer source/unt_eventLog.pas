@@ -141,6 +141,7 @@ type
     LastChildOrder: integer;  // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
 
     procedure AddLogToTree(eventLog: TRBWindowsEvent); //overload;
     function CheckSearchRecord(EvntLogRec: PEvntLogRec): boolean;
@@ -274,6 +275,7 @@ begin
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
+   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 
    LastModified := now ;
    LastRead := -1 ;
@@ -1817,6 +1819,11 @@ begin
    if Column = 0 then
       if node.Parent = VstDetail.RootNode then
          TargetCanvas.font.Style := [fsBold] ;
+end;
+
+procedure TFrmEventLog.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
 end;
 
 //------------------------------------------------------------------------------

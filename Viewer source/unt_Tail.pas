@@ -151,6 +151,7 @@ type
     LastChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
     function AddTrace(PtrBeg,PtrEnd: PAnsiChar; Ontop,IsNotCompleted : boolean): pVirtualNode;
     function getDelimitedStringsfromLine (SourceBegin : pAnsiChar; SourceEnd : pAnsiChar = nil) : TStringList ; overload ;
     function getDelimitedStringsfromWLine (SourceBegin : pWideChar; SourceEnd : pWideChar = nil) : TStringList ; overload ;
@@ -326,6 +327,7 @@ begin
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
+   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 
    DirMon := TDirMon.Create (self);  // owned by form
    DirMon.OnCreated := DirMon1Created ;
@@ -2751,6 +2753,11 @@ begin
    if Column = 0 then
       if node.Parent = VstDetail.RootNode then
          TargetCanvas.font.Style := [fsBold] ;
+end;
+
+procedure TFrmTail.VstDetailSelectorSelectionChanged(Sender: TVstSelector;  selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
 end;
 
 //------------------------------------------------------------------------------
