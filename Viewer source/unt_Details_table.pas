@@ -50,7 +50,7 @@ type
     { Public declarations }
     TraceWin: TFrm_Trace;
     Sorter: TVstSort;
-    VstSelector: TVstSelector;
+    VstDetailSelector: TVstSelector;
 
     Constructor Create(AOwner: TComponent);  override ;
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
@@ -140,9 +140,9 @@ begin
    VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
    // multiple selection handler
-   VstSelector := TVstSelector.Create(self);   // self is owner
-   VstSelector.Init(VstDetail);
-   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
+   VstDetailSelector := TVstSelector.Create(self);   // self is owner
+   VstDetailSelector.Init(VstDetail);
+   VstDetailSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 end;
 
 //------------------------------------------------------------------------------
@@ -380,7 +380,7 @@ var
    DetailRec : PTableRec ;
 begin
 
-   VstSelector.ResetSelection();
+   VstDetailSelector.ResetSelection();
 
    VstDetail.Clear ;
    if Sorter.SortColumns.Count > 1 then  
@@ -450,7 +450,7 @@ begin
    result := VstDetail.Focused();
    var CopyStrings := TStringList.Create;
    try
-      VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+      VstDetailSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
       var CopyText: PChar := CopyStrings.GetText;
       Clipboard.SetTextBuf(CopyText);
       StrDispose(CopyText);

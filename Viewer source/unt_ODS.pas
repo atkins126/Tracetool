@@ -164,7 +164,7 @@ type
   public
     Gutter: TImage;
     Sorter : TVstSort ;
-    VstSelector: TVstSelector;
+    VstDetailSelector: TVstSelector;
     ODSThread : TODSThread ;
     NodeToFocus : PVirtualNode ;
     LastModified : tDateTime ;
@@ -284,9 +284,9 @@ begin
    VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
    // multiple selection handler
-   VstSelector := TVstSelector.Create(self);   // self is owner
-   VstSelector.Init(VstDetail);
-   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
+   VstDetailSelector := TVstSelector.Create(self);   // self is owner
+   VstDetailSelector.Init(VstDetail);
+   VstDetailSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 
    LastModified := now ;
    if TraceConfig.Ods_Enabled = true then begin
@@ -399,6 +399,7 @@ begin
 
    vstdetail.clear ;
    frameMemo.SetMemoText('',false,false);
+   VstDetailSelector.ResetSelection;
 
    // get first then second. If second is not nil then it's multiselect : disable info panel
    FirstSelect := VstMain.GetNextSelected (nil) ;
@@ -1157,7 +1158,7 @@ begin
 
       if VstDetail.Focused then begin
          //CopyDetail (VstDetail.RootNode);
-         VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+         VstDetailSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
 
 
       end else begin

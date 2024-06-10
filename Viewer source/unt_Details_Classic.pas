@@ -67,7 +67,7 @@ type
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
-    VstSelector: TVstSelector;
+    VstDetailSelector: TVstSelector;
     Constructor Create(AOwner: TComponent);  override ;
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
@@ -138,9 +138,9 @@ begin
    VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
    // multiple selection handler
-   VstSelector := TVstSelector.Create(self);   // self is owner
-   VstSelector.Init(VstDetail);
-   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
+   VstDetailSelector := TVstSelector.Create(self);   // self is owner
+   VstDetailSelector.Init(VstDetail);
+   VstDetailSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 end;
 
 procedure Tframe_Classic.FrameMemoCanResize(Sender: TObject; var NewWidth,
@@ -521,7 +521,7 @@ begin
    try
       //CopyDetail (VstDetail, CopyStrings, VstDetail.RootNode);
 
-      VstSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+      VstDetailSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
       var CopyText: PChar := CopyStrings.GetText;
       Clipboard.SetTextBuf(CopyText);
       StrDispose(CopyText);

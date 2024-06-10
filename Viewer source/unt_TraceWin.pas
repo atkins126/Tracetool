@@ -191,9 +191,7 @@ interface
          CurrentViewers: TObjectList; // not Owner , array of Tframe_BaseDetails. Viewers that are currently displayed.
          TableFrame: TFrame;
          BitmapFrame: TFrame;
-         //XmlFrame: TFrame;
          TreeDetailFrame: TFrame;
-         //VstSelector: TVstSelector;
          VstDetail: TVirtualStringTree;
          VstDetailHaschildren: boolean;
 
@@ -1427,10 +1425,7 @@ begin
 
          SrcPos:=SrcPos + 3;
       until SrcPos >= Length(SubMember.Col2);
-
-
    end ;
-
 end;
 
 // ------------------------------------------------------------------------------
@@ -1486,6 +1481,8 @@ var
 begin
    SetCursor(Screen.Cursors[crHourGlass]);
    Tframe_Classic(TreeDetailFrame).frameMemo.SetMemoText('',false,false);
+   Tframe_Classic(TreeDetailFrame).VstDetailSelector.ResetSelection;
+
    try
       // scroll into view
       if Node <> nil then

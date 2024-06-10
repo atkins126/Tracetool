@@ -308,15 +308,41 @@ begin
   if (RowCount = 1) and (ColCount = 1) then
      result := ''
   else
-     result := inttostr(RowCount) + ' by ' + inttostr(ColCount) + ' selection';
+     result := 'Selection:' + inttostr(RowCount) + ' by ' + inttostr(ColCount) ;
 end;
 
 function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;
 var
   LoopEnd : PVirtualNode;
-  loopNode : PVirtualNode ;
+  loopStart : PVirtualNode ;
   startColPosition, EndColPosition, PositionToCheck: integer;
+
+   function LoopSibling(NodeToCheck : PVirtualNode) : boolean;
+   begin
+       result := false;
+       var loopNode : PVirtualNode := NodeToCheck;
+       while loopNode <> nil do begin
+          if (loopNode = node) then begin
+             result := true;
+             exit;
+          end;
+
+          // loop children
+          var firstChild := loopNode.FirstChild;
+          result := LoopSibling(firstChild);
+          if result then
+             exit;
+
+          // else next sibling
+          loopNode := loopNode.NextSibling;       // sometimes generated exception here. Don't know why :(
+          if (loopNode = loopEnd) or (loopNode = nil) then
+             break;
+       end;
+   end;
+
 begin
+
+
    result := false;
 
    if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
@@ -347,26 +373,13 @@ begin
    try
 
        if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
-          loopNode := StartSelectedNode;
+          loopStart := StartSelectedNode;
           loopEnd  := EndSelectedNode;
        end else begin
-          loopNode := EndSelectedNode ;
+          loopStart := EndSelectedNode ;
           loopEnd  := StartSelectedNode;
        end;
-
-       while loopNode <> nil do begin
-          if (node = loopNode) then begin
-             result := true;
-             exit;
-          end;
-
-          // TODO : FirstChild
-
-          loopNode := loopNode.NextSibling;       // sometimes generated exception here. Don't know why :(
-          if (loopNode = loopEnd) or (loopNode = nil) then
-             break;
-       end;
-
+       result := LoopSibling(loopStart);
    except
 
    end;
