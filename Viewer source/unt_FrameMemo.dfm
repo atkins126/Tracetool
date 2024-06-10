@@ -58,67 +58,74 @@ object FrameMemo: TFrameMemo
     BevelOuter = bvNone
     TabOrder = 1
     OnResize = PanelTopResize
-    object ShowAsTextButton: TBitBtn
-      Left = 0
-      Top = 0
-      Width = 42
-      Height = 25
-      Caption = 'Text'
-      TabOrder = 0
-      OnClick = ShowAsTextButtonClick
-    end
-    object ShowAsXmlButton: TBitBtn
-      Left = 48
-      Top = 0
-      Width = 45
-      Height = 25
-      Caption = 'Xml'
-      TabOrder = 1
-      OnClick = ShowAsXmlButtonClick
-    end
-    object ShowAsJSonButton: TBitBtn
-      Left = 99
-      Top = 0
-      Width = 45
-      Height = 25
-      Caption = 'Json'
-      TabOrder = 2
-      OnClick = ShowAsJSonButtonClick
+    object LabelSelect: TLabel
+      Left = 198
+      Top = 5
+      Width = 59
+      Height = 15
+      Caption = 'LabelSelect'
     end
     object FormatButton: TBitBtn
-      Left = 150
+      Left = 51
       Top = 0
       Width = 50
       Height = 25
       Caption = 'Format'
-      TabOrder = 3
+      TabOrder = 0
       OnClick = FormatButtonClick
     end
     object ShowPopupButton: TBitBtn
-      Left = 203
+      Left = 107
       Top = 0
       Width = 85
       Height = 25
       Caption = 'Show in Popup'
-      TabOrder = 4
+      TabOrder = 1
       OnClick = ShowPopupButtonClick
+    end
+    object ShowAsButton: TButton
+      Left = 0
+      Top = 0
+      Width = 45
+      Height = 25
+      Caption = 'Text'
+      DropDownMenu = PopupShowAs
+      Style = bsSplitButton
+      TabOrder = 2
+      OnClick = ShowAsButtonClick
     end
   end
   object SynJSONSyn: TSynJSONSyn
     Left = 24
-    Top = 68
+    Top = 100
   end
   object SynXMLSyn: TSynXMLSyn
     AttributeValueAttri.Style = []
     TextAttri.Style = []
     WantBracesParsed = False
     Left = 96
-    Top = 68
+    Top = 100
   end
   object XMLDocument: TXMLDocument
     Active = True
     Left = 176
-    Top = 68
+    Top = 100
     DOMVendorDesc = 'MSXML'
+  end
+  object PopupShowAs: TPopupMenu
+    Left = 96
+    Top = 32
+    object ShowAsText: TMenuItem
+      Caption = 'Show As Text'
+      OnClick = ShowAsTextClick
+    end
+    object ShowAsXml: TMenuItem
+      Caption = 'Show As Xml'
+      OnClick = ShowAsXmlClick
+    end
+    object ShowAsJson: TMenuItem
+      Caption = 'Show As Json'
+      OnClick = ShowAsJsonClick
+    end
   end
 end

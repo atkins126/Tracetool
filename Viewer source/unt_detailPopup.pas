@@ -40,6 +40,7 @@ end;
 procedure TDetailPopupForm.FormCreate(Sender: TObject);
 begin
    frameMemo.ShowPopupButton.visible := false;
+   frameMemo.LabelSelect.visible := false;
 end;
 
 //------------------------------------------------------------------------------

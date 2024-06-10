@@ -7,7 +7,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, SynEdit, Vcl.ComCtrls,
   Vcl.ToolWin, Xml.xmldom, Xml.XMLIntf, Xml.Win.msxmldom, Xml.XMLDoc,
   SynHighlighterXML, SynEditHighlighter, SynEditCodeFolding, SynHighlighterJSON,
-  System.JSON, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls;
+  System.JSON, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls, Vcl.Menus;
 
 type
   TFrameMemo = class(TFrame)
@@ -16,17 +16,21 @@ type
     SynXMLSyn: TSynXMLSyn;
     XMLDocument: TXMLDocument;
     PanelTop: TPanel;
-    ShowAsTextButton: TBitBtn;
-    ShowAsXmlButton: TBitBtn;
-    ShowAsJSonButton: TBitBtn;
     FormatButton: TBitBtn;
     ShowPopupButton: TBitBtn;
-    procedure ShowAsTextButtonClick(Sender: TObject);
-    procedure ShowAsXmlButtonClick(Sender: TObject);
-    procedure ShowAsJSonButtonClick(Sender: TObject);
+    PopupShowAs: TPopupMenu;
+    ShowAsText: TMenuItem;
+    ShowAsXml: TMenuItem;
+    ShowAsJson: TMenuItem;
+    ShowAsButton: TButton;
+    LabelSelect: TLabel;
     procedure FormatButtonClick(Sender: TObject);
     procedure ShowPopupButtonClick(Sender: TObject);
     procedure PanelTopResize(Sender: TObject);
+    procedure ShowAsButtonClick(Sender: TObject);
+    procedure ShowAsTextClick(Sender: TObject);
+    procedure ShowAsXmlClick(Sender: TObject);
+    procedure ShowAsJsonClick(Sender: TObject);
   private
   public
     procedure SetMemoText(text: string; isXml, isJson: boolean);
@@ -34,7 +38,7 @@ type
 
 implementation
 
-uses unt_detailPopup;
+uses unt_detailPopup, unt_TraceWin;
 
 {$R *.dfm}
 
@@ -43,26 +47,44 @@ uses unt_detailPopup;
 procedure TFrameMemo.PanelTopResize(Sender: TObject);
 begin
    if width >= 290 then begin
-      ShowAsTextButton.left :=   0 ; ShowAsTextButton.width := 45 ; ShowAsTextButton.caption := 'Text' ;
-      ShowAsXmlButton .left :=  48 ; ShowAsXmlButton .width := 45 ; ShowAsXmlButton .caption := 'Xml' ;
-      ShowAsJSonButton.left :=  99 ; ShowAsJSonButton.width := 45 ; ShowAsJSonButton.caption := 'Json' ;
-      FormatButton    .left := 150 ; FormatButton    .width := 50 ; FormatButton    .caption := 'Format' ;
-      ShowPopupButton .left := 203 ; ShowPopupButton .width := 85 ; ShowPopupButton .caption := 'Show in popup' ;
-   end else if width >= 156 then begin
-      ShowAsTextButton.left :=   0 ; ShowAsTextButton.width := 25 ; ShowAsTextButton.caption := 'Txt' ;
-      ShowAsXmlButton .left :=  28 ; ShowAsXmlButton .width := 25 ; ShowAsXmlButton .caption := 'Xml' ;
-      ShowAsJSonButton.left :=  56 ; ShowAsJSonButton.width := 28 ; ShowAsJSonButton.caption := 'Json' ;
-      FormatButton    .left :=  87 ; FormatButton    .width := 25 ; FormatButton    .caption := 'Fmt' ;
-      ShowPopupButton .left := 115 ; ShowPopupButton .width := 38 ; ShowPopupButton .caption := 'Popup' ;
-   end else begin
-      ShowAsTextButton.left :=   0 ; ShowAsTextButton.width := 14 ; ShowAsTextButton.caption := 'T' ;
-      ShowAsXmlButton .left :=  15 ; ShowAsXmlButton .width := 14 ; ShowAsXmlButton .caption := 'X' ;
-      ShowAsJSonButton.left :=  30 ; ShowAsJSonButton.width := 14 ; ShowAsJSonButton.caption := 'J' ;
-      FormatButton    .left :=  45 ; FormatButton    .width := 19 ; FormatButton    .caption := 'F.' ;
-      ShowPopupButton .left :=  65 ; ShowPopupButton .width := 19 ; ShowPopupButton .caption := 'P.' ;
-   end;
+      if (SynMemo.Highlighter = nil) then
+         ShowAsButton.Caption := 'Text'
+      else if (SynMemo.Highlighter = SynXMLSyn) then
+         ShowAsButton.Caption := 'Xml'
+      else if (SynMemo.Highlighter = SynJSONSyn) then
+         ShowAsButton.Caption := 'JSon';
+      ShowAsButton    .left :=   0; ShowAsButton.width := 50 ;                                                    //   0 + 50 + 6 = 56
+      FormatButton    .left :=  56; FormatButton    .width := 50 ; FormatButton    .caption := 'Format' ;         //  56 + 50 + 6 = 112
+      ShowPopupButton .left := 112; ShowPopupButton .width := 85 ; ShowPopupButton .caption := 'Show in popup' ;  // 112 + 85 + 6 = 203
+      LabelSelect     .Left := 203;
 
+   end else if width >= 156 then begin
+      if (SynMemo.Highlighter = nil) then
+         ShowAsButton.Caption := 'Text'
+      else if (SynMemo.Highlighter = SynXMLSyn) then
+         ShowAsButton.Caption := 'Xml'
+      else if (SynMemo.Highlighter = SynJSONSyn) then
+         ShowAsButton.Caption := 'JSon';
+      ShowAsButton    .left :=   0; ShowAsButton.width := 45 ;                                                    //   0 + 45 + 3 = 48
+      FormatButton    .left :=  48; FormatButton    .width := 38 ; FormatButton    .caption := 'Format' ;         //  48 + 38 + 3 = 89
+      ShowPopupButton .left :=  89; ShowPopupButton .width := 38 ; ShowPopupButton .caption := 'Popup' ;          //  89 + 38 + 3 = 130
+      LabelSelect     .Left := 130;
+
+   end else begin
+      if (SynMemo.Highlighter = nil) then
+         ShowAsButton.Caption := 'T'
+      else if (SynMemo.Highlighter = SynXMLSyn) then
+         ShowAsButton.Caption := 'X'
+      else if (SynMemo.Highlighter = SynJSONSyn) then
+         ShowAsButton.Caption := 'J';
+      ShowAsButton    .left :=   0; ShowAsButton.width := 30 ;                                                    //  0 + 30 + 1 = 31
+      FormatButton    .left :=  31; FormatButton    .width := 19 ; FormatButton    .caption := 'F.' ;             // 31 + 19 + 1 = 51
+      ShowPopupButton .left :=  51; ShowPopupButton .width := 19 ; ShowPopupButton .caption := 'P.' ;             // 51 + 19 + 1 = 71
+      LabelSelect     .Left :=  71;
+   end;
 end;
+
+//------------------------------------------------------------------------------
 
 procedure TFrameMemo.SetMemoText(text: string; isXml:boolean; isJson : boolean);
 begin
@@ -77,23 +99,42 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrameMemo.ShowAsTextButtonClick(Sender: TObject);
+procedure TFrameMemo.ShowAsTextClick(Sender: TObject);
 begin
+   if width >= 290 then
+      ShowAsButton.Caption := 'Text'
+   else if width >= 156 then
+      ShowAsButton.Caption := 'Txt'
+   else
+      ShowAsButton.Caption := 'T';
    SynMemo.Highlighter := nil;
 end;
 
-//------------------------------------------------------------------------------
-
-procedure TFrameMemo.ShowAsXmlButtonClick(Sender: TObject);
+procedure TFrameMemo.ShowAsXmlClick(Sender: TObject);
 begin
+   if width >= 290 then
+      ShowAsButton.Caption := 'Xml'
+   else if width >= 156 then
+      ShowAsButton.Caption := 'Xml'
+   else
+      ShowAsButton.Caption := 'X';
    SynMemo.Highlighter := SynXMLSyn;
 end;
 
-//------------------------------------------------------------------------------
-
-procedure TFrameMemo.ShowAsJSonButtonClick(Sender: TObject);
+procedure TFrameMemo.ShowAsJsonClick(Sender: TObject);
 begin
+   if width >= 290 then
+      ShowAsButton.Caption := 'JSon'
+   else if width >= 156 then
+      ShowAsButton.Caption := 'Jsn'
+   else
+      ShowAsButton.Caption := 'J';
    SynMemo.Highlighter := SynJSONSyn;
+end;
+
+procedure TFrameMemo.ShowAsButtonClick(Sender: TObject);
+begin
+    FormatButtonClick(sender);
 end;
 
 //------------------------------------------------------------------------------

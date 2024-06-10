@@ -10,10 +10,8 @@ object DetailPopupForm: TDetailPopupForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   inline FrameMemo: TFrameMemo
     Left = 0
@@ -22,19 +20,23 @@ object DetailPopupForm: TDetailPopupForm
     Height = 369
     Align = alClient
     TabOrder = 0
-    ExplicitTop = 29
     ExplicitWidth = 386
-    ExplicitHeight = 340
+    ExplicitHeight = 369
     inherited SynMemo: TSynEdit
       Width = 386
-      Height = 340
-      ExplicitTop = 29
-      ExplicitWidth = 386
-      ExplicitHeight = 311
+      Height = 344
+      ExplicitWidth = 382
+      ExplicitHeight = 343
     end
     inherited PanelTop: TPanel
       Width = 386
-      ExplicitLeft = 0
+      ExplicitWidth = 382
+      inherited LabelSelect: TLabel
+        Width = 54
+        Height = 13
+        ExplicitWidth = 54
+        ExplicitHeight = 13
+      end
     end
   end
 end
