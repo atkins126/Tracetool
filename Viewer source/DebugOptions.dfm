@@ -3,8 +3,8 @@ object frmDebugOptions: TfrmDebugOptions
   Top = 199
   BorderStyle = bsSizeToolWin
   Caption = 'TraceTool Options'
-  ClientHeight = 528
-  ClientWidth = 604
+  ClientHeight = 516
+  ClientWidth = 596
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,12 +18,10 @@ object frmDebugOptions: TfrmDebugOptions
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 604
-    Height = 483
+    Width = 596
+    Height = 471
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 596
-    ExplicitHeight = 471
     object PanelRight: TPanel
       Left = 617
       Top = 1
@@ -55,7 +53,7 @@ object frmDebugOptions: TfrmDebugOptions
           TabOrder = 0
           DesignSize = (
             408
-            453)
+            441)
           object GroupBox2: TGroupBox
             Left = 6
             Top = 0
@@ -239,7 +237,7 @@ object frmDebugOptions: TfrmDebugOptions
           ExplicitHeight = 441
           DesignSize = (
             408
-            453)
+            441)
           object Label19: TLabel
             Left = 10
             Top = 32
@@ -737,7 +735,7 @@ object frmDebugOptions: TfrmDebugOptions
           TabOrder = 0
           DesignSize = (
             408
-            453)
+            441)
           object Label21: TLabel
             Left = 8
             Top = 40
@@ -899,7 +897,7 @@ object frmDebugOptions: TfrmDebugOptions
           TabOrder = 0
           DesignSize = (
             408
-            453)
+            441)
           object Label9: TLabel
             Left = 27
             Top = 114
@@ -1097,7 +1095,7 @@ object frmDebugOptions: TfrmDebugOptions
           TabOrder = 0
           DesignSize = (
             408
-            453)
+            441)
           object Label11: TLabel
             Left = 27
             Top = 114
@@ -1300,7 +1298,7 @@ object frmDebugOptions: TfrmDebugOptions
           TabOrder = 0
           DesignSize = (
             408
-            453)
+            441)
           object chkEventLogVisible: TCheckBox
             Left = 8
             Top = 16
@@ -1605,7 +1603,7 @@ object frmDebugOptions: TfrmDebugOptions
       Left = 1
       Top = 1
       Width = 200
-      Height = 481
+      Height = 469
       Align = alLeft
       Colors.BorderColor = 15987699
       Colors.DisabledColor = clGray
@@ -1640,31 +1638,29 @@ object frmDebugOptions: TfrmDebugOptions
       OnGetImageIndex = VSTOptionsGetImageIndex
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
+      ExplicitHeight = 481
       Columns = <>
     end
   end
   object Panel2: TPanel
     Left = 0
-    Top = 483
-    Width = 604
+    Top = 471
+    Width = 596
     Height = 45
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 471
-    ExplicitWidth = 596
     DesignSize = (
-      604
+      596
       45)
     object StatusBar1: TStatusBar
       Left = 0
       Top = 0
-      Width = 604
+      Width = 596
       Height = 45
       Align = alClient
       Panels = <>
       SimplePanel = True
-      ExplicitWidth = 596
     end
     object btnOK: TButton
       Left = 8
@@ -1687,7 +1683,7 @@ object frmDebugOptions: TfrmDebugOptions
       OnClick = butApplyClick
     end
     object btnCancel: TButton
-      Left = 486
+      Left = 470
       Top = 12
       Width = 75
       Height = 25

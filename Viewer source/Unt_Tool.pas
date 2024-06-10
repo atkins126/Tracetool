@@ -656,7 +656,7 @@ begin
    FrmInternalTraces.ID := 'ERRID' ;
    FrmInternalTraces.Caption := 'Internal Trace' ;
 
-   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstTrace=' +  inttostr(integer(FrmInternalTraces.vstTrace)));
+   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstMain=' +  inttostr(integer(FrmInternalTraces.VstMain)));
    // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstDetail=' +  inttostr(integer(FrmInternalTraces.VstDetail)));
 
    if TraceConfig.DebugMode then begin
@@ -702,9 +702,9 @@ begin
    mitTrayShow.Visible := not TraceConfig.AppDisplay_HideViewer ;
 
    // hide cutter, time and thread id columns for the Internal trace window
-   FrmInternalTraces.vstTrace.Header.Columns[0].Options := FrmInternalTraces.vstTrace.Header.Columns[0].Options - [coVisible] ;
-   FrmInternalTraces.vstTrace.Header.Columns[1].Options := FrmInternalTraces.vstTrace.Header.Columns[1].Options - [coVisible] ;
-   FrmInternalTraces.vstTrace.Header.Columns[2].Options := FrmInternalTraces.vstTrace.Header.Columns[2].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[0].Options := FrmInternalTraces.VstMain.Header.Columns[0].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[1].Options := FrmInternalTraces.VstMain.Header.Columns[1].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[2].Options := FrmInternalTraces.VstMain.Header.Columns[2].Options - [coVisible] ;
 
    // force redesign toolbar and menu for the new active page
    MainPageContainer.DockingPagecontrol.onChange(nil) ;
@@ -1589,7 +1589,7 @@ begin
    // Disable all ttraces window
    for c := 0 to FormTraceList.Count-1 do begin
       FrmTrace := TFrm_Trace (FormTraceList.Items[c]) ;
-      FrmTrace.vstTrace.BeginUpdate ;
+      FrmTrace.VstMain.BeginUpdate ;
       FrmTrace.NodeToFocus := nil ;
    end ;
 
@@ -1640,9 +1640,9 @@ begin
          // to do : only if changed (add a flag)
          FrmTrace.CheckAutoClear () ;
          if FrmTrace.NodeToFocus <> nil then
-            FrmTrace.VstTrace.FocusedNode := FrmTrace.NodeToFocus ;
+            FrmTrace.VstMain.FocusedNode := FrmTrace.NodeToFocus ;
 
-         FrmTrace.vstTrace.EndUpdate ;
+         FrmTrace.VstMain.EndUpdate ;
       end ;
    end ;
 end;
@@ -2505,7 +2505,7 @@ begin
       ParentNode := TFrm_Trace.InternalTrace ('ParseTraceMsg') ;
       if ParentNode = nil then
          exit ;
-      LastParsedTreeRec := FrmInternalTraces.vstTrace.GetNodeData(ParentNode) ;
+      LastParsedTreeRec := FrmInternalTraces.VstMain.GetNodeData(ParentNode) ;
       if LastParsedTreeRec = nil then
          exit ;
       if LastParsedTreeRec.Members = nil then
@@ -2585,7 +2585,7 @@ begin
    //else begin
    try
       ParentNode := TFrm_Trace.InternalTrace (string(exceptIntf.ExceptClass),string(exceptIntf.ExceptMessage)) ;
-      TreeRec := FrmInternalTraces.vstTrace.GetNodeData(ParentNode) ;
+      TreeRec := FrmInternalTraces.VstMain.GetNodeData(ParentNode) ;
       if TreeRec.Members = nil then
          TreeRec.Members := TMember.create();
       

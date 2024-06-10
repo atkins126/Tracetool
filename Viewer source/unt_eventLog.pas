@@ -42,7 +42,7 @@ type
   TFrmEventLog = class(TFrmBase)
     GroupPanel: TPanel;
     VSplitter: TSplitter;
-    VstEvent: TVirtualStringTree;
+    VstMain: TVirtualStringTree;
     PanelTraceInfo: TPanel;
     VstDetail: TVirtualStringTree;
     PanelTop: TPanel;
@@ -62,22 +62,22 @@ type
     SplitterH: TSplitter;
     FrameMemo: TFrameMemo;
     procedure FormCreate(Sender: TObject);
-    procedure VstEventChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
-    procedure VstEventGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure VstMainChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VstMainGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String);
-    procedure VstEventFreeNode(Sender: TBaseVirtualTree;
+    procedure VstMainFreeNode(Sender: TBaseVirtualTree;
       Node: PVirtualNode);
     procedure VstDetailGetText(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: String);
-    procedure VstEventGetImageIndex(Sender: TBaseVirtualTree;
+    procedure VstMainGetImageIndex(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure butGetAllClick(Sender: TObject);
     procedure butReloadClick(Sender: TObject);
     procedure butCloseClick(Sender: TObject);
-    procedure VstEventHeaderDragged(Sender: TVTHeader;
+    procedure VstMainHeaderDragged(Sender: TVTHeader;
       Column: TColumnIndex; OldPosition: Integer);
     procedure VstDetailCreateEditor(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
@@ -88,31 +88,31 @@ type
       const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure VstEventCreateEditor(Sender: TBaseVirtualTree;
+    procedure VstMainCreateEditor(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
-    procedure VstEventDblClick(Sender: TObject);
-    procedure VstEventEditCancelled(Sender: TBaseVirtualTree;
+    procedure VstMainDblClick(Sender: TObject);
+    procedure VstMainEditCancelled(Sender: TBaseVirtualTree;
       Column: TColumnIndex);
-    procedure VstEventEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure VstMainEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
-    procedure VstEventKeyAction(Sender: TBaseVirtualTree;
+    procedure VstMainKeyAction(Sender: TBaseVirtualTree;
       var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-    procedure VstEventAfterPaint(Sender: TBaseVirtualTree;
+    procedure VstMainAfterPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas);
-    procedure VstEventCompareNodes(Sender: TBaseVirtualTree; Node1,
+    procedure VstMainCompareNodes(Sender: TBaseVirtualTree; Node1,
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
-    procedure VstEventBeforeCellPaint(Sender: TBaseVirtualTree;
+    procedure VstMainBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    procedure VstEventAfterCellPaint(Sender: TBaseVirtualTree;
+    procedure VstMainAfterCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellRect: TRect);
     procedure VstDetailFreeNode(Sender: TBaseVirtualTree;
       Node: PVirtualNode);
     procedure PanelGutterDblClick(Sender: TObject);
-    procedure VstEventMeasureItem(Sender: TBaseVirtualTree;
+    procedure VstMainMeasureItem(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
-    procedure VstEventPaintText(Sender: TBaseVirtualTree;
+    procedure VstMainPaintText(Sender: TBaseVirtualTree;
       const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure VstDetailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
@@ -121,7 +121,7 @@ type
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     procedure VstDetailEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; var Allowed: Boolean);
-    procedure VstEventEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure VstMainEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; var Allowed: Boolean);
     procedure VstDetailColumnClick(Sender: TBaseVirtualTree;
       Column: TColumnIndex; Shift: TShiftState);
@@ -209,7 +209,7 @@ begin
    var size := PanelTraceInfo.Width;
    VSplitterCanResize(self,size,accept); // calculated once left and right percent
 
-   vst := VstEvent ;
+   vst := VstMain ;
    with TPSCMenu.create (self) do begin
       DimLevel := 0 ;    // don't gray icon
       Active := true ;
@@ -220,34 +220,34 @@ begin
    LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
 
    Sorter := TVstSort.create (self) ;
-   Sorter.tree := VstEvent ;
+   Sorter.tree := VstMain ;
    Sorter.UtilityImages := Frm_Tool.UtilityImages ;
    Sorter.canUnsort := true ;
 
    // redirect some events to the sorter
-   VstEvent.onHeaderClick             := sorter.OnHeaderClick ;
-   VstEvent.OnKeyUp                   := sorter.OnKeyUp ;
-   VstEvent.onHeaderDrawQueryElements := sorter.OnHeaderDrawQueryElements ;
-   VstEvent.onAdvancedHeaderDraw      := sorter.OnAdvancedHeaderDraw ;
-   // tips : don't forget to include the hoOwnerDraw in the VstEvent.Header.Options
+   VstMain.onHeaderClick             := sorter.OnHeaderClick ;
+   VstMain.OnKeyUp                   := sorter.OnKeyUp ;
+   VstMain.onHeaderDrawQueryElements := sorter.OnHeaderDrawQueryElements ;
+   VstMain.onAdvancedHeaderDraw      := sorter.OnAdvancedHeaderDraw ;
+   // tips : don't forget to include the hoOwnerDraw in the VstMain.Header.Options
 
    // copy all options from main form
-   VstEvent.Colors.UnfocusedColor                := Frm_Trace.vstTrace.Colors.UnfocusedColor ;
-   VstEvent.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstEvent.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
-   VstEvent.NodeDataSize := sizeof (TEvntLogRec) ;
-   VstEvent.Header.MainColumn := 0 ;
-   VstEvent.Header.AutoSizeIndex := -1 ;  // auto
+   VstMain.Colors.UnfocusedColor                := Frm_Trace.VstMain.Colors.UnfocusedColor ;
+   VstMain.Colors.UnfocusedSelectionColor       := Frm_Trace.VstMain.Colors.UnfocusedSelectionColor ;
+   VstMain.Colors.UnfocusedSelectionBorderColor := Frm_Trace.VstMain.Colors.UnfocusedSelectionBorderColor ;
+   VstMain.NodeDataSize := sizeof (TEvntLogRec) ;
+   VstMain.Header.MainColumn := 0 ;
+   VstMain.Header.AutoSizeIndex := -1 ;  // auto
 
-   VstEvent.Header.Options := VstEvent.Header.Options
+   VstMain.Header.Options := VstMain.Header.Options
       - [hoDrag]              // columns cannot be moved
       + [hoOwnerDraw]         // needed for sort : header items with the owner draw style can be drawn by the application via event
       + [hoDblClickResize] ;  // allows a column to resize itself to its largest entry
 
-   VstEvent.TreeOptions.AutoOptions      := Frm_Trace.vstTrace.TreeOptions.AutoOptions ;
-   VstEvent.TreeOptions.PaintOptions     := Frm_Trace.vstTrace.TreeOptions.PaintOptions ;
-   VstEvent.TreeOptions.SelectionOptions := Frm_Trace.vstTrace.TreeOptions.SelectionOptions ;
-   VstEvent.TreeOptions.MiscOptions      := Frm_Trace.vstTrace.TreeOptions.MiscOptions ;
+   VstMain.TreeOptions.AutoOptions      := Frm_Trace.VstMain.TreeOptions.AutoOptions ;
+   VstMain.TreeOptions.PaintOptions     := Frm_Trace.VstMain.TreeOptions.PaintOptions ;
+   VstMain.TreeOptions.SelectionOptions := Frm_Trace.VstMain.TreeOptions.SelectionOptions ;
+   VstMain.TreeOptions.MiscOptions      := Frm_Trace.VstMain.TreeOptions.MiscOptions ;
 
    {$IFDEF WIN64}
      VstDetail.NodeDataSize := 16 ;
@@ -267,9 +267,9 @@ begin
    VstDetail.TreeOptions.PaintOptions     := Frm_Trace.VstDetail.TreeOptions.PaintOptions ;
    VstDetail.TreeOptions.SelectionOptions := Frm_Trace.VstDetail.TreeOptions.SelectionOptions ;
    VstDetail.TreeOptions.MiscOptions      := Frm_Trace.VstDetail.TreeOptions.MiscOptions ;
-   VstDetail.Colors.UnfocusedColor                := Frm_Trace.vstTrace.Colors.UnfocusedColor ;
-   VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+   VstDetail.Colors.UnfocusedColor                := Frm_Trace.VstMain.Colors.UnfocusedColor ;
+   VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.VstMain.Colors.UnfocusedSelectionColor ;
+   VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
@@ -295,11 +295,11 @@ procedure TFrmEventLog.SetEventLog (LogName : string ; LineToRead : integer);
 begin
    fLogName := LogName ;
 
-   VstEvent.Clear;
+   VstMain.Clear;
    AddWaitingMessage() ;
    fWindowsEventLogs := TRBWindowsEventLogs.Create(LogName);
    fWindowsEventLogs.Reader.GetWindowsEventLogs(LineToRead);
-   VstEvent.Clear;
+   VstMain.Clear;
    for var event in fWindowsEventLogs.Reader do
       AddLogToTree(event);
    freeAndNil(fWindowsEventLogs);
@@ -311,9 +311,9 @@ var
    node : PVirtualNode ;
    TreeRec : PEvntLogRec ;
 begin
-   node := VstEvent.AddChild (nil);
-   VstEvent.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
-   TreeRec := VstEvent.GetNodeData(node);
+   node := VstMain.AddChild (nil);
+   VstMain.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
+   TreeRec := VstMain.GetNodeData(node);
 
    if TraceConfig.AppDisplay_FocusToReceivedMessage then
       NodeToFocus := node ;
@@ -376,9 +376,9 @@ const
    end ;
 
 begin
-   var node := VstEvent.AddChild (nil);
-   VstEvent.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
-   TreeRec := VstEvent.GetNodeData(node);
+   var node := VstMain.AddChild (nil);
+   VstMain.ReinitNode(node,false);       // ensure node is initialized. Needed when the node is free to call onFreeNode
+   TreeRec := VstMain.GetNodeData(node);
 
    if TraceConfig.AppDisplay_FocusToReceivedMessage then
       NodeToFocus := node ;
@@ -440,7 +440,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventChange(Sender: TBaseVirtualTree;   Node: PVirtualNode);
+procedure TFrmEventLog.VstMainChange(Sender: TBaseVirtualTree;   Node: PVirtualNode);
 var
    EvntLogRec : PEvntLogRec ;
    Haschildren : boolean ;
@@ -476,11 +476,11 @@ begin
    VstDetail.clear ;
    frameMemo.SetMemoText('',false,false);
    // get first then second. If second is not nil then it's multiselect : disable info panel
-   FirstSelect := VstEvent.GetNextSelected (nil) ;
+   FirstSelect := VstMain.GetNextSelected (nil) ;
    if FirstSelect = nil then
       exit ;
 
-   SecondSelect := VstEvent.GetNextSelected (FirstSelect) ;
+   SecondSelect := VstMain.GetNextSelected (FirstSelect) ;
    if SecondSelect <> nil then begin
        VstDetail.Clear;
        VstDetail.AddChild(nil); // the Get Text will draw itself number of row selected
@@ -516,11 +516,11 @@ var
    newOrder : integer ;
 begin
 
-   selectedNode := VstEvent.GetFirstSelected;
+   selectedNode := VstMain.GetFirstSelected;
    selectedTreeRec := nil;
 
    if selectedNode <> nil then begin
-      selectedTreeRec := VstEvent.GetNodeData(selectedNode);
+      selectedTreeRec := VstMain.GetNodeData(selectedNode);
       Frm_AddLine.EditTime.Text := selectedTreeRec.Time;
       Frm_AddLine.EditThId.Text := selectedTreeRec.Source;
    end;
@@ -531,18 +531,18 @@ begin
       exit;
 
    if (Frm_AddLine.InsertWhere.ItemIndex = 0) then begin          // on first line
-      newTreeNode := VstEvent.InsertNode(nil,amAddChildFirst);
+      newTreeNode := VstMain.InsertNode(nil,amAddChildFirst);
       dec (FirstChildOrder) ;
       NewOrder := FirstChildOrder ;
 
    end else if (Frm_AddLine.InsertWhere.ItemIndex = 1) then begin // Before selected line
       if selectedNode = nil then begin
-         newTreeNode := VstEvent.InsertNode(nil,amAddChildFirst);
+         newTreeNode := VstMain.InsertNode(nil,amAddChildFirst);
          dec (FirstChildOrder) ;
          NewOrder := FirstChildOrder ;
 
       end else begin
-         newTreeNode := VstEvent.InsertNode(selectedNode,amInsertBefore);
+         newTreeNode := VstMain.InsertNode(selectedNode,amInsertBefore);
          newOrder := selectedTreeRec.EventRecordNum-1 ;
          if newOrder = 0 then  // 0 is reserved
             dec(newOrder);
@@ -550,23 +550,23 @@ begin
 
    end else if (Frm_AddLine.InsertWhere.ItemIndex = 2) then begin  // After selected line
       if selectedNode = nil then begin
-         newTreeNode := VstEvent.AddChild(nil);
+         newTreeNode := VstMain.AddChild(nil);
          NewOrder := LastChildOrder ;
          inc (LastChildOrder) ;
 
       end else begin
-         newTreeNode := VstEvent.InsertNode(selectedNode,amInsertAfter);
+         newTreeNode := VstMain.InsertNode(selectedNode,amInsertAfter);
          newOrder := selectedTreeRec.EventRecordNum+1 ;
       end;
 
    end else begin                                                 // 3: At the end
-      newTreeNode := VstEvent.AddChild(nil);
+      newTreeNode := VstMain.AddChild(nil);
       NewOrder := LastChildOrder ;
       inc (LastChildOrder) ;
    end;
 
-   VstEvent.ReinitNode(newTreeNode, false);
-   newTreeRec := VstEvent.GetNodeData(newTreeNode);
+   VstMain.ReinitNode(newTreeNode, false);
+   newTreeRec := VstMain.GetNodeData(newTreeNode);
    newTreeRec.MessageText := Frm_AddLine.EditTrace.Text;
    newTreeRec.Source      := Frm_AddLine.EditThId.Text;
    newTreeRec.Time        := Frm_AddLine.EditTime.Text;
@@ -576,7 +576,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventGetText(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainGetText(Sender: TBaseVirtualTree;
      Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText: String);
 var
    EvntLogRec : PEvntLogRec ;
@@ -623,7 +623,7 @@ begin
       on e : exception do
          TFrm_Trace.InternalTrace(e.Message) ;
    end ;
-   if toEditable in VstEvent.TreeOptions.MiscOptions then
+   if toEditable in VstMain.TreeOptions.MiscOptions then
       exit;
 
    if Length(CellText) > 400 then
@@ -632,7 +632,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventCompareNodes(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainCompareNodes(Sender: TBaseVirtualTree;
   Node1, Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
 var
    EvntLogRec1,EvntLogRec2    : PEvntLogRec ;
@@ -655,7 +655,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventGetImageIndex(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
@@ -666,7 +666,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+procedure TFrmEventLog.VstMainFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
    EvntLogRec : PEvntLogRec ;
    idx : integer ;
@@ -743,13 +743,13 @@ begin
 
    CellText := '' ;
    try
-     SelectedCompoNode := VstEvent.GetFirstSelected ;
+     SelectedCompoNode := VstMain.GetFirstSelected ;
      if SelectedCompoNode = nil then
         exit ;
 
-     var SecondSelect := VstEvent.GetNextSelected (SelectedCompoNode) ;
+     var SecondSelect := VstMain.GetNextSelected (SelectedCompoNode) ;
      if SecondSelect <> nil then begin
-         var selection := inttostr(VstEvent.SelectedCount) + ' lines selected';
+         var selection := inttostr(VstMain.SelectedCount) + ' lines selected';
          case Column of
             0 : CellText := selection ;
             else  CellText := '' ;
@@ -873,7 +873,7 @@ end;
 
 procedure TFrmEventLog.ResizeColumns;
 begin
-   AutosizeAll (VstEvent) ;
+   AutosizeAll (VstMain) ;
 end;
 
 //------------------------------------------------------------------------------
@@ -930,7 +930,7 @@ var
       if Supports(NodeTag, IXMLnodeType) = false then
          exit ;
 
-      EvntLogRec := VstEvent.GetNodeData(VtNode) ;
+      EvntLogRec := VstMain.GetNodeData(VtNode) ;
       if EvntLogRec <> nil then begin   // treeRec can be nil the first time when VtNode is vst.RootNode
          // save the tree col1
          NodeTag.Text := EvntLogRec.Source ;
@@ -982,7 +982,7 @@ begin
       XMLRootData := NewData ;
 
       // generate nodes
-      MasterTVNode := VstEvent.RootNode ;
+      MasterTVNode := VstMain.RootNode ;
       generateNodeXML (XMLRootData ,MasterTVNode) ;  // recursive
 
       XMLRootData.OwnerDocument.SaveToFile(Frm_Tool.SaveDialog1.FileName);
@@ -1008,8 +1008,8 @@ var
    var
       ChildVtNode : PVirtualNode ;
    begin
-      if VstEvent.Selected [TestNode] then begin
-         EvntLogRec := VstEvent.GetNodeData(TestNode) ;
+      if VstMain.Selected [TestNode] then begin
+         EvntLogRec := VstMain.GetNodeData(TestNode) ;
 
          IsFirst := true ;
          NewLine := '' ;
@@ -1070,7 +1070,7 @@ var
 begin
    result := false;
    // reroute CTRL-C to the focused component if it's not the master tree
-   if (VstDetail.Focused = false) and (VstEvent.Focused = false) then begin
+   if (VstDetail.Focused = false) and (VstMain.Focused = false) then begin
       focusedComponent := GetFocus ;
       if focusedComponent <> 0 then begin
          SendMessage(focusedComponent, WM_COPY, 0, 0);
@@ -1080,7 +1080,7 @@ begin
    end ;
    result := true;
 
-   if VstEvent.GetFirstSelected = nil then
+   if VstMain.GetFirstSelected = nil then
       exit ;
 
    CopyStrings := TStringList.Create;
@@ -1121,7 +1121,7 @@ begin
          end ;
 
          // add node, starting from the invisible root node (recursive)
-         CheckIfNodeSelected (VstEvent.RootNode) ;
+         CheckIfNodeSelected (VstMain.RootNode) ;
       end ;
 
       CopyText := CopyStrings.GetText;
@@ -1143,11 +1143,11 @@ var
    Node : PVirtualNode ;
    CellText : string ;
 begin
-   if VstEvent.Focused then begin
-      Node := VstEvent.FocusedNode ;
+   if VstMain.Focused then begin
+      Node := VstMain.FocusedNode ;
       if node = nil then
          exit ;
-      VstEventGetText(VstEvent, Node, VstEvent.FocusedColumn,ttStatic,CellText);   // ttStatic is used to get the real text
+      VstMainGetText(VstMain, Node, VstMain.FocusedColumn,ttStatic,CellText);   // ttStatic is used to get the real text
    end else if VstDetail.Focused then begin
       Node := VstDetail.FocusedNode ;
       if node = nil then
@@ -1165,30 +1165,30 @@ procedure TFrmEventLog.DeleteSelected;
 var
    node : PVirtualNode ;
 begin
-   if VstEvent.Focused = false then
+   if VstMain.Focused = false then
      exit ;
    VstDetail.clear ;
-   node := VstEvent.GetFirstSelected ;
+   node := VstMain.GetFirstSelected ;
    if node = nil then   // no node selected
       exit ;
-   node := VstEvent.GetPreviousVisible(node) ;
-   VstEvent.DeleteSelectedNodes ;
+   node := VstMain.GetPreviousVisible(node) ;
+   VstMain.DeleteSelectedNodes ;
 
    // case of the first node : GetPreviousVisible is nil ...
    if node = nil then
-      node := VstEvent.GetFirst
-   else if VstEvent.GetNextVisible(node) <> nil then
-      node := VstEvent.GetNextVisible(node) ;
+      node := VstMain.GetFirst
+   else if VstMain.GetNextVisible(node) <> nil then
+      node := VstMain.GetNextVisible(node) ;
 
-   VstEvent.FocusedNode := node ;
-   VstEvent.Selected [node] := true ;
+   VstMain.FocusedNode := node ;
+   VstMain.Selected [node] := true ;
 end;
 
 //------------------------------------------------------------------------------
 
 procedure TFrmEventLog.ClearWin;
 begin
-   VstEvent.Clear ;
+   VstMain.Clear ;
    VstDetail.clear ;
 end;
 
@@ -1204,12 +1204,12 @@ end;
 procedure TFrmEventLog.SelectAll;
 begin
    // normally when the IVstEditor is not nil, he is visible
-   if ((VstEvent.IsEditing) or VstDetail.IsEditing) and (IVstEditor <> nil) and (TMoveMemoEditLink(IVstEditor).IsVisible) then begin
+   if ((VstMain.IsEditing) or VstDetail.IsEditing) and (IVstEditor <> nil) and (TMoveMemoEditLink(IVstEditor).IsVisible) then begin
       VstEditor.SelectAll() ;  // TMoveMemoEditLink(IVstEditor).SelectAll() ;
       exit ;
    end ;
-   if VstEvent.Focused = true then
-      VstEvent.SelectAll(true)      // select all visible items (don't select filtered items)
+   if VstMain.Focused = true then
+      VstMain.SelectAll(true)      // select all visible items (don't select filtered items)
    else if VstDetail.Focused then
       VstDetail.SelectAll(false) ;  // select all (visible or invisible)
 end;
@@ -1219,15 +1219,15 @@ end;
 procedure TFrmEventLog.TimerInfo;
 begin
    TracesInfo.Caption := TimeToStr(LastModified)
-                         + ', not filtered lines : ' + inttostr(VstEvent.RootNode.ChildCount)
+                         + ', not filtered lines : ' + inttostr(VstMain.RootNode.ChildCount)
                          + '   "' + fLogName+ '"' ;
                         // + '   Total count : ' + inttostr (fEventLog.EventLogThread.userCount) ;
    TracesInfo.Hint := TracesInfo.Caption ;
    if NodeToFocus <> nil then begin
-      VstEvent.ClearSelection();
-      VstEvent.Selected [NodeToFocus] := true ;
-      VstEvent.FocusedNode := NodeToFocus;
-      VstEvent.ScrollIntoView (NodeToFocus,false,false);
+      VstMain.ClearSelection();
+      VstMain.Selected [NodeToFocus] := true ;
+      VstMain.FocusedNode := NodeToFocus;
+      VstMain.ScrollIntoView (NodeToFocus,false,false);
    end;
    NodeToFocus := nil ;
 end;
@@ -1251,12 +1251,12 @@ end;
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventHeaderDragged(Sender: TVTHeader;
+procedure TFrmEventLog.VstMainHeaderDragged(Sender: TVTHeader;
   Column: TColumnIndex; OldPosition: Integer);
 begin
-   VstEventChange (VstEvent,nil);
-   VstEvent.Header.MainColumn := VstEvent.Header.Columns.GetFirstVisibleColumn ;
-   AutosizeAll (VstEvent) ;
+   VstMainChange (VstMain,nil);
+   VstMain.Header.MainColumn := VstMain.Header.Columns.GetFirstVisibleColumn ;
+   AutosizeAll (VstMain) ;
 end;
 
 //------------------------------------------------------------------------------
@@ -1335,7 +1335,7 @@ var
 begin
    Node := Pointer(Message.WParam);
    if Assigned(Node) then
-      VstEvent.EditNode(Node, VstEvent.FocusedColumn);
+      VstMain.EditNode(Node, VstMain.FocusedColumn);
 end;
 
 //------------------------------------------------------------------------------
@@ -1343,28 +1343,28 @@ end;
 // Detect the F2 key.
 // To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
 // When the F2 key is pressed or the user double click the node, the flag is set
-procedure TFrmEventLog.VstEventDblClick(Sender: TObject);
+procedure TFrmEventLog.VstMainDblClick(Sender: TObject);
 var
    P: TPoint;
    SelectedNode, MouseNode : PVirtualNode ;
    Dummy: Integer;
 begin
    //InternalTrace ('DetailDblClick ') ;
-   SelectedNode := VstEvent.GetFirstSelected  ;
+   SelectedNode := VstMain.GetFirstSelected  ;
 
    // no node selected
    if SelectedNode = nil then
      exit ;
 
    GetCursorPos(P);
-   P := VstEvent.ScreenToClient(P);
-   MouseNode := VstEvent.GetNodeAt(P.X, P.Y, True, Dummy) ;
+   P := VstMain.ScreenToClient(P);
+   MouseNode := VstMain.GetNodeAt(P.X, P.Y, True, Dummy) ;
 
    // the mouse under the cursor is not the selected node
    if SelectedNode <> MouseNode then
       exit ;
 
-   VstEvent.TreeOptions.MiscOptions := VstEvent.TreeOptions.MiscOptions + [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions + [toEditable] ;
 
    // We want to start editing the currently selected node. However it might well happen that this change event
    // here is caused by the node editor if another node is currently being edited. It causes trouble
@@ -1379,11 +1379,11 @@ end;
 // Detect the F2 key.
 // To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
 // When the F2 key is pressed or the user double click the node, the flag is set
-procedure TFrmEventLog.VstEventKeyAction(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainKeyAction(Sender: TBaseVirtualTree;
   var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
    if CharCode = VK_F2 then
-      VstEvent.TreeOptions.MiscOptions := VstEvent.TreeOptions.MiscOptions + [toEditable] ;
+      VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions + [toEditable] ;
    if CharCode = VK_DELETE then
       DeleteSelected() ;
 end;
@@ -1391,22 +1391,22 @@ end;
 //------------------------------------------------------------------------------
 
 // After node is edited, reset the toEditable flag to not allow editing on simple click
-procedure TFrmEventLog.VstEventEditCancelled(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainEditCancelled(Sender: TBaseVirtualTree;
   Column: TColumnIndex);
 begin
-   VstEvent.TreeOptions.MiscOptions := VstEvent.TreeOptions.MiscOptions - [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
 // After node is edited, reset the toEditable flag to not allow editing on simple click
-procedure TFrmEventLog.VstEventEdited(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainEdited(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
 begin
-   VstEvent.TreeOptions.MiscOptions := VstEvent.TreeOptions.MiscOptions - [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
-procedure TFrmEventLog.VstEventEditing(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainEditing(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
 begin
    Allowed := true;
@@ -1414,7 +1414,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventCreateEditor(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainCreateEditor(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
 begin
    if IVstEditor = nil then begin
@@ -1452,28 +1452,28 @@ begin
       exit ;
 
    if start = true then begin
-      currentNode := VstEvent.GetFirstVisible() ;
+      currentNode := VstMain.GetFirstVisible() ;
    end else begin
-      currentNode := VstEvent.GetFirstSelected ;
+      currentNode := VstMain.GetFirstSelected ;
       if currentNode = nil then
-         currentNode := VstEvent.GetFirstVisible()
+         currentNode := VstMain.GetFirstVisible()
       else  // when start is false, we are searching in the current document
-         currentNode := VstEvent.GetNextVisible(currentNode) ;   // skip the first selected
+         currentNode := VstMain.GetNextVisible(currentNode) ;   // skip the first selected
    end ;
 
    while currentNode <> nil do begin
-      EvntLogRec := VstEvent.GetNodeData(currentNode) ;
+      EvntLogRec := VstMain.GetNodeData(currentNode) ;
       if CheckSearchRecord (EvntLogRec) then begin
          if ActiveTracePage <> self then
             SetActivePage() ;
-         VstEvent.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
-         VstEvent.ClearSelection;
-         VstEvent.Selected [currentNode] := true ;
-         VstEvent.SetFocus() ;
+         VstMain.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
+         VstMain.ClearSelection;
+         VstMain.Selected [currentNode] := true ;
+         VstMain.SetFocus() ;
          result := true ;
          exit ;
       end ;
-      currentNode := VstEvent.GetNextVisible(currentNode) ;
+      currentNode := VstMain.GetNextVisible(currentNode) ;
    end ;
 end;
 
@@ -1485,8 +1485,8 @@ var
    EvntLogRec : PEvntLogRec ;
    procedure CheckVisible () ;
    begin
-      while (currentNode <> nil) and (VstEvent.IsVisible[currentNode] = false) do begin
-         currentNode := VstEvent.GetPrevious(currentNode) ;
+      while (currentNode <> nil) and (VstMain.IsVisible[currentNode] = false) do begin
+         currentNode := VstMain.GetPrevious(currentNode) ;
       end ;
    end ;
 begin
@@ -1495,30 +1495,30 @@ begin
       exit ;
 
    if atEnd = true then begin
-      currentNode := VstEvent.GetLast() ;
+      currentNode := VstMain.GetLast() ;
    end else begin
-      currentNode := VstEvent.GetFirstSelected ;
+      currentNode := VstMain.GetFirstSelected ;
       if currentNode = nil then
-         currentNode := VstEvent.GetLastVisible()
+         currentNode := VstMain.GetLastVisible()
       else  // when atEnd is false, we are searching in the current document
-         currentNode := VstEvent.GetPrevious(currentNode) ;   // skip the first selected
+         currentNode := VstMain.GetPrevious(currentNode) ;   // skip the first selected
    end ;
 
    CheckVisible() ;
    while currentNode <> nil do begin
-      EvntLogRec := VstEvent.GetNodeData(currentNode) ;
+      EvntLogRec := VstMain.GetNodeData(currentNode) ;
       if CheckSearchRecord (EvntLogRec) then begin
          if ActiveTracePage <> self then
             SetActivePage() ;
          // fully visible ?
-         VstEvent.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
-         VstEvent.ClearSelection;
-         VstEvent.Selected [currentNode] := true ;
-         VstEvent.SetFocus() ;
+         VstMain.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
+         VstMain.ClearSelection;
+         VstMain.Selected [currentNode] := true ;
+         VstMain.SetFocus() ;
          result := true ;
          exit ;
       end ;
-      currentNode := VstEvent.GetPrevious(currentNode) ;
+      currentNode := VstMain.GetPrevious(currentNode) ;
       CheckVisible() ;
    end ;
 end;
@@ -1527,7 +1527,7 @@ end;
 
 procedure TFrmEventLog.RefreshView;
 begin
-   vstEvent.Refresh ;
+   VstMain.Refresh ;
    VstDetail.Refresh ;
 end;
 
@@ -1535,7 +1535,7 @@ end;
 
 // if the paint area is modified, AfterPaint is called to redisplay the gutter
 
-procedure TFrmEventLog.VstEventAfterPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas);
+procedure TFrmEventLog.VstMainAfterPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas);
 var
    Node : pvirtualNode ;
    BaseOffset : Integer;  // top position of the top node to draw given in absolute tree coordinates
@@ -1549,12 +1549,12 @@ var
    BookmarkPos : integer ;
 begin
    // detect header height
-   if VstEvent.Header.Columns.Count <> 0 then begin
+   if VstMain.Header.Columns.Count <> 0 then begin
       // get the header height from the first header column
       // since the VT.headerRect property is protected :-(
-      HeaderHeight := VstEvent.Header.Columns[0].GetRect.Bottom ;
+      HeaderHeight := VstMain.Header.Columns[0].GetRect.Bottom ;
    end else begin  // should not happens
-      HeaderHeight := VstEvent.header.Height + 2 ;  // plus somme bevels
+      HeaderHeight := VstMain.header.Height + 2 ;  // plus somme bevels
    end ;
 
    newgutter := timage.Create(self);
@@ -1572,10 +1572,10 @@ begin
 
    // Determine node to start drawing with.
    BaseOffset := 0 ;
-   Node := VstEvent.GetNodeAt(0, 0, true, BaseOffset);
+   Node := VstMain.GetNodeAt(0, 0, true, BaseOffset);
    if node <> nil then begin    // nothing to display
       // get the first visible node rectangle.
-      DispRec := VstEvent.GetDisplayRect (Node,NoColumn,false,false) ;
+      DispRec := VstMain.GetDisplayRect (Node,NoColumn,false,false) ;
 
       // We just need the TOP node position
       // This top position is zero or negative since the node can be partially visible
@@ -1587,8 +1587,8 @@ begin
 
       // draw each node
       while node <> nil do begin
-         NodeHeight := VstEvent.NodeHeight[Node] ;
-         EvntLogRec := VstEvent.GetNodeData(Node) ;
+         NodeHeight := VstMain.NodeHeight[Node] ;
+         EvntLogRec := VstMain.GetNodeData(Node) ;
 
          BookmarkPos := bookmarks.IndexOf(Node) ;
          if BookmarkPos <> -1 then begin
@@ -1612,7 +1612,7 @@ begin
          //   Frm_Tool.ilActions.Draw(gutterCanvas, 0 , Yposition , 15);
 
          inc (Yposition , NodeHeight) ;
-         Node := VstEvent.GetNextVisible(Node) ;
+         Node := VstMain.GetNextVisible(Node) ;
       end ;
    end ;
 
@@ -1635,7 +1635,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventBeforeCellPaint(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
@@ -1650,7 +1650,7 @@ begin
    if (SearchText = '') or (SearchKind <> mrYesToAll) then
       exit ;
 
-   EvntLogRec := VstEvent.GetNodeData(Node) ;
+   EvntLogRec := VstMain.GetNodeData(Node) ;
    if (unt_search.SearchInAllPages) or (ActiveTracePage = self) then
       if CheckSearchRecord (EvntLogRec) then     // check if the node or one of his child match the search text
          DrawHighlight (TargetCanvas, CellRect,false) ;
@@ -1658,7 +1658,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventAfterCellPaint(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellRect: TRect);
+procedure TFrmEventLog.VstMainAfterCellPaint(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellRect: TRect);
 begin
    // draw the level icon (warning/error/debug/...) here.
    // This cannot be done using the OnGetImageIndex because it take too much space
@@ -1668,7 +1668,7 @@ begin
       Frm_Tool.ImageList1.Draw(TargetCanvas, 0, 0, ImageIndex);
    end else begin
       var CellText: String ;
-     VstEventGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
+     VstMainGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
      if IsSeparator(CellText) then begin
         TargetCanvas.Pen.Color := clBlack;
         var middle := CellRect.Bottom div 2 ;
@@ -1692,7 +1692,7 @@ begin
    if Filter = nil then
       Filter := TFrmFilter.create (self) ;
 
-   Filter.Vst := VstEvent ;
+   Filter.Vst := VstMain ;
    Filter.base := self ;
    Filter.ColumnNameList.Clear ;
    Filter.ColumnNameList.AddObject('Trace Kind', tObject(999)) ;  // same as col 0, but force fill with predefined debug,warning,error
@@ -1710,7 +1710,7 @@ function TFrmEventLog.getMembers(Node: PVirtualNode): TMember;
 var
    EvntLogRec : PEvntLogRec ;
 begin
-   EvntLogRec := VstEvent.GetNodeData(Node) ;
+   EvntLogRec := VstMain.GetNodeData(Node) ;
    result := EvntLogRec.Members ;
 end;
 
@@ -1740,8 +1740,8 @@ var
 begin
 
    GetCursorPos(P);
-   P := VstEvent.ScreenToClient(P);
-   Node := VstEvent.GetNodeAt(0, P.Y) ;
+   P := VstMain.ScreenToClient(P);
+   Node := VstMain.GetNodeAt(0, P.Y) ;
    if Node = nil then
       exit ;
 
@@ -1752,20 +1752,20 @@ begin
       bookmarks.Delete(index) ;
    end ;
 
-   VstEvent.InvalidateNode(Node) ;
+   VstMain.InvalidateNode(Node) ;
 end;
 
 //------------------------------------------------------------------------------
 
 // main tree : fixed node height
-procedure TFrmEventLog.VstEventMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+procedure TFrmEventLog.VstMainMeasureItem(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
 begin
    NodeHeight := TraceConfig.EventLog_Trace_NodeHeight ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmEventLog.VstEventPaintText(Sender: TBaseVirtualTree;
+procedure TFrmEventLog.VstMainPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 begin
@@ -1823,12 +1823,12 @@ end;
 
 procedure TFrmEventLog.ApplyFont;
 begin
-   VstEvent.BeginUpdate ;
-   VstEvent.Font.Name         := TraceConfig.EventLog_Trace_FontName ;
-   VstEvent.Font.Size         := TraceConfig.EventLog_Trace_FontSize ;
-   VstEvent.DefaultNodeHeight := TraceConfig.EventLog_Trace_NodeHeight ;
-   VstEvent.ReinitChildren (nil,true);
-   VstEvent.EndUpdate ;
+   VstMain.BeginUpdate ;
+   VstMain.Font.Name         := TraceConfig.EventLog_Trace_FontName ;
+   VstMain.Font.Size         := TraceConfig.EventLog_Trace_FontSize ;
+   VstMain.DefaultNodeHeight := TraceConfig.EventLog_Trace_NodeHeight ;
+   VstMain.ReinitChildren (nil,true);
+   VstMain.EndUpdate ;
 
    VstDetail.BeginUpdate ;
    VstDetail.Font.Name         := TraceConfig.EventLog_Info_FontName ;
@@ -1841,7 +1841,7 @@ end;
 
 procedure TFrmEventLog.Print;
 begin
-   FrmPrintPreview.initialize(vstEvent, nil) ;
+   FrmPrintPreview.initialize(VstMain, nil) ;
    FrmPrintPreview.ShowModal ;
 end;
 

@@ -3,7 +3,7 @@ inherited frame_Table: Tframe_Table
   Height = 266
   ExplicitWidth = 435
   ExplicitHeight = 266
-  object VstTable: TVirtualStringTree
+  object VstDetail: TVirtualStringTree
     Left = 0
     Top = 0
     Width = 435
@@ -53,18 +53,18 @@ inherited frame_Table: Tframe_Table
     TreeOptions.AnimationOptions = [toAnimatedToggle]
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
     TreeOptions.SelectionOptions = [toExtendedFocus, toMultiSelect, toSimpleDrawSelection]
-    OnBeforeCellPaint = VstTableBeforeCellPaint
-    OnChange = VstTableChange
-    OnColumnClick = VstTableColumnClick
-    OnCreateEditor = VstTableCreateEditor
-    OnDblClick = VstTableDblClick
-    OnEditCancelled = VstTableEditCancelled
-    OnEdited = VstTableEdited
-    OnFocusChanged = VstTableFocusChanged
-    OnFreeNode = VstTableFreeNode
-    OnGetText = VstTableGetText
-    OnPaintText = VstTablePaintText
-    OnMeasureItem = VstTableMeasureItem
+    OnBeforeCellPaint = VstDetailBeforeCellPaint
+    OnChange = VstDetailChange
+    OnColumnClick = VstDetailColumnClick
+    OnCreateEditor = VstDetailCreateEditor
+    OnDblClick = VstDetailDblClick
+    OnEditCancelled = VstDetailEditCancelled
+    OnEdited = VstDetailEdited
+    OnFocusChanged = VstDetailFocusChanged
+    OnFreeNode = VstDetailFreeNode
+    OnGetText = VstDetailGetText
+    OnPaintText = VstDetailPaintText
+    OnMeasureItem = VstDetailMeasureItem
     Touch.InteractiveGestures = [igPan, igPressAndTap]
     Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
     Columns = <

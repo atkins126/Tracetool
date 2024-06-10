@@ -26,7 +26,7 @@ inherited FrmEventLog: TFrmEventLog
       ExplicitLeft = 196
       ExplicitHeight = 149
     end
-    object VstEvent: TVirtualStringTree
+    object VstMain: TVirtualStringTree
       Left = 12
       Top = 22
       Width = 329
@@ -75,23 +75,23 @@ inherited FrmEventLog: TFrmEventLog
       TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
       TreeOptions.PaintOptions = [toHideSelection, toShowButtons, toShowDropmark, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
       TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect, toRightClickSelect]
-      OnAfterCellPaint = VstEventAfterCellPaint
-      OnAfterPaint = VstEventAfterPaint
-      OnBeforeCellPaint = VstEventBeforeCellPaint
-      OnChange = VstEventChange
-      OnCompareNodes = VstEventCompareNodes
-      OnCreateEditor = VstEventCreateEditor
-      OnDblClick = VstEventDblClick
-      OnEditCancelled = VstEventEditCancelled
-      OnEdited = VstEventEdited
-      OnEditing = VstEventEditing
-      OnFreeNode = VstEventFreeNode
-      OnGetText = VstEventGetText
-      OnPaintText = VstEventPaintText
-      OnGetImageIndex = VstEventGetImageIndex
-      OnHeaderDragged = VstEventHeaderDragged
-      OnKeyAction = VstEventKeyAction
-      OnMeasureItem = VstEventMeasureItem
+      OnAfterCellPaint = VstMainAfterCellPaint
+      OnAfterPaint = VstMainAfterPaint
+      OnBeforeCellPaint = VstMainBeforeCellPaint
+      OnChange = VstMainChange
+      OnCompareNodes = VstMainCompareNodes
+      OnCreateEditor = VstMainCreateEditor
+      OnDblClick = VstMainDblClick
+      OnEditCancelled = VstMainEditCancelled
+      OnEdited = VstMainEdited
+      OnEditing = VstMainEditing
+      OnFreeNode = VstMainFreeNode
+      OnGetText = VstMainGetText
+      OnPaintText = VstMainPaintText
+      OnGetImageIndex = VstMainGetImageIndex
+      OnHeaderDragged = VstMainHeaderDragged
+      OnKeyAction = VstMainKeyAction
+      OnMeasureItem = VstMainMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
       ExplicitLeft = 11

@@ -115,26 +115,26 @@ begin
    VstDetail.Header.Columns.Items[2].text := '' ;
 
 
-   VstDetail.Header.Options           := TraceWin.vstTrace.Header.Options ;
-   VstDetail.TreeOptions.AutoOptions  := TraceWin.vstTrace.TreeOptions.AutoOptions
+   VstDetail.Header.Options           := TraceWin.VstMain.Header.Options ;
+   VstDetail.TreeOptions.AutoOptions  := TraceWin.VstMain.TreeOptions.AutoOptions
              + [toDisableAutoscrollOnEdit] ; // Do not center a node horizontally when it is edited.
 
-   VstDetail.TreeOptions.PaintOptions := TraceWin.vstTrace.TreeOptions.PaintOptions
+   VstDetail.TreeOptions.PaintOptions := TraceWin.VstMain.TreeOptions.PaintOptions
              + [toShowTreeLines] ;        // show tree lines in 'members' tree
 
-   VstDetail.TreeOptions.SelectionOptions := TraceWin.vstTrace.TreeOptions.SelectionOptions
+   VstDetail.TreeOptions.SelectionOptions := TraceWin.VstMain.TreeOptions.SelectionOptions
              + [toExtendedFocus]          // Entries other than in the main column can be selected, edited etc.
              - [toFullRowSelect]          // selection highlight the whole line
              + [toMultiselect] ;          // don't Allow more than one node to be selected.
 
-   VstDetail.TreeOptions.MiscOptions := TraceWin.vstTrace.TreeOptions.MiscOptions
+   VstDetail.TreeOptions.MiscOptions := TraceWin.VstMain.TreeOptions.MiscOptions
              + [toGridExtensions]
              - [toEditable]               // don't allow edition. Code is used to detect double click or F2 key
              - [toReportMode] ;           // Tree behaves like TListView in report mode.
 
-   VstDetail.Colors.UnfocusedColor                := TraceWin.vstTrace.Colors.UnfocusedColor ;
-   VstDetail.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+   VstDetail.Colors.UnfocusedColor                := TraceWin.VstMain.Colors.UnfocusedColor ;
+   VstDetail.Colors.UnfocusedSelectionColor       := TraceWin.VstMain.Colors.UnfocusedSelectionColor ;
+   VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
@@ -518,7 +518,7 @@ end;
 //------------------------------------------------------------------------------
 
 // Detect the F2 key.
-// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
+// To not allow editing on simple click, the VstMain.TreeOptions.MiscOptions toEditable flag is not set.
 // When the F2 key is pressed or the user double click the node, the flag is set
 procedure Tframe_Classic.VstDetailKeyAction(Sender: TBaseVirtualTree;
   var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);

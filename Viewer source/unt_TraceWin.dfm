@@ -47,7 +47,7 @@ object Frm_Trace: TFrm_Trace
       OnResize = PanelLeftResize
       ExplicitWidth = 212
       ExplicitHeight = 301
-      object vstTrace: TVirtualStringTree
+      object vstMain: TVirtualStringTree
         Left = 12
         Top = 0
         Width = 204
@@ -99,28 +99,26 @@ object Frm_Trace: TFrm_Trace
         TreeOptions.MiscOptions = []
         TreeOptions.PaintOptions = []
         TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect, toMultiSelect, toRightClickSelect, toSimpleDrawSelection]
-        OnAfterCellPaint = vstTraceAfterCellPaint
-        OnAfterPaint = vstTraceAfterPaint
-        OnBeforeCellPaint = vstTraceBeforeCellPaint
-        OnChange = vstTraceChange
-        OnCompareNodes = vstTraceCompareNodes
-        OnCreateEditor = vstTraceCreateEditor
-        OnDblClick = vstTraceDblClick
-        OnEditCancelled = vstTraceEditCancelled
-        OnEdited = vstTraceEdited
-        OnEditing = vstTraceEditing
-        OnFreeNode = vstTraceFreeNode
-        OnGetText = vstTraceGetText
-        OnPaintText = vstTracePaintText
-        OnGetImageIndex = vstTraceGetImageIndex
-        OnGetHint = vstTraceGetHint
-        OnHeaderDragged = vstTraceHeaderDragged
-        OnKeyAction = vstTraceKeyAction
-        OnMeasureItem = vstTraceMeasureItem
+        OnAfterCellPaint = vstMainAfterCellPaint
+        OnAfterPaint = vstMainAfterPaint
+        OnBeforeCellPaint = vstMainBeforeCellPaint
+        OnChange = vstMainChange
+        OnCompareNodes = vstMainCompareNodes
+        OnCreateEditor = vstMainCreateEditor
+        OnDblClick = vstMainDblClick
+        OnEditCancelled = vstMainEditCancelled
+        OnEdited = vstMainEdited
+        OnEditing = vstMainEditing
+        OnFreeNode = vstMainFreeNode
+        OnGetText = vstMainGetText
+        OnPaintText = vstMainPaintText
+        OnGetImageIndex = vstMainGetImageIndex
+        OnGetHint = vstMainGetHint
+        OnHeaderDragged = vstMainHeaderDragged
+        OnKeyAction = vstMainKeyAction
+        OnMeasureItem = vstMainMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
-        ExplicitLeft = 11
-        ExplicitTop = 2
         Columns = <
           item
             Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coShowDropMark, coVisible]

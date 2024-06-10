@@ -316,10 +316,10 @@ begin
      VSTOptions.NodeDataSize := 4 ;
    {$ENDIF}
 
-   //VSTOptions.TreeOptions.SelectionOptions := Frm_Trace.vstTrace.TreeOptions.SelectionOptions ;
-   //VSTOptions.TreeOptions.AutoOptions      := Frm_Trace.vstTrace.TreeOptions.AutoOptions ;
-   //VSTOptions.TreeOptions.MiscOptions      := Frm_Trace.vstTrace.TreeOptions.MiscOptions ;
-   //VSTOptions.TreeOptions.PaintOptions     := Frm_Trace.vstTrace.TreeOptions.PaintOptions  - [toShowRoot] ; // don't show Root
+   //VSTOptions.TreeOptions.SelectionOptions := Frm_Trace.VstMain.TreeOptions.SelectionOptions ;
+   //VSTOptions.TreeOptions.AutoOptions      := Frm_Trace.VstMain.TreeOptions.AutoOptions ;
+   //VSTOptions.TreeOptions.MiscOptions      := Frm_Trace.VstMain.TreeOptions.MiscOptions ;
+   //VSTOptions.TreeOptions.PaintOptions     := Frm_Trace.VstMain.TreeOptions.PaintOptions  - [toShowRoot] ; // don't show Root
 
    VSTOptions.Clear ;
    VSTOptions.AddChild(nil, PnlGeneral) ;

@@ -311,7 +311,7 @@ var
 
          // ordered column.
 
-         for OrderedIndex := 0 to length(orderedList)-1 do begin // VstTable.header.Columns.Count-1 do begin
+         for OrderedIndex := 0 to length(orderedList)-1 do begin
             ColumnIndex :=  orderedList[OrderedIndex];
             if IsSelected(TestNode,ColumnIndex) then begin
                 hasSelectionInNode := true;

@@ -31,7 +31,7 @@ object FrmTail: TFrmTail
       ExplicitLeft = 162
       ExplicitHeight = 214
     end
-    object VstTail: TVirtualStringTree
+    object VstMain: TVirtualStringTree
       Left = 12
       Top = 22
       Width = 170
@@ -79,23 +79,23 @@ object FrmTail: TFrmTail
       TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
       TreeOptions.PaintOptions = [toHideSelection, toShowButtons, toShowDropmark, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
       TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect]
-      OnAfterCellPaint = VstTailAfterCellPaint
-      OnAfterItemPaint = VstTailAfterItemPaint
-      OnAfterPaint = VstTailAfterPaint
-      OnBeforeCellPaint = VstTailBeforeCellPaint
-      OnChange = VstTailChange
-      OnCompareNodes = VstTailCompareNodes
-      OnCreateEditor = VstTailCreateEditor
-      OnDblClick = VstTailDblClick
-      OnEditCancelled = VstTailEditCancelled
-      OnEdited = VstTailEdited
-      OnEditing = VstTailEditing
-      OnFreeNode = VstTailFreeNode
-      OnGetText = VstTailGetText
-      OnPaintText = VstTailPaintText
-      OnHeaderDragged = VstTailHeaderDragged
-      OnKeyAction = VstTailKeyAction
-      OnMeasureItem = VstTailMeasureItem
+      OnAfterCellPaint = VstMainAfterCellPaint
+      OnAfterItemPaint = VstMainAfterItemPaint
+      OnAfterPaint = VstMainAfterPaint
+      OnBeforeCellPaint = VstMainBeforeCellPaint
+      OnChange = VstMainChange
+      OnCompareNodes = VstMainCompareNodes
+      OnCreateEditor = VstMainCreateEditor
+      OnDblClick = VstMainDblClick
+      OnEditCancelled = VstMainEditCancelled
+      OnEdited = VstMainEdited
+      OnEditing = VstMainEditing
+      OnFreeNode = VstMainFreeNode
+      OnGetText = VstMainGetText
+      OnPaintText = VstMainPaintText
+      OnHeaderDragged = VstMainHeaderDragged
+      OnKeyAction = VstMainKeyAction
+      OnMeasureItem = VstMainMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
       Columns = <
