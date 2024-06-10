@@ -395,19 +395,22 @@ begin
    if Node <> nil then
       Sender.ScrollIntoView (Node,false,false);     // center and horizontally false
 
+   vstdetail.clear ;
    frameMemo.SetMemoText('',false,false);
+
    // get first then second. If second is not nil then it's multiselect : disable info panel
    FirstSelect := VstDebugString.GetNextSelected (nil) ;
    if FirstSelect = nil then
       exit ;
 
    SecondSelect := VstDebugString.GetNextSelected (FirstSelect) ;
-   if SecondSelect <> nil then
+   if SecondSelect <> nil then begin
+      AddOneLineDetail(inttostr(VstDebugString.SelectedCount) + ' lines selected', '');
       exit ;
+   end;
 
    if PanelTraceInfo.Visible = false then
       exit ;
-   vstdetail.clear ;
 
    ODSRec := Sender.GetNodeData(FirstSelect) ;  // node
 

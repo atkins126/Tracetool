@@ -1630,20 +1630,23 @@ begin
    if Node <> nil then
       Sender.ScrollIntoView (Node,false,false);     // center and horizontally false
 
+   vstdetail.Clear ;
    frameMemo.SetMemoText('',false,false);
+
    // get first then second. If second is not nil then it's multiselect : disable info panel
    FirstSelect := VstTail.GetNextSelected (nil) ;
    if FirstSelect = nil then
       exit ;
 
    SecondSelect := VstTail.GetNextSelected (FirstSelect) ;
-   if SecondSelect <> nil then
+   if SecondSelect <> nil then begin
+      AddOneLineDetail(inttostr(VstTail.SelectedCount) + ' lines selected', '');
       exit ;
+   end;
 
    if PanelTraceInfo.Visible = false then
       exit ;
 
-   vstdetail.Clear ;
 
    TailRec := TVirtualStringTree (Sender).GetNodeData(FirstSelect) ; // node
 
