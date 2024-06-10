@@ -243,9 +243,7 @@ inherited FrmEventLog: TFrmEventLog
           Width = 381
           ExplicitWidth = 381
           inherited LabelSelect: TLabel
-            Width = 56
             Height = 13
-            ExplicitWidth = 56
             ExplicitHeight = 13
           end
         end

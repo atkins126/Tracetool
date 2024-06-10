@@ -263,6 +263,8 @@ procedure Tframe_Classic.VstDetailSelectorSelectionChanged( Sender: TVstSelector
 begin
    //TFrm_Trace.InternalTrace('VstDetailSelectorSelectionChanged') ;
    frameMemo.LabelSelect.Caption := selectionAsText;
+   if (frameMemo.LabelSelect.Caption <> '') then
+      FrameMemo.SetMemoText('',false,false);
 end;
 
 procedure Tframe_Classic.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
@@ -284,7 +286,8 @@ begin
       1 : CellText := DetailRec.Col2 ;
       2 : CellText := DetailRec.Col3 ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -306,7 +309,8 @@ begin
       1 : CellText := DetailRec.Col2 ;
       2 : CellText := DetailRec.Col3 ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------

@@ -265,6 +265,8 @@ end;
 procedure Tframe_table.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
 begin
    Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption := selectionAsText;
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption <> '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).FrameMemo.SetMemoText('',false,false);
 end;
 
 procedure Tframe_table.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
@@ -276,7 +278,32 @@ begin
    if DetailRec = nil then
       exit ;
    CellText := DetailRec.Columns[Column] ;
-   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption = '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailColumnClick(Sender: TBaseVirtualTree;  Column: TColumnIndex; Shift: TShiftState);
+var
+   DetailRec : PTableRec ;
+   CellText: String;
+   SelectedNode: PVirtualNode ;
+begin
+   SelectedNode := Sender.GetFirstSelected  ;
+
+   // no node selected
+   if SelectedNode = nil then
+     exit ;
+
+   DetailRec := Sender.GetNodeData(SelectedNode) ;
+   if DetailRec = nil then
+      exit ;
+
+   CellText := DetailRec.Columns[Column] ;
+
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption = '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -339,29 +366,6 @@ begin
 //   // if multiline, NodeHeight is bigger than DefaultNodeHeight
 //   if NodeHeight = 0 then
 //      NodeHeight := newNodeHeight ;
-end;
-
-//------------------------------------------------------------------------------
-
-procedure Tframe_table.VstDetailColumnClick(Sender: TBaseVirtualTree;  Column: TColumnIndex; Shift: TShiftState);
-var
-   DetailRec : PTableRec ;
-   CellText: String;
-   SelectedNode: PVirtualNode ;
-begin
-   SelectedNode := Sender.GetFirstSelected  ;
-
-   // no node selected
-   if SelectedNode = nil then
-     exit ;
-
-   DetailRec := Sender.GetNodeData(SelectedNode) ;
-   if DetailRec = nil then
-      exit ;
-
-   CellText := DetailRec.Columns[Column] ;
-
-   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------

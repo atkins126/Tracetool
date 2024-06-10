@@ -305,7 +305,10 @@ begin
   except
 
   end;
-  result := inttostr(RowCount) + ' * ' +inttostr(ColCount);
+  if (RowCount = 1) and (ColCount = 1) then
+     result := ''
+  else
+     result := inttostr(RowCount) + ' by ' + inttostr(ColCount) + ' selection';
 end;
 
 function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;

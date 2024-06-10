@@ -61,9 +61,8 @@ object FrameMemo: TFrameMemo
     object LabelSelect: TLabel
       Left = 198
       Top = 5
-      Width = 59
+      Width = 3
       Height = 15
-      Caption = 'LabelSelect'
     end
     object FormatButton: TBitBtn
       Left = 51

@@ -691,6 +691,14 @@ end;
 
 //------------------------------------------------------------------------------
 
+
+procedure TFrmEventLog.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
+   if (frameMemo.LabelSelect.Caption <> '') then
+      FrameMemo.SetMemoText('',false,false);
+end;
+
 procedure TFrmEventLog.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 var
    CellText: String;
@@ -707,7 +715,8 @@ begin
       2 : CellText := Member.Col3 ;
       else  CellText := '' ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -730,7 +739,8 @@ begin
       2 : CellText := Member.Col3 ;
       else  CellText := '' ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -1819,11 +1829,6 @@ begin
    if Column = 0 then
       if node.Parent = VstDetail.RootNode then
          TargetCanvas.font.Style := [fsBold] ;
-end;
-
-procedure TFrmEventLog.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
-begin
-   frameMemo.LabelSelect.Caption := selectionAsText;
 end;
 
 //------------------------------------------------------------------------------

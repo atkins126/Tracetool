@@ -2191,6 +2191,12 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure TFrmTail.VstDetailSelectorSelectionChanged(Sender: TVstSelector;  selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
+   if (frameMemo.LabelSelect.Caption <> '') then
+      FrameMemo.SetMemoText('',false,false);
+end;
 
 procedure TFrmTail.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 var
@@ -2207,7 +2213,8 @@ begin
       1 : CellText := DetailRec.Col2 ;
       2 : CellText := DetailRec.Col3 ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -2229,7 +2236,8 @@ begin
       1 : CellText := DetailRec.Col2 ;
       2 : CellText := DetailRec.Col3 ;
    end ;
-   frameMemo.SetMemoText(CellText,false,false);
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
 end;
 
 //------------------------------------------------------------------------------
@@ -2753,11 +2761,6 @@ begin
    if Column = 0 then
       if node.Parent = VstDetail.RootNode then
          TargetCanvas.font.Style := [fsBold] ;
-end;
-
-procedure TFrmTail.VstDetailSelectorSelectionChanged(Sender: TVstSelector;  selectionAsText: string);
-begin
-   frameMemo.LabelSelect.Caption := selectionAsText;
 end;
 
 //------------------------------------------------------------------------------
