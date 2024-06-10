@@ -61,6 +61,7 @@ type
       Node: PVirtualNode; Column: TColumnIndex);
     procedure FrameMemoCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
   public
@@ -139,6 +140,7 @@ begin
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
+   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 end;
 
 procedure Tframe_Classic.FrameMemoCanResize(Sender: TObject; var NewWidth,
@@ -257,14 +259,24 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure Tframe_Classic.VstDetailSelectorSelectionChanged( Sender: TVstSelector; selectionAsText: string);
+begin
+   //TFrm_Trace.InternalTrace('VstDetailSelectorSelectionChanged') ;
+   frameMemo.LabelSelect.Caption := selectionAsText;
+
+end;
 
 procedure Tframe_Classic.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 var
    DetailRec : PDetailRec ;
    CellText: String;
 begin
+   frameMemo.SetMemoText('',false,false);
    if (Node = nil) then
       exit;
+
+   //TFrm_Trace.InternalTrace('Tframe_Classic.VstDetailFocusChanged') ;
+
    DetailRec := Sender.GetNodeData(Node) ;
    if DetailRec = nil then
       exit ;
@@ -438,6 +450,7 @@ begin
    // force font
    TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
 end;
+
 
 //------------------------------------------------------------------------------
 

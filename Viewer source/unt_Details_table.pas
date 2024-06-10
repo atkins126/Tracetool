@@ -45,6 +45,7 @@ type
     procedure VstDetailFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
@@ -78,6 +79,11 @@ begin
 
    TraceWin := TFrm_Trace(owner);
 
+   // initialize sort
+   Sorter := TVstSort.Create(self);
+   Sorter.tree := VstDetail;
+   Sorter.UtilityImages := Frm_Tool.UtilityImages;
+   Sorter.canUnsort := true;
 
    // redirect some events to the sorter
    VstDetail.onHeaderClick := Sorter.onHeaderClick;
@@ -133,15 +139,11 @@ begin
    VstDetail.Colors.UnfocusedSelectionColor       := TraceWin.VstMain.Colors.UnfocusedSelectionColor ;
    VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
-   // initialize sort
-   Sorter := TVstSort.Create(self);
-   Sorter.tree := VstDetail;
-   Sorter.UtilityImages := Frm_Tool.UtilityImages;
-   Sorter.canUnsort := true;
-
    // multiple selection handler
    VstSelector := TVstSelector.Create(self);   // self is owner
    VstSelector.Init(VstDetail);
+   VstSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
+
 end;
 
 //------------------------------------------------------------------------------
@@ -260,6 +262,11 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
+begin
+   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption := selectionAsText;
+end;
 
 procedure Tframe_table.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 var

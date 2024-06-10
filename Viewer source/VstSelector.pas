@@ -11,6 +11,10 @@ uses
 
 type
 
+  TVirtualTreeColumnsCracker = class(TVirtualTreeColumns);
+  TVstSelector = class;
+  TVstSelectorSelectionChangedEvent = procedure(Sender: TVstSelector; selectionAsText: string) of object;
+
   TVstSelector = class (TComponent)
   private
      fTree : TVirtualStringTree;
@@ -21,6 +25,8 @@ type
      fOldOnMouseUp:         TMouseEvent;
      fOldOnFocusChanged:    TVTFocusChangeEvent;
      fOldOnBeforeCellPaint: TVTBeforeCellPaintEvent;
+
+     fOnSelectionChanged: TVstSelectorSelectionChangedEvent;
 
      procedure VstKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
      procedure VstKeyAction(Sender: TBaseVirtualTree;var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
@@ -40,13 +46,19 @@ type
 
     procedure Init (Tree : TVirtualStringTree);
     function IsSelected(Node: PVirtualNode; ColumnIndexToCheck:integer): boolean;
+    function GetSelectionAsText(): string;
     procedure ResetSelection();
     procedure CopySelectedCells (CopyStrings: TStringList;TextQualifier : string; TextSeparator: string);
+
+  published
+    property OnSelectionChanged: TVstSelectorSelectionChangedEvent read fOnSelectionChanged write fOnSelectionChanged;
 
   end;
 
 
 implementation
+
+uses unt_traceWin;
 
 { TVstSelector }
 
@@ -119,6 +131,7 @@ procedure TVstSelector.VstMouseDown(Sender: TObject; Button: TMouseButton; Shift
 var
    HitInfo: THitInfo;
 begin
+   //TFrm_Trace.InternalTrace('TVstSelector.VstMouseDown') ;
    fTree.GetHitTestInfoAt(X, Y, True, HitInfo, []);
 
    if (ssShift in Shift) then begin
@@ -154,25 +167,49 @@ begin
    if (SelectingWithMouse = false)  then
       exit;
 
+   //TFrm_Trace.InternalTrace('TVstSelector.VstMouseMove') ;
+
+   var NodeTop: TDimension;
    var HitInfo: THitInfo;
-   fTree.GetHitTestInfoAt(X, Y, True, HitInfo, []);
+   var ColLeft, ColRight: TDimension;
+
+   // search node
+   HitInfo.HitNode := fTree
+      .GetNodeAt(
+         X, Y,
+         true,          // relative
+         NodeTop);      // output: Top Y position of node (not needed)
+
+   // search column
+   HitInfo.HitColumn := TVirtualTreeColumnsCracker(fTree.Header.Columns)
+      .GetColumnAndBounds(  // TVirtualTreeColumnsCracker is used to get protected function GetColumnAndBounds
+         Point(X,Y),
+         ColLeft,       // output: Left  X column
+         ColRight,      // output: Right X column
+         true);         // Relative
+
    if HitInfo.HitNode = nil then
       exit;
-   var CellText: string;
+   //var CellText: string;
    if StartSelectedColumn = -1 then begin
-      fTree.OnGetText(fTree, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
       StartSelectedColumn := HitInfo.HitColumn;
       EndSelectedColumn   := HitInfo.HitColumn;
       StartSelectedNode   := HitInfo.HitNode;
       EndSelectedNode     := HitInfo.HitNode;
-   end else begin
-      if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
-         fTree.OnGetText(fTree, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
-         fTree.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
-         EndSelectedColumn := HitInfo.HitColumn;
-         EndSelectedNode   := HitInfo.HitNode;
-      end;
+      //fTree.OnGetText(fTree, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
+      if Assigned(fOnSelectionChanged) then
+         fOnSelectionChanged (self,GetSelectionAsText());
    end;
+
+   if (EndSelectedNode <> HitInfo.HitNode) or (EndSelectedColumn <> HitInfo.HitColumn) then begin
+      EndSelectedColumn := HitInfo.HitColumn;
+      EndSelectedNode   := HitInfo.HitNode;
+      //fTree.OnGetText(fTree, HitInfo.HitNode, HitInfo.HitColumn, ttNormal, CellText);
+      fTree.ScrollIntoView (HitInfo.HitNode,false,false);  //Center, Horizontally false
+      if Assigned(fOnSelectionChanged) then
+         fOnSelectionChanged (self,GetSelectionAsText());
+   end;
+
    if assigned (fOldOnMouseMove) then
       fOldOnMouseMove(sender,Shift,X,Y);
 
@@ -182,6 +219,7 @@ end;
 
 procedure TVstSelector.VstMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
+   //TFrm_Trace.InternalTrace('TVstSelector.VstMouseUp') ;
    Selecting := false;
    SelectingWithMouse := false;
    if assigned (fOldOnMouseUp) then
@@ -202,6 +240,9 @@ begin
 
    EndSelectedColumn  := Column;
    EndSelectedNode    := Node;
+
+   if Assigned(fOnSelectionChanged) then
+      fOnSelectionChanged (self,GetSelectionAsText());
 
    if assigned (fOldOnFocusChanged) then
       fOldOnFocusChanged(sender,Node,Column);
@@ -224,11 +265,54 @@ begin
    TargetCanvas.FillRect(CellRect);
 end;
 
+function TVstSelector.GetSelectionAsText() : string;
+var
+  RowCount, ColCount : integer ;
+  ColsAsString : string;
+  startColPosition, EndColPosition: integer;
+  LoopEnd : PVirtualNode;
+  loopNode : PVirtualNode ;
+begin
+  result := '';
+  ColCount := 1;
+  RowCount := 1;
+  if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
+      exit;
+
+  try
+     if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
+       startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
+       EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
+     end else begin  // reverse selection
+       startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
+       EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
+     end;
+     ColCount := EndColPosition - startColPosition + 1;
+     ColsAsString := '(' + intToStr(startColPosition) + '..' + intToStr(EndColPosition) + ')';
+
+     if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
+        loopNode := StartSelectedNode;
+        loopEnd  := EndSelectedNode;
+     end else begin
+        loopNode := EndSelectedNode ;
+        loopEnd  := StartSelectedNode;
+     end;
+
+     while (loopNode <> nil) and (loopNode <> loopEnd) do begin
+        inc(RowCount);
+        loopNode := loopNode.NextSibling;       // sometimes generated exception here :(
+     end;
+  except
+
+  end;
+  result := inttostr(RowCount) + ' * ' + ColsAsString;
+end;
+
 function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;
 var
   LoopEnd : PVirtualNode;
   loopNode : PVirtualNode ;
-  startPosition, EndPosition, PositionToCheck: integer;
+  startColPosition, EndColPosition, PositionToCheck: integer;
 begin
    result := false;
 
@@ -238,14 +322,14 @@ begin
    PositionToCheck := fTree.Header.Columns[ColumnIndexToCheck].Position;
 
    if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
-     startPosition := fTree.Header.Columns[StartSelectedColumn].Position;
-     endPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
+     startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
    end else begin  // reverse selection
-     startPosition := fTree.Header.Columns[EndSelectedColumn].Position;
-     endPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
+     startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
    end;
 
-   if (PositionToCheck < startPosition) or (PositionToCheck > endPosition) then
+   if (PositionToCheck < startColPosition) or (PositionToCheck > EndColPosition) then
        exit;
 
    if (node = StartSelectedNode) or (node = EndSelectedNode) then begin
@@ -272,7 +356,10 @@ begin
              result := true;
              exit;
           end;
-          loopNode := loopNode.NextSibling;       // sometimes generated exception here :(
+
+          // TODO : FirstChild
+
+          loopNode := loopNode.NextSibling;       // sometimes generated exception here. Don't know why :(
           if (loopNode = loopEnd) or (loopNode = nil) then
              break;
        end;
