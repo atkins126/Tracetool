@@ -21,6 +21,7 @@ type
      fTree : TVirtualStringTree;
      fOldOnKeyDown :        TKeyEvent;
      fOldOnKeyAction:       TVTKeyActionEvent;
+     fOldOnKeyUp:           TKeyEvent;
      fOldOnMouseDown:       TMouseEvent;
      fOldOnMouseMove:       TMouseMoveEvent;
      fOldOnMouseUp:         TMouseEvent;
@@ -31,6 +32,7 @@ type
 
      procedure VstKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
      procedure VstKeyAction(Sender: TBaseVirtualTree;var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
+     procedure VstKeyUp(Sender: TObject; var Key: Word;Shift: TShiftState);
      procedure VstMouseMove(Sender: TObject; Shift: TShiftState; X,Y: Integer);
      procedure VstMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
      procedure VstMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -86,6 +88,7 @@ begin
 
    fOldOnKeyDown          := Tree.OnKeyDown;
    fOldOnKeyAction        := Tree.OnKeyAction;
+   fOldOnKeyUp            := Tree.OnKeyUp;
    fOldOnMouseDown        := Tree.OnMouseDown;
    fOldOnMouseMove        := Tree.OnMouseMove;
    fOldOnMouseUp          := Tree.OnMouseUp;
@@ -94,6 +97,7 @@ begin
 
    Tree.OnKeyDown         := VstKeyDown;
    Tree.OnKeyAction       := VstKeyAction;
+   Tree.OnKeyUp           := VstKeyUp;
    Tree.OnMouseDown       := VstMouseDown;
    Tree.OnMouseMove       := VstMouseMove;
    Tree.OnMouseUp         := VstMouseUp;
@@ -105,6 +109,8 @@ procedure TVstSelector.VstKeyDown(Sender: TObject; var Key: Word; Shift: TShiftS
 begin
    // start selection is shift is pressed
 
+   //TFrm_Trace.InternalTrace('TVstSelector.VstKeyDown') ;
+
    if (not Selecting) and (Key = VK_SHIFT) then  begin
       Selecting := true;
       SelectingWithMouse := false;
@@ -115,9 +121,9 @@ end;
 
 procedure TVstSelector.VstKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
-
    // stop selection if no more Shift
 
+   //  TFrm_Trace.InternalTrace('TVstSelector.VstKeyAction') ;
    if (selecting) and not (ssShift in Shift) then begin
       Selecting           := false;
       SelectingWithMouse  := false;
@@ -131,12 +137,25 @@ begin
       fOldOnKeyAction(sender,CharCode,Shift,DoDefault);
 end;
 
+procedure TVstSelector.VstKeyUp(Sender: TObject; var Key: Word;  Shift: TShiftState);
+begin
+   //  TFrm_Trace.InternalTrace('TVstSelector.VstKeyUp') ;
+
+   if (selecting) and not (ssShift in Shift) then begin
+      Selecting           := false;
+      SelectingWithMouse  := false;
+      fTree.Refresh;
+   end;
+   if assigned (fOldOnKeyUp) then
+      fOldOnKeyUp(sender,key,Shift);
+end;
 
 procedure TVstSelector.VstMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
    HitInfo: THitInfo;
 begin
    //TFrm_Trace.InternalTrace('TVstSelector.VstMouseDown') ;
+
    fTree.GetHitTestInfoAt(X, Y, True, HitInfo, []);
 
    if (ssShift in Shift) then begin
@@ -236,7 +255,7 @@ end;
 procedure TVstSelector.VstFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 begin
 
-  // focus changed. Expand selection
+   // focus changed. Expand selection
 
    if not Selecting then begin
       StartSelectedColumn := Column;
@@ -245,6 +264,7 @@ begin
 
    EndSelectedColumn  := Column;
    EndSelectedNode    := Node;
+   fTree.Refresh;
 
    if Assigned(fOnSelectionChanged) then
       fOnSelectionChanged (self,GetSelectionAsText());

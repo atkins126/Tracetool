@@ -1719,8 +1719,7 @@ end;
 
 // ------------------------------------------------------------------------------
 
-procedure TFrm_Trace.vstMainKeyAction(Sender: TBaseVirtualTree;
-   var CharCode: Word; var Shift: TShiftState; var DoDefault: boolean);
+procedure TFrm_Trace.vstMainKeyAction(Sender: TBaseVirtualTree; var CharCode: Word; var Shift: TShiftState; var DoDefault: boolean);
 begin
    if CharCode = VK_DELETE then
       DeleteSelected() ;
