@@ -179,8 +179,8 @@ object Frm_Tool: TFrm_Tool
     end
   end
   object ilActions: TImageList
-    Left = 152
-    Top = 8
+    Left = 16
+    Top = 88
     Bitmap = {
       494C010131003800040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000040000000D0000000010020000000000000D0
@@ -1999,7 +1999,7 @@ object Frm_Tool: TFrm_Tool
   end
   object pmuTaskBar: TPopupMenu
     Images = ilActions
-    Left = 96
+    Left = 24
     Top = 168
     object mitTrayShow: TMenuItem
       Action = actShow
@@ -2021,8 +2021,8 @@ object Frm_Tool: TFrm_Tool
   object ImageList1: TImageList
     AllocBy = 36
     ShareImages = True
-    Left = 24
-    Top = 168
+    Left = 88
+    Top = 88
     Bitmap = {
       494C010119001B00240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
@@ -2992,8 +2992,8 @@ object Frm_Tool: TFrm_Tool
     Top = 232
   end
   object UtilityImages: TImageList
-    Left = 96
-    Top = 232
+    Left = 168
+    Top = 88
     Bitmap = {
       494C01010D000F00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
