@@ -24,6 +24,7 @@ type
     ShowAsJson: TMenuItem;
     ShowAsButton: TButton;
     LabelSelect: TLabel;
+    WordWrapButton: TSpeedButton;
     procedure FormatButtonClick(Sender: TObject);
     procedure ShowPopupButtonClick(Sender: TObject);
     procedure PanelTopResize(Sender: TObject);
@@ -31,6 +32,7 @@ type
     procedure ShowAsTextClick(Sender: TObject);
     procedure ShowAsXmlClick(Sender: TObject);
     procedure ShowAsJsonClick(Sender: TObject);
+    procedure WordWrapButtonClick(Sender: TObject);
   private
   public
     procedure SetMemoText(text: string; isXml, isJson: boolean);
@@ -56,7 +58,8 @@ begin
       ShowAsButton    .left :=   0; ShowAsButton.width := 50 ;                                                    //   0 + 50 + 6 = 56
       FormatButton    .left :=  56; FormatButton    .width := 50 ; FormatButton    .caption := 'Format' ;         //  56 + 50 + 6 = 112
       ShowPopupButton .left := 112; ShowPopupButton .width := 85 ; ShowPopupButton .caption := 'Show in popup' ;  // 112 + 85 + 6 = 203
-      LabelSelect     .Left := 203;
+      WordWrapButton  .Left := 203;                                                                               // 203 + 25 + 6 = 234
+      LabelSelect     .Left := 234;
 
    end else if width >= 156 then begin
       if (SynMemo.Highlighter = nil) then
@@ -68,7 +71,8 @@ begin
       ShowAsButton    .left :=   0; ShowAsButton.width := 45 ;                                                    //   0 + 45 + 3 = 48
       FormatButton    .left :=  48; FormatButton    .width := 38 ; FormatButton    .caption := 'Format' ;         //  48 + 38 + 3 = 89
       ShowPopupButton .left :=  89; ShowPopupButton .width := 38 ; ShowPopupButton .caption := 'Popup' ;          //  89 + 38 + 3 = 130
-      LabelSelect     .Left := 130;
+      WordWrapButton  .Left := 130;                                                                               // 130 + 25 + 3 = 158
+      LabelSelect     .Left := 158;
 
    end else begin
       if (SynMemo.Highlighter = nil) then
@@ -80,7 +84,8 @@ begin
       ShowAsButton    .left :=   0; ShowAsButton.width := 30 ;                                                    //  0 + 30 + 1 = 31
       FormatButton    .left :=  31; FormatButton    .width := 19 ; FormatButton    .caption := 'F.' ;             // 31 + 19 + 1 = 51
       ShowPopupButton .left :=  51; ShowPopupButton .width := 19 ; ShowPopupButton .caption := 'P.' ;             // 51 + 19 + 1 = 71
-      LabelSelect     .Left :=  71;
+      WordWrapButton  .Left :=  71;                                                                               // 71 + 25 + 1 = 97
+      LabelSelect     .Left :=  97;
    end;
 end;
 
@@ -224,6 +229,13 @@ begin
    popup := TDetailPopupForm.create(Application);
    popup.SetMemoText(SynMemo.Text);
    popup.show();
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrameMemo.WordWrapButtonClick(Sender: TObject);
+begin
+   SynMemo.WordWrap := WordWrapButton.Down;
 end;
 
 end.

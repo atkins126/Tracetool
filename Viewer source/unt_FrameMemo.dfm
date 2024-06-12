@@ -64,6 +64,17 @@ object FrameMemo: TFrameMemo
       Width = 3
       Height = 15
     end
+    object WordWrapButton: TSpeedButton
+      Left = 238
+      Top = 0
+      Width = 25
+      Height = 25
+      AllowAllUp = True
+      GroupIndex = 1
+      ImageIndex = 44
+      Images = Frm_Tool.ilActions
+      OnClick = WordWrapButtonClick
+    end
     object FormatButton: TBitBtn
       Left = 51
       Top = 0
