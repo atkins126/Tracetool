@@ -87,6 +87,10 @@ begin
       WordWrapButton  .Left :=  71;                                                                               // 71 + 25 + 1 = 97
       LabelSelect     .Left :=  97;
    end;
+
+   if ShowPopupButton.Visible = false then
+      WordWrapButton.Left := ShowPopupButton.Left;
+
 end;
 
 //------------------------------------------------------------------------------

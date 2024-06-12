@@ -32,9 +32,7 @@ object DetailPopupForm: TDetailPopupForm
       Width = 386
       ExplicitWidth = 382
       inherited LabelSelect: TLabel
-        Width = 54
         Height = 13
-        ExplicitWidth = 54
         ExplicitHeight = 13
       end
     end

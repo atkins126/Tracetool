@@ -65,7 +65,7 @@ object FrameMemo: TFrameMemo
       Height = 15
     end
     object WordWrapButton: TSpeedButton
-      Left = 238
+      Left = 198
       Top = 0
       Width = 25
       Height = 25

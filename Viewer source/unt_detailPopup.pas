@@ -39,6 +39,7 @@ end;
 
 procedure TDetailPopupForm.FormCreate(Sender: TObject);
 begin
+   frameMemo.WordWrapButton.Left := frameMemo.ShowPopupButton.left;
    frameMemo.ShowPopupButton.visible := false;
    frameMemo.LabelSelect.visible := false;
 end;
