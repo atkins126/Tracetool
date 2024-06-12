@@ -84,7 +84,7 @@ interface
          PanelRight: TPanel;
          VSplitter: TSplitter;
          PanelLeft: TPanel;
-    vstMain: TVirtualStringTree;
+         vstMain: TVirtualStringTree;
          PanelTTraces: TPanel;
          PanelTop: TPanel;
          TracesInfo: TLabel;
@@ -441,7 +441,7 @@ begin
    VstMain.NodeDataSize := sizeof(TTreeRec);
 
    // set the main column
-   VstMain.Header.MainColumn := 0;
+   VstMain.Header.MainColumn := 3;      // must be the "trace column", else the tree will not expandable
    VstMain.Header.AutoSizeIndex := -1; // auto
 
    VstMain.Header.options := VstMain.Header.options
