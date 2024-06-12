@@ -12,6 +12,7 @@ uses
 type
 
   TVirtualTreeColumnsCracker = class(TVirtualTreeColumns);
+  TBaseVirtualTreeCracker = class(TBaseVirtualTree);
   TVstSelector = class;
   TVstSelectorSelectionChangedEvent = procedure(Sender: TVstSelector; selectionAsText: string) of object;
 
@@ -35,6 +36,7 @@ type
      procedure VstMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
      procedure VstFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
      procedure VstBeforeCellPaint(Sender: TBaseVirtualTree;TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;CellPaintMode: TVTCellPaintMode; CellRect: TRect;var ContentRect: TRect);
+     function CompareNodePositions(Node1, Node2: PVirtualNode; ConsiderChildrenAbove: Boolean = False): Integer;
 
   public
     StartSelectedColumn: integer;
@@ -60,6 +62,7 @@ implementation
 
 uses
    System.types,
+   System.Math,
    unt_traceWin;
 
 { TVstSelector }
@@ -267,122 +270,64 @@ begin
    TargetCanvas.FillRect(CellRect);
 end;
 
-function TVstSelector.GetSelectionAsText() : string;
+function TVstSelector.CompareNodePositions(Node1, Node2: PVirtualNode; ConsiderChildrenAbove: Boolean = False): Integer;
+// TBaseVirtualTree.CompareNodePositions is private, not protected. This is a copied version :(
+
+// Tries hard and smart to quickly determine whether Node1's structural position is before Node2's position.
+// If ConsiderChildrenAbove is True, the nodes will be compared with their visual order in mind.
+// Returns 0 if Node1 = Node2, < 0 if Node1 is located before Node2 else > 0.
+
 var
-  RowCount, ColCount : integer ;
-  startColPosition, EndColPosition: integer;
-  LoopEnd : PVirtualNode;
-  loopNode : PVirtualNode ;
+  Run1,
+  Run2: PVirtualNode;
+  Level1,
+  Level2: Cardinal;
+
 begin
-  result := '';
-  ColCount := 1;
-  RowCount := 1;
-  if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
-      exit;
+  Assert(Assigned(Node1) and Assigned(Node2), 'Nodes must never be nil.');
 
-  try
-     if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
-       startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
-       EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
-     end else begin  // reverse selection
-       startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
-       EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
-     end;
-     ColCount := EndColPosition - startColPosition + 1;
-
-     if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
-        loopNode := StartSelectedNode;
-        loopEnd  := EndSelectedNode;
-     end else begin
-        loopNode := EndSelectedNode ;
-        loopEnd  := StartSelectedNode;
-     end;
-
-     while (loopNode <> nil) and (loopNode <> loopEnd) do begin
-        inc(RowCount);
-        loopNode := loopNode.NextSibling;       // sometimes generated exception here :(
-     end;
-  except
-
-  end;
-  if (RowCount = 1) and (ColCount = 1) then
-     result := ''
+  if Node1 = Node2 then
+    Result := 0
   else
-     result := 'Selection:' + inttostr(RowCount) + ' by ' + inttostr(ColCount) ;
-end;
+  begin
+    if fTree.HasAsParent(Node1, Node2) then
+      Result := IfThen(ConsiderChildrenAbove and (toChildrenAbove in ftree.TreeOptions.PaintOptions), -1, 1)
+    else
+      if fTree.HasAsParent(Node2, Node1) then
+        Result := IfThen(ConsiderChildrenAbove and (toChildrenAbove in ftree.TreeOptions.PaintOptions), 1, -1)
+      else
+      begin
+        // the given nodes are neither equal nor are they parents of each other, so go up to FRoot
+        // for each node and compare the child indices of the top level parents
+        // Note: neither Node1 nor Node2 can be FRoot at this point as this (a bit strange) circumstance would
+        //       be caught by the previous code.
 
-function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;
-var
-  LoopEnd : PVirtualNode;
-  loopStart : PVirtualNode ;
-  startColPosition, EndColPosition, PositionToCheck: integer;
+        // start lookup at the same level
+        Level1 := fTree.GetNodeLevel(Node1);
+        Level2 := fTree.GetNodeLevel(Node2);
+        Run1 := Node1;
+        while Level1 > Level2 do
+        begin
+          Run1 := Run1.Parent;
+          System.Dec(Level1);
+        end;
+        Run2 := Node2;
+        while Level2 > Level1 do
+        begin
+          Run2 := Run2.Parent;
+          System.Dec(Level2);
+        end;
 
-   function LoopSibling(NodeToCheck : PVirtualNode) : boolean;
-   begin
-       result := false;
-       var loopNode : PVirtualNode := NodeToCheck;
-       while loopNode <> nil do begin
-          if (loopNode = node) then begin
-             result := true;
-             exit;
-          end;
-
-          // loop children
-          var firstChild := loopNode.FirstChild;
-          result := LoopSibling(firstChild);
-          if result then
-             exit;
-
-          // else next sibling
-          loopNode := loopNode.NextSibling;       // sometimes generated exception here. Don't know why :(
-          if (loopNode = loopEnd) or (loopNode = nil) then
-             break;
-       end;
-   end;
-
-begin
-
-
-   result := false;
-
-   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
-      exit;
-
-   PositionToCheck := fTree.Header.Columns[ColumnIndexToCheck].Position;
-
-   if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
-     startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
-     EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
-   end else begin  // reverse selection
-     startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
-     EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
-   end;
-
-   if (PositionToCheck < startColPosition) or (PositionToCheck > EndColPosition) then
-       exit;
-
-   if (node = StartSelectedNode) or (node = EndSelectedNode) then begin
-      result := true;
-      exit;
-   end;
-
-   // start and last are the same node. Looping over LastSelectedNode will always found nodes
-   if (StartSelectedNode = EndSelectedNode ) then
-      exit;
-
-   try
-
-       if (StartSelectedNode^.Index) <= (EndSelectedNode^.Index) then begin   // Top to bottom
-          loopStart := StartSelectedNode;
-          loopEnd  := EndSelectedNode;
-       end else begin
-          loopStart := EndSelectedNode ;
-          loopEnd  := StartSelectedNode;
-       end;
-       result := LoopSibling(loopStart);
-   except
-
-   end;
+        // now go up until we find a common parent node (loop will safely stop at FRoot if the nodes
+        // don't share a common parent)
+        while Run1.Parent <> Run2.Parent do
+        begin
+          Run1 := Run1.Parent;
+          Run2 := Run2.Parent;
+        end;
+        Result := Integer(Run1.Index) - Integer(Run2.Index);
+      end;
+  end;
 end;
 
 procedure TVstSelector.ResetSelection;
@@ -393,49 +338,141 @@ begin
   EndSelectedNode     := nil;
 end;
 
+function TVstSelector.GetSelectionAsText() : string;
+var
+   RowCount, ColCount : integer ;
+   startColPosition, EndColPosition: integer;
+
+   procedure CountSibling(NodeToCheck,lastNode : PVirtualNode);
+   begin
+      var loopNode : PVirtualNode := NodeToCheck;
+      while (loopNode <> nil) do begin
+         inc(RowCount);
+         if (loopNode = lastNode) then
+             break;
+         // don't use loopNode.FirstChild and loopNode.NextSibling: node can be not yet initialized
+         loopNode := fTree.GetNext(loopNode, {ConsiderChildrenAbove} true) ; // Returns next node in tree. The Result will be initialized if needed.
+      end;
+   end;
+
+begin
+  result := '';
+  ColCount := 1;
+  if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
+      exit;
+
+  if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
+     startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
+  end else begin  // reverse selection
+     startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
+  end;
+  ColCount := EndColPosition - startColPosition + 1;
+
+  RowCount := 0;
+  var isTopToBottom := CompareNodePositions(StartSelectedNode, EndSelectedNode,false) < 0;
+
+  if isTopToBottom then
+     CountSibling(StartSelectedNode, EndSelectedNode)
+  else
+     CountSibling(EndSelectedNode, StartSelectedNode);
+
+  if (RowCount = 1) and (ColCount = 1) then
+     result := ''
+  else if ColCount = 1 then
+     result := 'Selection:' + inttostr(RowCount) + ' rows'
+  else
+     result := 'Selection:' + inttostr(RowCount) + ' rows, ' + inttostr(ColCount) + ' cols';
+end;
+
+
+function TVstSelector.IsSelected(Node: PVirtualNode;  ColumnIndexToCheck: integer): boolean;
+var
+   startColPosition, EndColPosition, ColumnPositionToCheck: integer;
+begin
+   result := false;
+
+   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
+      exit;
+
+   ColumnPositionToCheck := fTree.Header.Columns[ColumnIndexToCheck].Position;
+
+   if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
+     startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
+   end else begin  // reverse selection
+     startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
+     EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
+   end;
+
+   if (ColumnPositionToCheck < startColPosition) or (ColumnPositionToCheck > EndColPosition) then
+       exit;
+
+    if (node = StartSelectedNode) or (node = EndSelectedNode) then begin
+       result := true;
+       exit;
+    end;
+
+    if (StartSelectedNode = EndSelectedNode ) then
+       exit;
+
+    if CompareNodePositions(StartSelectedNode, EndSelectedNode,false) < 0 then begin   // start < node < end
+       if CompareNodePositions(node ,StartSelectedNode, false)     < 0 then exit       // node before start
+       else if CompareNodePositions(Node, EndSelectedNode,false)   > 0 then exit       // node after end
+       else result := true;  // after start and before end
+    end else begin                                                                     // end < node < start
+       if CompareNodePositions(node ,EndSelectedNode, false)       < 0 then exit       // node before end
+       else if CompareNodePositions(node, StartSelectedNode,false) > 0 then exit       // node after start
+       else result := true;  // after start and before end
+    end;
+
+end;
+
 procedure TVstSelector.CopySelectedCells (CopyStrings: TStringList;TextQualifier : string; TextSeparator: string);
 var
    orderedList : Array of integer;
    ColumnIndex : integer ;
 
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      NewLine: string;
-      OrderedIndex: integer ;
-      CellText :string ;
+   procedure CopyDetail (StartSelectedNode, EndSelectedNode : PVirtualNode);
    begin
+      // ordered column.
+      var startColPosition, EndColPosition: integer;
+      if fTree.Header.Columns[StartSelectedColumn].Position <= fTree.Header.Columns[EndSelectedColumn].Position then begin
+        startColPosition := fTree.Header.Columns[StartSelectedColumn].Position;
+        EndColPosition   := fTree.Header.Columns[EndSelectedColumn].Position;
+      end else begin  // reverse selection
+        startColPosition := fTree.Header.Columns[EndSelectedColumn].Position;
+        EndColPosition   := fTree.Header.Columns[StartSelectedColumn].Position;
+      end;
 
-      var rec := fTree.GetNodeData(TestNode) ;
-      if rec <> nil then begin
-
-         NewLine := '' ;
+      var loopNode : PVirtualNode := StartSelectedNode;
+      while loopNode <> nil do begin
          var hasSelectionInNode : boolean := false;
+         var NewLine := '' ;
 
-         // ordered column.
-
-         for OrderedIndex := 0 to length(orderedList)-1 do begin
+         for var OrderedIndex := 0 to length(orderedList)-1 do begin
             ColumnIndex :=  orderedList[OrderedIndex];
-            if IsSelected(TestNode,ColumnIndex) then begin
+            var ColumnPositionToCheck:integer := fTree.Header.Columns[ColumnIndex].Position;
+            if (ColumnPositionToCheck >= startColPosition) and (ColumnPositionToCheck <= EndColPosition) then begin
                 hasSelectionInNode := true;
 
-                fTree.OnGetText(fTree, TestNode, ColumnIndex, ttNormal, CellText);
+                var CellText :string ;
+                fTree.OnGetText(fTree, loopNode, ColumnIndex, ttNormal, CellText);
                 if NewLine = '' then
                    NewLine := TextQualifier + CellText + TextQualifier
                 else
                    NewLine := NewLine + TextSeparator  + TextQualifier + CellText + TextQualifier ;
-
             end;
          end ;
          if hasSelectionInNode then
             CopyStrings.Add(NewLine);
-      end ;
 
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
+         if (loopNode = EndSelectedNode) then
+             break;
+
+         // don't use loopNode.FirstChild and loopNode.NextSibling: node can be not yet initialized
+         loopNode := fTree.GetNext(loopNode, {ConsiderChildrenAbove} true) ; // Returns next node in tree. The Result will be initialized if needed.
       end ;
    end ;
 begin
@@ -444,7 +481,11 @@ begin
    for ColumnIndex := 0 to fTree.header.Columns.Count-1 do
       orderedList[fTree.header.Columns[ColumnIndex].Position] := ColumnIndex ;
 
-   CopyDetail (fTree.RootNode);
+   var isTopToBottom := CompareNodePositions(StartSelectedNode, EndSelectedNode,false) < 0;
+   if isTopToBottom then
+      CopyDetail(StartSelectedNode, EndSelectedNode)
+   else
+      CopyDetail(EndSelectedNode, StartSelectedNode);
 end;
 
 

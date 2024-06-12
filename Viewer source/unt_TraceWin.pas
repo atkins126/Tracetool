@@ -167,6 +167,7 @@ interface
          class function InternalTrace(LeftMsg: string; RightMsg: string = '') : PVirtualNode; overload;
          class function InternalTrace(Node: PVirtualNode; LeftMsg: string; RightMsg: string = ''): PVirtualNode; overload;
          class procedure InternalDumpFromThread(const memory: pointer; const ByteCount: Integer); static;
+         class procedure InternalClearTrace; static;
          class procedure checkInternals;
          function ChangeFontDetail(const IsTrace: boolean; const TargetCanvas: TCanvas; const Column: TColumnIndex; const FontDetails: TFontDetailArray; const selected: boolean): boolean;
          function ChangeBackgroundColor(const TargetCanvas: TCanvas; const CellRect: TRect; const Column: TColumnIndex; const FontDetails: TFontDetailArray; const selected: boolean): boolean;
@@ -695,6 +696,19 @@ begin
    TreeRec := FrmInternalTraces.VstMain.GetNodeData(Result);
    TreeRec.LeftMsg := LeftMsg;
    TreeRec.RightMsg := RightMsg;
+
+end;
+
+class procedure TFrm_Trace.InternalClearTrace();
+begin
+
+   if FrmInternalTraces.Visible = false then begin
+      FrmInternalTraces.Visible := true;
+      if FrmInternalTraces.Parent = nil then
+         FrmInternalTraces.DockToMainPanel();
+      FrmInternalTraces.SetActivePage(); // PageControlChange() ;
+   end;
+   FrmInternalTraces.VstMain.clear();
 
 end;
 
