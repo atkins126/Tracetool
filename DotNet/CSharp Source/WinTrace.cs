@@ -85,7 +85,7 @@ namespace TraceTool
             Enabled = true;
             WinTraceId = Id;    // winTraceId need to be the same as 'id' if we want to call sendXxx() directly on WinTrace object
 
-            ContextList = new List<NodeContext>();
+            ContextList = new List<string>();
 
             //fWinTraceContext = null ;
 
