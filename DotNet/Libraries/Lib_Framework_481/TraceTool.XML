@@ -1654,15 +1654,11 @@
         <member name="M:TraceTool.TraceToSend.PrepareNewNode(System.String,System.String)">
             Prepare the commandList. Common to all SendXXX function
         </member>
-        <member name="M:TraceTool.TraceToSend.GetLastContext">
-            Get the last context.
-            @return last context for the thread
-        </member>
         <member name="M:TraceTool.TraceToSend.GetLastContextId">
-            Get the last context ID.
-            @return last context ID for the thread
+            Get the last context Id
+            @return last context 
         </member>
-        <member name="M:TraceTool.TraceToSend.PushContext(TraceTool.NodeContext)">
+        <member name="M:TraceTool.TraceToSend.PushContext(System.String)">
             Save the context
             @param newContext the context to push
         </member>
