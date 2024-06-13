@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lib_Standard_20", "Lib_Standard_20\Lib_Standard_20.csproj", "{CBF21930-6E95-435C-A3DD-E592EFF9AB78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib_Framework_48", "Lib_Framework_48\Lib_Framework_48.csproj", "{7CF111BE-3614-4514-966A-FDF779773E51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib_Framework_481", "Lib_Framework_481\Lib_Framework_481.csproj", "{7CF111BE-3614-4514-966A-FDF779773E51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
