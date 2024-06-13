@@ -16,10 +16,10 @@
 	<AppDisplay>
 		<SmallBut Value="true"/>
 		<ApplicationTitle Value="socket: 8090 / 4502,  Http : 85, WebSocket:8091"/>
-		<Left Value="26"/>
-		<Top Value="26"/>
-		<Width Value="697"/>
-		<Height Value="636"/>
+		<Left Value="847"/>
+		<Top Value="136"/>
+		<Width Value="1064"/>
+		<Height Value="647"/>
 		<StayOnTop Value="false"/>
 		<ShowOnstartup Value="true"/>
 		<ShowOnMessageReceived Value="false"/>
@@ -97,7 +97,7 @@
 		<MinNode Value="20000"/>
 		<SizeToLoad Value="800"/>
 		<ColumnStyle Value="Lines"/>
-		<AutoCreateColStyle Value="First"/>
+		<AutoCreateColStyle Value="Each"/>
 		<TextQualifier Value="None"/>
 		<Separator Value="9"/>
 		<FirstcolIsTitle Value="false"/>

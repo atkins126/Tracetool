@@ -377,7 +377,6 @@ var
 
 begin
   result := '';
-  ColCount := 1;
   if (StartSelectedColumn = -1) or (EndSelectedColumn = -1) or (StartSelectedNode = nil) or (EndSelectedNode = nil) then
       exit;
 

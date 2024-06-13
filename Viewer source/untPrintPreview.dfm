@@ -160,16 +160,15 @@ object FrmPrintPreview: TFrmPrintPreview
       object Panel1: TPanel
         Left = 193
         Top = 39
-        Width = 597
-        Height = 453
+        Width = 593
+        Height = 452
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 601
         object PageNavigator: TTabSet
           Left = 0
-          Top = 426
-          Width = 597
+          Top = 425
+          Width = 593
           Height = 27
           Align = alBottom
           Font.Charset = DEFAULT_CHARSET
@@ -178,12 +177,14 @@ object FrmPrintPreview: TFrmPrintPreview
           Font.Name = 'Arial'
           Font.Style = [fsBold]
           OnChange = PageNavigatorChange
+          ExplicitTop = 426
+          ExplicitWidth = 597
         end
         object PrintPreview: TPrintPreview
           Left = 0
           Top = 0
-          Width = 597
-          Height = 426
+          Width = 593
+          Height = 425
           HorzScrollBar.Margin = 10
           HorzScrollBar.Tracking = True
           VertScrollBar.Margin = 10
@@ -206,13 +207,12 @@ object FrmPrintPreview: TFrmPrintPreview
           OnAfterPrint = PrintPreviewAfterPrint
           OnZoomChange = PrintPreviewZoomChange
           OnAnnotation = PrintPreviewAnnotation
-          ExplicitWidth = 601
         end
       end
       object Toolbar: TPanel
         Left = 0
         Top = 0
-        Width = 790
+        Width = 786
         Height = 39
         Align = alTop
         BevelOuter = bvNone
@@ -223,6 +223,7 @@ object FrmPrintPreview: TFrmPrintPreview
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitWidth = 790
         object Label1: TLabel
           Left = 8
           Top = 13

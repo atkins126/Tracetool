@@ -647,11 +647,11 @@ begin
    if SourceBegin = nil then
       exit ;
 
-   var sep : WideChar;
+   var sep : WideChar := char(0);
    if (Length(ColSeparator) >= 1) then
      sep := WideChar(ColSeparator[1]);
 
-   var textQualif : WideChar;
+   var textQualif : WideChar := Char(0);
    if (Length(TextQualifier) >= 1) then
      textQualif := WideChar(TextQualifier[1]);
 
