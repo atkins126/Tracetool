@@ -47,9 +47,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TraceTool, Version=13.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Tracetool.DotNet.Api.13.0.1\lib\netstandard2.0\TraceTool.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -103,6 +100,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="App.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Libraries\Lib_Standard_20\Lib_Standard_20.csproj">
+      <Project>{98711898-fb6c-46f4-ab11-eba404f7e462}</Project>
+      <Name>Lib_Standard_20</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

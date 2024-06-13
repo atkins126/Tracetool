@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using TraceTool;
@@ -444,7 +446,7 @@ namespace Wpf_Demo
 
         //------------------------------------------------------------------------------
 
-        private void IndentButton_Click(object sender, RoutedEventArgs e)
+        private async void IndentButton_Click(object sender, RoutedEventArgs e)
         {
             TraceNode node = TTrace.Debug.Send("Tree indentation using Indent and UnIndent methods");
 
@@ -472,6 +474,54 @@ namespace Wpf_Demo
             nodeEx.Send();
             TTrace.Debug.UnIndent();
             TTrace.Debug.Send("root 2", TTrace.Debug.IndentLevel.ToString());
+
+
+            // Indent/Unindent on a Single thread
+            TTrace.Debug.Indent("Indent A, same thread");
+            foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+            {
+                TTrace.Debug.Send($"under Indent A : [{counter}]").Show();
+                // No await here !
+            }
+            TTrace.Debug.UnIndent("UnIndent A");
+            TTrace.Debug.Send("Root A");
+
+            // Indent/Unindent with Async task
+            TTrace.Debug.Indent("Indent B, with async");
+            foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+            {
+                if (counter == 3)
+                    await Task.Run(async () =>
+                    {
+                        await Task.Delay(500);
+                        TTrace.Debug.Send("under Indent B [3] Async, from 'possible' another thread");
+                        await TTrace.FlushAsync();
+                    });
+                else
+                    TTrace.Debug.Send($"under Indent B : [{counter}]").Show();
+            }
+            TTrace.Debug.UnIndent("UnIndent B");
+            TTrace.Debug.Send("Root B");
+            await TTrace.FlushAsync();
+
+            // using a TraceNode and Async
+            var traceNode = TTrace.Debug.Send("Using trace Node C, with async");
+            foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+            {
+                if (counter == 3)
+                    await Task.Run(async () =>
+                    {
+                        await Task.Delay(1000);
+                        traceNode.Send("under Node C [3] Async, from 'possible' another thread");
+                        await TTrace.FlushAsync();
+                    });
+                else
+                    traceNode.Send($"under Node C : [{counter}]").Show();
+            }
+            await TTrace.FlushAsync();
+            TTrace.Debug.Send("Root C");
+
+
         }
 
         //------------------------------------------------------------------------------
@@ -656,7 +706,7 @@ namespace Wpf_Demo
                 // 3, Local log is disabled
                 // 4, Local log enabled. No size limit.
                 // 5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
-                _multiColTrace.SetLogFile("c:\\MultiCol.xml", 4);
+                _multiColTrace.SetLogFile("c:\\temp\\MultiCol.xml", 4);
             }
             _multiColTrace.Debug.Send("1 \t 2 \t 3");
         }

@@ -24,7 +24,48 @@ myRecord.Bar = "bar";
 TTrace.Debug.SendValue("myRecord", myRecord);
 TTrace.Debug.SendObject("myRecord", myRecord);
 
-TTrace.Flush();
+// Indent/Unindent on a Single thread
+TTrace.Debug.Indent("Indent A, same thread");
+foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+{
+    TTrace.Debug.Send($"under Indent A : [{counter}]").Show();
+    // No await here !
+}
+TTrace.Debug.UnIndent("UnIndent A");
+
+// Indent/Unindent with Async task
+TTrace.Debug.Indent("Indent B, with async");
+foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+{
+    if (counter == 3)
+        await Task.Run(async () =>
+        {
+            await Task.Delay(500);
+            TTrace.Debug.Send("under Indent B [3] Async, from 'possible' another thread");
+            await TTrace.FlushAsync();
+        });
+    else
+        TTrace.Debug.Send($"under Indent B : [{counter}]").Show();
+}
+TTrace.Debug.UnIndent("UnIndent B");
+await TTrace.FlushAsync();
+
+// using a TraceNode and Async
+var traceNode = TTrace.Debug.Send("Using trace Node C, with async");
+foreach (var counter in new[] { 0, 1, 2, 3, 4, 5 })
+{
+    if (counter == 3)
+        await Task.Run(async () =>
+        {
+            await Task.Delay(1000);
+            traceNode.Send("under Node C [3] Async, from 'possible' another thread");
+            await TTrace.FlushAsync();
+        });
+    else
+        traceNode.Send($"under Node C : [{counter}]").Show();
+}
+await TTrace.FlushAsync();
+
 
 public class MyClass
 { 

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Tracetool.DotNet.Api" Version="13.0.1" />
+    <ProjectReference Include="..\..\Libraries\Lib_Standard_20\Lib_Standard_20.csproj" />
   </ItemGroup>
 
 </Project>
