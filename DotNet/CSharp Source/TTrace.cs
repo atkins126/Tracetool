@@ -32,19 +32,14 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 
-#if !NETSTANDARD1_6  
 using System.Runtime.InteropServices;
 using System.Net.WebSockets;
-#endif
 
 #if NETFULL 
 using System.Configuration;
 using System.Diagnostics ;                // Process
 using Microsoft.Win32;                   // registry
-#endif
-
-#if NETSTANDARD1_6 || NETFULL  
-using System.Reflection;  // Type.GetTypeInfo (NETSTANDARD1_6) , Type.Assembly (NETFULL). Not needed in NETSTANDARD2
+using System.Reflection;  // Type.Assembly (NETFULL). Not needed in NETSTANDARD2
 #endif
 
 using System.Threading;                  // thead pool, ResetEvent
@@ -106,18 +101,9 @@ namespace TraceTool
 
         private static TextWriter _writerOut;
 
-#if !NETSTANDARD1_6
         private static readonly CancellationTokenSource CancellationToken;
         private static ClientWebSocket _webSocketClient;     // Web socket
-#endif
-
-
-#if NETSTANDARD1_6
-        // no udp for NETSTANDARD1_6. You need to switch to NETSTANDARD2_0
-        //private static UdpClient _udpSocket;
-#else //full framework or standard2
         private static UdpClient _udpSocket;
-#endif
 
         // ReSharper disable NotAccessedField.Global
         // ReSharper disable RedundantDefaultMemberInitializer
@@ -148,9 +134,7 @@ namespace TraceTool
             // create the lock system and the thread
             DataReady = new AutoResetEvent(false);  // initial state false
             StopEvent = new ManualResetEvent(false);   // ask the thread to quit
-#if !NETSTANDARD1_6
             CancellationToken = new CancellationTokenSource();
-#endif
             //_traceThread = new Thread(SendThreadEntryPoint); //  new Thread(SendThreadEntryPoint);
             //// force the thread to be killed when all foreground thread are terminated.
             //_traceThread.IsBackground = true;  
@@ -166,7 +150,7 @@ namespace TraceTool
                 // ReSharper disable once JoinDeclarationAndInitializer
                 string configFile;
 
-#if NETSTANDARD1_6 || NETSTANDARD2_0
+#if NETSTANDARD2_0
                 Options.SendMode = SendMode.Socket;
                 Options.SocketHost = "127.0.0.1";
 
@@ -184,11 +168,7 @@ namespace TraceTool
                     return;
 
                 // 4) check the existence of tracetool.dll.TraceTool file
-#if NETSTANDARD1_6
-                configFile = typeof(TTrace).GetTypeInfo().Assembly.ToString();
-#else // NETFULL or NETSTANDARD1_6
                 configFile = typeof(TTrace).Module.ToString();
-#endif
                 configFile += ".TraceTool";
                 if (GetConfigFomFile(configFile))
                     return;
@@ -260,34 +240,7 @@ namespace TraceTool
                 FileStream fileStream = new FileStream(fileName, FileMode.Open);
                 doc.Load(fileStream);
 
-#if NETSTANDARD1_6
-                XmlNode config = null;
-                // Check if the TraceTool node is root or under configuration node
-                foreach (XmlNode node in doc.ChildNodes)
-                {
-                   string tagName = node.Name.ToLower();
-                   if (string.Compare(tagName, "tracetool", StringComparison.Ordinal) == 0)
-                   {
-                       config = node;
-                       break;
-                   }
-                   if (string.Compare(tagName, "configuration", StringComparison.Ordinal) == 0)
-                   {
-                      foreach (XmlNode subNode in node)
-                      {
-                         string tagName2 = subNode.Name.ToLower();
-                         if (string.Compare(tagName2, "tracetool", StringComparison.Ordinal) == 0)
-                         {
-                             config = subNode;
-                             break;
-                         }
-                      }
-                      break;
-                   }
-                }
-#else // SelectSingleNode :  all dot net framework 
                 XmlNode config = doc.SelectSingleNode("//TraceTool");
-#endif
                 if (config == null)
                 {
                     //Debug.Send (fileName + " file exist but with NO TraceTool section") ;
@@ -560,7 +513,7 @@ namespace TraceTool
         {
             StopEvent.Set();
             DataReady.Set();
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0  // Dot net core don't support Thread.Abort
+#if !NETSTANDARD2_0  // Dot net core don't support Thread.Abort
             _traceThread.Abort();
 #endif
             _traceThread = null;
@@ -635,13 +588,10 @@ namespace TraceTool
         {
             if (Options.SendMode == SendMode.Socket && _socket != null)
             {
-#if !NETSTANDARD1_6
                 _socket.Close();
-#endif
                 _socket = null;
             }
 
-#if !NETSTANDARD1_6
             if (Options.SendMode == SendMode.WebSocket && _webSocketClient != null && _webSocketClient.State == WebSocketState.Open)
             {
                 var timeout = new CancellationTokenSource(10000); // MS, 10 sec
@@ -659,7 +609,6 @@ namespace TraceTool
                 //cancellationToken ?
 
             }
-#endif
         }
 
         //------------------------------------------------------------------------------
@@ -943,11 +892,6 @@ namespace TraceTool
 
                         try
                         {
-#if NETSTANDARD1_6  // only socket
-                            if (Options.SendMode == SendMode.Socket)
-                                SendToSocketSync(sb);
-#else
-
                             // Sync mode (thread)
 
                             if (Options.SendMode == SendMode.WinMsg)
@@ -963,7 +907,6 @@ namespace TraceTool
                                 SendToWebSocketSync(sb);
                             }  // else no transport
                             // else no transport
-#endif
                         }
                         catch (Exception ex)
                         {
@@ -1085,7 +1028,6 @@ namespace TraceTool
                         try
                         {
                             // Async mode 
-#if !NETSTANDARD1_6 
 
                             if (Options.SendMode == SendMode.WinMsg)
                             {
@@ -1097,7 +1039,6 @@ namespace TraceTool
                                 //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToWebSocketAsync done");                  
                             }
                             else 
-#endif
                             if (Options.SendMode == SendMode.Socket)
                             {
                                 await SendToSocketAsync(sb);
@@ -1134,7 +1075,6 @@ namespace TraceTool
                 _socket = null; // auto close connection
 
             // Also done in CloseSocket
-#if !NETSTANDARD1_6
             if (Options.SendMode == SendMode.WebSocket && _webSocketClient != null)
             {
                 //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} Closing websocket");
@@ -1150,11 +1090,9 @@ namespace TraceTool
                 _webSocketClient = null; // auto close connection
                 //cancellationToken ?
             }
-#endif
         }  // async task function
 
         //------------------------------------------------------------------------------
-#if !NETSTANDARD1_6
         internal static void SendToWebSocketSync(StringBuilder message)
         {
             if (_isSocketError)
@@ -1284,7 +1222,6 @@ namespace TraceTool
                 _lastError = ex.Message;         // for debug purpose
             }
         }
-#endif
 
         //------------------------------------------------------------------------------
         /// flush remaining traces to the viewer
@@ -1335,8 +1272,6 @@ namespace TraceTool
             FlushList.Remove(key2);
         }
 
-#if !NETSTANDARD1_6
-
         internal static IntPtr VarPtr(object e)
         {
             GCHandle gC = GCHandle.Alloc(e, GCHandleType.Pinned);
@@ -1359,7 +1294,6 @@ namespace TraceTool
                 Helper.SendMessage(debugWin, TraceConst.WM_COPYDATA, IntPtr.Zero, VarPtr(cds));
             }
         }
-#endif
 
         //------------------------------------------------------------------------------
         // Prepare the byte[] _buffToSend
@@ -1454,7 +1388,6 @@ namespace TraceTool
             if (Options.SocketPort == 0)
                 Options.SocketPort = 8090;
 
-#if !NETSTANDARD1_6
             if (Options.SocketUdp)
             {
                 if (_udpSocket == null)
@@ -1477,7 +1410,6 @@ namespace TraceTool
                 }
                 return;
             }
-#endif
             // the socket must be connected in the sender thread !!! not here..  to do
             if (_socket == null)
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -1485,14 +1417,7 @@ namespace TraceTool
             if (_socket.Connected == false)
             {
                 // resolve address
-
-#if NETSTANDARD1_6
-                Task<IPHostEntry> hostEntryTask = Dns.GetHostEntryAsync(Options.SocketHost);  
-                Task.WaitAll(hostEntryTask) ;
-                IPHostEntry hostEntry =  hostEntryTask.Result ;
-#else // NETFULL or standard 2
                 IPHostEntry hostEntry = Dns.GetHostEntry(Options.SocketHost);
-#endif
                 // Don't get the first address. It's perhaps a IPv6 address.
                 // Thanks BCheng for the IPV4 fix.
                 IPEndPoint endPoint = null;
@@ -1565,7 +1490,6 @@ namespace TraceTool
 
             // Synchrone communication
 
-#if !NETSTANDARD1_6
             if (Options.SocketUdp)
             {
                 if (_udpSocket == null)
@@ -1588,7 +1512,6 @@ namespace TraceTool
                 }
                 return;
             }
-#endif
 
             // the socket must be connected in the sender thread !!! not here..  to do
             if (_socket == null)
@@ -1598,13 +1521,7 @@ namespace TraceTool
             {
                 // resolve address
 
-#if NETSTANDARD1_6
-                Task<IPHostEntry> hostEntryTask = Dns.GetHostEntryAsync(Options.SocketHost);  
-                Task.WaitAll(hostEntryTask) ;
-                IPHostEntry hostEntry =  hostEntryTask.Result ;
-#else // NETFULL or standard 2
                 IPHostEntry hostEntry = Dns.GetHostEntry(Options.SocketHost);
-#endif
                 // Don't get the first address. It's perhaps a IPv6 address.
                 // Thanks BCheng for the IPV4 fix.
                 IPEndPoint endPoint = null;
@@ -1649,7 +1566,6 @@ namespace TraceTool
         } // SendToSocketSync function
 
         //------------------------------------------------------------------------------
-
         internal static InternalWinTrace GetInternalTraceForm(string traceWinId, bool doCreate)
         {
             if (string.IsNullOrEmpty(traceWinId) || traceWinId == "_")
@@ -1924,9 +1840,7 @@ namespace TraceTool
             xml.Append("\n</Data>");
             Byte[] info = new UTF8Encoding(true).GetBytes(xml.ToString());
             f.Write(info, 0, info.Length);
-#if !NETSTANDARD1_6
             f.Close();
-#endif
 
             // limit file size
             if (traceForm.MaxLines != -1)
@@ -1943,7 +1857,6 @@ namespace TraceTool
         //----------------------------------------------------------------------
         // Assembly private function
 
-#if !NETSTANDARD1_6
         internal static int StartTDebug()
         {
             var winHandle = Helper.FindWindow("TFormReceiver", "FormReceiver");
@@ -1979,7 +1892,6 @@ namespace TraceTool
 #endif
             return winHandle;
         }
-#endif
         //----------------------------------------------------------------------
 
         // Formats a DateTime in the format "HH:mm:ss:SSS" for example, "15:49:37:459".
@@ -2138,7 +2050,7 @@ namespace TraceTool
         /// WinMsg (for desktop applications only), Socket (ASP , services, or remote computer), WebSocket (webAssembly), None (No messages are send, use local log)
         /// </summary>
         public SendMode SendMode =
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
             SendMode.WinMsg ;   // default for windows framework : windows messages
 #else
             SendMode.Socket;    // default for .Net standard : socket
@@ -2222,8 +2134,6 @@ namespace TraceTool
         /// </summary>
 #if NETFULL
         public string Framework => "DotNet framework 4";
-#elif NETSTANDARD1_6
-        public string Framework => "DotNet standard 1.6";
 #elif NETSTANDARD2_0
         public string Framework => "DotNet standard 2.0";
 #endif
@@ -2282,7 +2192,7 @@ namespace TraceTool
     //------------------------------------------------------------------------------
     //------------------------------------------------------------------------------
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
 
     /// <summary>
     /// configure tracetool using app.config
@@ -2317,12 +2227,11 @@ namespace TraceTool
     // ReSharper disable once InconsistentNaming
     internal class TTraceWriter : TextWriter
     {
-#if !NETSTANDARD1_6
         public override void Close()
         {
             Dispose(true);
         }
-#endif
+
         public override void WriteLine(string value)
         {
             TTrace.Debug.Send(value);

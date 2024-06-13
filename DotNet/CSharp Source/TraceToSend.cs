@@ -352,7 +352,7 @@ namespace TraceTool
 
         //------------------------------------------------------------------------------
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
 
         /// <summary>
         /// Send a bitmap
