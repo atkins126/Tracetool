@@ -57,12 +57,12 @@ Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip")
   * [Event Log Traces](#Event-Log-Traces "Event Log Traces")
   * [Save/Load to XML File](#Save-Load-to-XML-File "Save/Load to XML File")
 
-# What is TraceTool ?
+## What is TraceTool ?
 
 * A viewer that displays multiple kinds of sources (from the tracetool framework, log file, event log, or OutputDebugString)
 * A native language client framework (Dotnet, Java, Javasvript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
 
-# Viewer Installation
+## Viewer Installation
 
 Download the [Viewer](/GithubFiles/Viewer32.zip "Viewer32.zip") and unpack the file into a folder of your chose (windows only).
 
@@ -71,7 +71,7 @@ If you plan to use the "windows message" mode, you must start once the viewer to
 When the viewer is started, he appears on the tray icon. Closing the viewer just reduce it to systray. \
 Hit ctrl - Alt - X to close it.
 
-# Client Api
+## Client Api
 
 You can chose how to send traces to the viewer.
 
@@ -330,7 +330,7 @@ var TTrace = new ActiveXObject("TraceToolCom.XTrace");
 TTrace.Debug.Send("hello from jScript") ;
 ```
 
-# Samples
+## Samples
 
 For facility, all samples uses the DOTNET syntax.
 Note that not all client framework support all functionalities like sending image to viewer with Python
