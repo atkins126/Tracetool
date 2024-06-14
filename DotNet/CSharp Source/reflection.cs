@@ -117,13 +117,13 @@ namespace TraceTool
                 if (type.IsPointer)
                     return Type2ShortString(type.GetElementType()) + "*";       // recursive
 
-                string name;
-                if (TypeNames.ContainsKey(type))
-                    name = TypeNames[type];
-                else if (type.FullName != null)
-                    name = type.FullName;
-                else
-                    name = type.Name;
+                if (!TypeNames.TryGetValue(type, out var name))
+                {
+                    if (type.FullName != null)
+                        name = type.FullName;
+                    else
+                        name = type.Name;
+                }
 
                 // remove unneeded assembly information [version,culture,mscorlib,...]
                 int pos = name.IndexOf('[');
@@ -369,7 +369,7 @@ namespace TraceTool
         {
             try
             {
-                // get the "get" method of the property, if don't exist, take the "set" one
+                // get the "get" method of the property, if 'Get' don't exist, take the "set" one
                 MethodInfo getMethod = field.GetGetMethod(true);
                 MethodInfo setMethod = field.GetSetMethod(true);
                 MethodInfo oneMethod;
@@ -472,17 +472,10 @@ namespace TraceTool
 
                 // get the method name
 
-                string methodName;
-                if (OperatorsNames.ContainsKey(method.Name))
-                {
-                    methodName = OperatorsNames[method.Name];
+                if (OperatorsNames.TryGetValue(method.Name, out var methodName))
                     result = true;
-                }
                 else
-                {
-                    methodName = method.Name;
-                    //result = false;
-                }
+                    methodName = method.Name; //result = false;
 
                 //Console.WriteLine("\tIs this a generic method definition? {0}", method.IsGenericMethodDefinition);
                 //Console.WriteLine("\tIs it a generic method? {0}", method.IsGenericMethod);
@@ -594,7 +587,7 @@ namespace TraceTool
                             strModifier += "abstract ";              // only for type, no instance possible
                         else
                             strModifier += "virtual ";               // virtual fct not redefined
-                    else                                             // redefined in sub class
+                    else                                             // redefined in subclass
                         if (oneMethod.IsAbstract)
                         strModifier += "abstract override";          // abstract fct redefined. Not tested
                     else
@@ -612,7 +605,7 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /// <summary>
-        /// return the parameters name and type of a method
+        /// return the parameters name and type of method
         /// </summary>
         // ReSharper disable once MemberCanBePrivate.Global
         public static string MethodParams2String(MethodBase method) // (ParameterInfo[] parameters)
@@ -657,7 +650,7 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /// <summary>
-        /// return the parameters type of a method , useful to retrieve XML documentation for a method
+        /// return the parameters type of method , useful to retrieve XML documentation for a method
         /// parenthesis are included only if parameters exists
         /// </summary>
         public static string MethodParamsType2String(MethodBase method) // (ParameterInfo[] parameters)
@@ -690,7 +683,7 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /// <summary>
-        /// return the parameters type of a property , useful to retrieve XML documentation for a property
+        /// return the parameters type of property , useful to retrieve XML documentation for a property
         /// parenthesis are included only if parameters exists
         /// </summary>
         public static string PropertyParamsType2String(PropertyInfo prop)

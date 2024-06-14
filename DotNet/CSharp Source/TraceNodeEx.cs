@@ -76,7 +76,7 @@ namespace TraceTool
 
         //----------------------------------------------------------------------
         /// <summary>
-        /// create a Node with an unique ID
+        /// create a Node with an unique Id
         /// </summary>
 
         public TraceNodeEx()
@@ -91,7 +91,7 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /// <summary>
-        /// create a Node with an unique ID (true)
+        /// create a Node with unique Id (true)
         /// </summary>
         /// <param name="parentNode">The parent node where to place that trace.
         /// The IconIndex and the enabled properties are also recopied
@@ -446,8 +446,8 @@ namespace TraceTool
                     // Custom attributes.
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-                        Attribute[] custAttribList = Attribute.GetCustomAttributes(oType, true);  // true : inherit
-                        foreach (Attribute attr in custAttribList)
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(oType, true);  // true : inherit
+                        foreach (Attribute attr in customAttribList)
                             classGroup.Add("Custom attribute", attr.ToString());
                     }
                 }
@@ -538,10 +538,10 @@ namespace TraceTool
         */
 
         // to do : move that function to reflection.cs file and return a string list
-        // to do : if mi is not a member of the xml file, open the appropriate one. All XPathNavigator must be stored into an array
+        // to do : if mInfo is not a member of the xml file, open the appropriate one. All XPathNavigator must be stored into an array
         // to do : XML iteration must be changed to use sub tags (like <summary> <para> and <see>)
 
-        internal void AddDocumentation(Object documentation, TMemberNode group, Type oType, MemberInfo mi)
+        internal void AddDocumentation(object documentation, TMemberNode group, Type oType, MemberInfo mInfo)
         {
             try
             {
@@ -553,38 +553,38 @@ namespace TraceTool
                     string typeName = oType.FullName.Replace("+", ".");
 
                     string xpathString = "";
-                    if (mi == null)
+                    if (mInfo == null)
                     {
                         xpathString = "//member[@name='T:" + typeName + "']";
                     }
                     else
                     {
-                        switch (mi.MemberType)
+                        switch (mInfo.MemberType)
                         {
                             case MemberTypes.Constructor:
                                 xpathString = "//member[@name='M:" + typeName + ".#ctor" +
-                                              ReflectionHelper.MethodParamsType2String((MethodBase)mi) +
+                                              ReflectionHelper.MethodParamsType2String((MethodBase)mInfo) +
                                               "']";
                                 break;
                             case MemberTypes.Method:
-                                xpathString = "//member[@name='M:" + typeName + "." + mi.Name +
-                                              ReflectionHelper.MethodParamsType2String((MethodBase)mi);
+                                xpathString = "//member[@name='M:" + typeName + "." + mInfo.Name +
+                                              ReflectionHelper.MethodParamsType2String((MethodBase)mInfo);
 
-                                if (mi.Name == "op_Implicit" || mi.Name == "op_Explicit")
-                                    xpathString += "~" + ((MethodInfo)mi).ReturnType.FullName;
+                                if (mInfo.Name == "op_Implicit" || mInfo.Name == "op_Explicit")
+                                    xpathString += "~" + ((MethodInfo)mInfo).ReturnType.FullName;
 
                                 xpathString += "']";
                                 break;
                             case MemberTypes.Property:
-                                xpathString = "//member[@name='P:" + typeName + "." + mi.Name +
-                                              ReflectionHelper.PropertyParamsType2String((PropertyInfo)mi) +
+                                xpathString = "//member[@name='P:" + typeName + "." + mInfo.Name +
+                                              ReflectionHelper.PropertyParamsType2String((PropertyInfo)mInfo) +
                                               "']";
                                 break;
                             case MemberTypes.Field:
-                                xpathString = "//member[@name='F:" + typeName + "." + mi.Name + "']";
+                                xpathString = "//member[@name='F:" + typeName + "." + mInfo.Name + "']";
                                 break;
                             case MemberTypes.Event:
-                                xpathString = "//member[@name='E:" + typeName + "." + mi.Name + "']";
+                                xpathString = "//member[@name='E:" + typeName + "." + mInfo.Name + "']";
                                 break;
                         }
                     }
@@ -606,9 +606,9 @@ namespace TraceTool
                         {
                             string s2 = s.Trim("\r ".ToCharArray());
                             if (s2.Length != 0)
-                                if (mi == null)
+                                if (mInfo == null)
                                     group.Add("Documentation", s2);
-                                else // putting Documentation on the column 3 is to far, use space indentation in place.
+                                else // putting Documentation on the column 3 is too far, use space indentation in place.
                                     group.Add("Documentation", "            " + s2);
                         }
                     }
@@ -630,7 +630,7 @@ namespace TraceTool
                 if (attributeList.Length > 0)
                     foreach (Attribute attribute in attributeList)
                     {
-                        // putting attribute name on the column 3 is to far, use space indentation in place.
+                        // putting attribute name on the column 3 is too far, use space indentation in place.
                         memberNode.Add("Custom Attribute", "            " + attribute);
                     }
             }
@@ -667,7 +667,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="objToSend">Object to display</param>
         /// <param name="sendPrivate">Display private fields</param>
-        /// <param name="maxLevel">Number of sub component to display in tree</param>
+        /// <param name="maxLevel">Number of subcomponent to display in tree</param>
         public void AddValue(object objToSend, bool sendPrivate, int maxLevel)
         {
             string strModifier = "";
@@ -699,7 +699,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="objToSend">Object to display</param>
         /// <param name="sendPrivate">Display private fields</param>
-        /// <param name="maxLevel">Number of sub component to display in tree</param>
+        /// <param name="maxLevel">Number of subcomponent to display in tree</param>
         /// <param name="objTitle">Title to display for the object</param>
         public void AddValue(object objToSend, bool sendPrivate, int maxLevel, string objTitle)
         {
@@ -1212,12 +1212,12 @@ namespace TraceTool
                         // return ALL interfaces, not only interfaces for the current type
                         Type[] typeInterfaceList = oType.GetInterfaces();
 
-                        foreach (Type intf in typeInterfaceList)
+                        foreach (Type interF in typeInterfaceList)
                         {
                             if (interfacesNames == "")
-                                interfacesNames = intf.Name;
+                                interfacesNames = interF.Name;
                             else
-                                interfacesNames += "," + intf.Name;
+                                interfacesNames += "," + interF.Name;
                         }
 
                         if (basesGroup == null)
@@ -1257,7 +1257,7 @@ namespace TraceTool
 
                 foreach (var subType in nestedTypes)
                 {
-                    // don't check (yet) if the subtype is non public...
+                    // don't check (yet) if the subtype is non-public...
 
                     string strModifier = "", strName = "";
                     ReflectionHelper.Type2String(subType, ref strModifier, ref strName);
@@ -1344,8 +1344,8 @@ namespace TraceTool
 
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
 
@@ -1433,7 +1433,7 @@ namespace TraceTool
 
                     if ((flags & TraceDisplayFlags.ShowInheritedMembers) != TraceDisplayFlags.ShowInheritedMembers
                         && (member.DeclaringType != member.ReflectedType))
-                       continue;
+                        continue;
 
                     // Try to retrieve instance property value
                     object oValue;
@@ -1480,8 +1480,8 @@ namespace TraceTool
                     AddDocumentation(documentationNav, memberNode, oType, member);
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1528,15 +1528,15 @@ namespace TraceTool
                         Members.Add(constructorGroup);
                     }
 
-                    TMemberNode memberNode = new TMemberNode(memberModifier, memberName); // ci[iprop].ToString()) ;
+                    TMemberNode memberNode = new TMemberNode(memberModifier, memberName); 
                     constructorGroup.Add(memberNode);
 
                     // add doc and custom attribute
                     AddDocumentation(documentationNav, memberNode, oType, member);
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1617,7 +1617,7 @@ namespace TraceTool
                             groupToUse = methodsGroup;
                         }
 
-                        TMemberNode memberNode = new TMemberNode(memberModifier, memberName);  //  mi[iprop].ToString()
+                        TMemberNode memberNode = new TMemberNode(memberModifier, memberName);  
                         groupToUse.Add(memberNode);
 
                         // add doc and custom attribute
@@ -1625,8 +1625,8 @@ namespace TraceTool
 
                         if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                         {
-                            Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                            DisplayCustomAttribute(memberNode, customAttribs);
+                            Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                            DisplayCustomAttribute(memberNode, customAttribList);
                         }
                     }     // discard method used by properties
                 }        // for loop
@@ -1690,8 +1690,8 @@ namespace TraceTool
 
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1873,7 +1873,7 @@ namespace TraceTool
                 // 2) create a byte array from the stream
                 int sourceLength = (int)imgStream.Length;
                 byte[] sourceData = new byte[sourceLength];
-                imgStream.Read(sourceData, 0, sourceLength);
+                _ = imgStream.Read(sourceData, 0, sourceLength);
                 imgStream.Close();
 
                 // 3) encode (base 64) source array into another array
@@ -1924,7 +1924,7 @@ namespace TraceTool
                 // 2) create a byte array from the stream
                 int sourceLength = (int)imgStream.Length;
                 byte[] sourceData = new byte[sourceLength];
-                imgStream.Read(sourceData, 0, sourceLength);
+                _ = imgStream.Read(sourceData, 0, sourceLength);
                 imgStream.Close();
 
                 // 3) encode (base 64) source array into another array
@@ -1987,7 +1987,7 @@ namespace TraceTool
                     while ((byteDumped < count) && (d < 16) && (c < bytes.Length))
                     {
                         byte oneByte = bytes[c];
-                        hexaRepresentation.Append(((Int32)oneByte).ToString("X2")).Append(" ");
+                        hexaRepresentation.Append(((int)oneByte).ToString("X2")).Append(" ");
 
                         // only the zero cannot be copied to the stream
                         //if (OneByte == 0)
@@ -2002,7 +2002,7 @@ namespace TraceTool
                     dumpGroup.Add(beginLine.ToString("X6"), hexaRepresentation.ToString()); // , Str_representation.ToString());
                     //.SetFontDetail(1,false,false,-1,0,"Lucida console") ;
                 }
-                dumpGroup.Col2 = byteDumped.ToString() + " byte(s) dumped";
+                dumpGroup.Col2 = byteDumped + " byte(s) dumped";
             }
             catch (Exception e)
             {
@@ -2059,7 +2059,7 @@ namespace TraceTool
             TMemberNode fCurrentRow = tableMembers.Add("");
             Type oType = itemObject.GetType();
 
-            // set first col if give. First col title is set by caller.
+            // set first col if given. First col title is set by caller.
             if (firstColValue != null)
                 fCurrentRow.Col1 = firstColValue;
 
@@ -2220,7 +2220,7 @@ namespace TraceTool
                 else if (list is IDictionary)
                 {
                     // Special case for IDictionary : display the Key on first column
-                    // IDictionary must be check before IEnumerable because IDictionary inherit from IEnumerable
+                    // IDictionary must be checked before IEnumerable because IDictionary inherit from IEnumerable
                     tableMembers.Col1 = "Key"; // set first col title
                     foreach (DictionaryEntry itemDic in (IDictionary)list)
                     {
@@ -2417,7 +2417,7 @@ namespace TraceTool
                     }
                     else
                     {
-                        tempStr.Append(String.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, fontDetail.ColId));
+                        tempStr.Append(string.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, fontDetail.ColId));
 
                         if (fontDetail.Bold)
                             tempStr.Append("1");
@@ -2428,7 +2428,7 @@ namespace TraceTool
                             tempStr.Append("1");
                         else
                             tempStr.Append("0");
-                        tempStr.Append(String.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
+                        tempStr.Append(string.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
                         commandList.Add(tempStr.ToString());
                     }
                 }

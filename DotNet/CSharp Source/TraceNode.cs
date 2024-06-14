@@ -39,14 +39,14 @@ namespace TraceTool
 
         /// <summary>
         /// Constructor. Use TTrace or TraceNodeEx class as entry point
-        /// Create a Node with an unique ID (true)
-        /// You can also recreated an already send node if you still have the id
+        /// Create a Node with unique Id (true)
+        /// You can also recreate an already send node if you still have the id
         /// </summary>
         /// <param name="parentNode">The parent node where to place that trace.
         /// The IconIndex and the enabled properties are also recopied
         /// Can be null : the root tree become the parent node, enabled is true and the default icon is used
         /// </param>
-        /// <param name="generateUniqueId">When true, a unique ID (a guid) is generated for the trace.
+        /// <param name="generateUniqueId">When true, a unique Id (a guid) is generated for the trace.
         /// </param>
 
         public TraceNode(TraceNode parentNode, bool generateUniqueId)  // TraceToSend base class don't have constructor
@@ -317,7 +317,7 @@ namespace TraceTool
 
             StringBuilder tempStr = new StringBuilder();
 
-            tempStr.Append(String.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, colId));
+            tempStr.Append(string.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, colId));
 
 
             if (bold)
@@ -341,7 +341,7 @@ namespace TraceTool
                 color = (b << 0x10) + (g << 8) + r;
             }
 
-            tempStr.Append(String.Format("{0,11}{1,11}", color, size)).Append(fontName);
+            tempStr.Append(string.Format("{0,11}{1,11}", color, size)).Append(fontName);
 
             commandList.Add(tempStr.ToString());
 
@@ -436,7 +436,7 @@ namespace TraceTool
             List<string> commandList = new List<string>();
             Helper.AddCommand(commandList, TraceConst.CST_USE_NODE, Id);                  // param : guid
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             result.AddStackTrace(1);
             result.Members.AddToStringList(commandList); // convert all groups and nested items/group to strings
 

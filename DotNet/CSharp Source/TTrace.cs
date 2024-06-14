@@ -12,22 +12,6 @@
 // Download :  http://sourceforge.net/projects/tracetool/
 // See License.txt for license information
 
-// History :
-// 12.7  : 2015 10 06 : Some method no more raise exception.
-// 12.7   : 2015 10 06 : Fix AssemblyDocumentationFileName exception
-// 12.7   : 2015 10 07 : Added default options in TTraceOptions (from TraceDisplayFlags)
-// 12.7   : 2015 10 26 : Added SendStack with default level
-// 12.7   : 2015 11 08 : TraceNode constructor is public
-// 12.7   : 2015 11 08 : TraceNode.AppendStack()
-// 12.7   : 2015 11 08 : TraceToSend.Indent() and TraceToSend.EnterMethod() returns a TraceNode
-// 12.8   : 2016 07 26 : Fix stack trace with Lambda
-// 12.8   : 2016 07 28 : Fix addDependencyPropertiesValues, DisplayDependencyProperties
-// 12.8.5 : 2016 10 05 : stack trace display the class of the method. Modifier is removed (public static,...)
-// 12.9   : 2017 11 03 : Add conditional compilation for Dot Net Standard (1.6)
-// 12.9   : 2017 11 06 : Add conditional compilation for Dot Net Standard (2.0)
-// 13.0   : 2020 04 05 : Add WebSocket mode, add Async mode, remove pocket pc, Silverlight, upgrade dot net framework 4.7.1
-// 13.0.1 : 2020 05 17 : hotfix flush hang 
-
 using System.Text;
 using System;
 using System.Collections.Generic;
@@ -71,7 +55,7 @@ namespace TraceTool
     /// <summary>
     /// TTrace is the entry point for all traces.
     /// TTrace give 3 'TraceNode' doors : Warning , Error and Debug.
-    /// Theses 3 doors are displayed with a special icon (all of them have the 'enabled' property set to true.
+    /// Theses 3 doors are displayed with a special icon (all of them have the 'enabled' property set to true).
     /// That class is fully static.
     /// </summary>
 
@@ -89,6 +73,7 @@ namespace TraceTool
         private static readonly List<InternalWinTrace> FormTraceList;
         private static Thread _traceThread;
         private static List<List<string>> _msgQueue;         // store all messages to send
+        private static readonly object MessageQueueLocker = new object(); // used to lock the _msgQueue while adding or swapping with worker queue
         private static long _errorTime;
         private static string _lastError = "";
         private static WinTrace _winTrace;
@@ -124,7 +109,7 @@ namespace TraceTool
         static TTrace()
         {
             //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} TTrace static init");
-            FlushList = new Dictionary<String, Object>();              // TaskCompletionSource<string> flush list
+            FlushList = new Dictionary<string, object>();              // TaskCompletionSource<string> flush list
             FormTraceList = new List<InternalWinTrace>();
             DefaultWinTrace = new InternalWinTrace();       // main InternalWinTrace. Id is empty
             FormTraceList.Add(DefaultWinTrace);
@@ -266,11 +251,11 @@ namespace TraceTool
 
             try
             {
-                // Since XML is case sensitive and is then source of error, it's better to detect keyword
-                // without case sensitive.
+                // Since XML is case-sensitive and is then source of error, it's better to detect keyword
+                // without case-sensitive.
                 foreach (XmlNode node in config.ChildNodes)
                 {
-                    // detect 'param' tag not case sensitive
+                    // detect 'param' tag not case-sensitive
                     string tagName = node.Name.ToLower();
                     // ReSharper disable StringCompareToIsCultureSpecific
                     if (tagName.CompareTo("param") == 0)
@@ -323,7 +308,7 @@ namespace TraceTool
         {
             foreach (XmlNode node in xmlTraceNode.ChildNodes)
             {
-                // detect 'param' tag without case sensitive
+                // detect 'param' tag without case-sensitive
                 string tagName = node.Name.ToLower();
                 // ReSharper disable StringCompareToIsCultureSpecific
                 if (tagName.CompareTo("param") == 0)
@@ -342,7 +327,7 @@ namespace TraceTool
                     {       // int IconIndex
                         try
                         {
-                            trace.IconIndex = Int32.Parse(paramValue);
+                            trace.IconIndex = int.Parse(paramValue);
                         }
                         catch
                         {
@@ -359,6 +344,7 @@ namespace TraceTool
         internal static void InitOptions(string paramName, string paramValue)
         {
             // ReSharper disable StringCompareToIsCultureSpecific
+            // ReSharper disable StringLiteralTypo
             if (paramName.CompareTo("sendmode") == 0)
             {                // SendMode
                 if (paramValue.ToLower().CompareTo("socket") == 0)
@@ -384,7 +370,7 @@ namespace TraceTool
             {       // int SocketPort
                 try
                 {
-                    Options.SocketPort = Int32.Parse(paramValue);
+                    Options.SocketPort = int.Parse(paramValue);
                 }
                 catch
                 {
@@ -395,7 +381,7 @@ namespace TraceTool
             {       // int ObjectTreeDepth
                 try
                 {
-                    Options.ObjectTreeDepth = Int32.Parse(paramValue);
+                    Options.ObjectTreeDepth = int.Parse(paramValue);
                 }
                 catch
                 {
@@ -493,6 +479,7 @@ namespace TraceTool
                 else if (paramValue.ToLower().CompareTo("false") == 0)
                     Options.SendThreadId = false;
             }
+            // ReSharper restore StringLiteralTypo
             // ReSharper restore StringCompareToIsCultureSpecific
         }
 
@@ -536,7 +523,7 @@ namespace TraceTool
         /// Set the global search criteria. You must call TTrace.Wintrace.FindNext to position to the next or previous matching node
         /// </summary>
         /// <param name="text">Text to search</param>
-        /// <param name="sensitive">Search is case sensitive</param>
+        /// <param name="sensitive">Search is case-sensitive</param>
         /// <param name="wholeWord">match only whole word</param>
         /// <param name="highlight">Highlight results</param>
         /// <param name="searchInAllPages">call to FindNext will search also in other traces windows if true</param>
@@ -683,7 +670,7 @@ namespace TraceTool
         //------------------------------------------------------------------------------
 
         /// <summary>
-        /// TextWriter output. For Linq to SQL for example : NORTHWNDDataContext.Log = TTrace.Out 
+        /// TextWriter output. 
         /// </summary>
 
         public static TextWriter Out
@@ -713,28 +700,28 @@ namespace TraceTool
             if (Options.SendThreadId)
             {
                 if (threadName == null)
-                    commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, Helper.GetCurrentThreadId()));
+                    commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, Helper.GetCurrentThreadId()));
                 else
-                    commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, threadName));
+                    commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, threadName));
             }
 
             // add current time. TTrace.FormatDate is faster than  DateTime.ToString("HH:mm:ss:fff")
             if (dateTime == null)
-                commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, FormatDate(DateTime.Now))); // DateTime.Now.ToString("HH:mm:ss:fff") ));
+                commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, FormatDate(DateTime.Now))); // DateTime.Now.ToString("HH:mm:ss:fff") ));
             else
-                commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, dateTime));
+                commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, dateTime));
 
             // add process name
             if (Options.SendProcessName)
             {
-                commandList.Insert(0, String.Format("{0,5}{1}",
+                commandList.Insert(0, string.Format("{0,5}{1}",
                    TraceConst.CST_PROCESS_NAME,
                    Helper.GetCurrentProcessName()));
             }
 
             // CST_USE_TREE MUST be inserted at the first position
             if (!string.IsNullOrEmpty(winTraceId))
-                commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_USE_TREE, winTraceId));
+                commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_USE_TREE, winTraceId));
 
             SendToViewer(commandList);
         }
@@ -746,22 +733,21 @@ namespace TraceTool
         {
             // insert thread id
             if (Options.SendThreadId)
-                commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, Helper.GetCurrentThreadId()));
+                commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_THREAD_NAME, Helper.GetCurrentThreadId()));
 
             // add current time. TTrace.FormatDate is faster than  DateTime.ToString("HH:mm:ss:fff")
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, FormatDate(DateTime.Now))); // FormatDate will add date if necessary
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_MESSAGE_TIME, FormatDate(DateTime.Now))); // FormatDate will add date if necessary
 
             // add process name
             if (Options.SendProcessName)
             {
-                commandList.Insert(0, String.Format("{0,5}{1}",
+                commandList.Insert(0, string.Format("{0,5}{1}",
                    TraceConst.CST_PROCESS_NAME,
                    Helper.GetCurrentProcessName()));
             }
 
             // CST_USE_TREE MUST be inserted at the first position
-            //if (winWatch != null && winWatch.Id != null && winWatch.Id != "")
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_WINWATCH_ID, winWatchId));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_WINWATCH_ID, winWatchId));
 
             SendToViewer(commandList);
         }
@@ -773,9 +759,8 @@ namespace TraceTool
         {
             if (Options.UseWorkerThread)
             {
-                lock (DataReady)    // don't lock the MsgQue, because we can swap with workQueue
+                lock (MessageQueueLocker)    
                 {
-
                     if (_traceThread == null)
                     {
                         _traceThread = new Thread(SendToViewerThread)
@@ -786,7 +771,7 @@ namespace TraceTool
                     }
                     _msgQueue.Add(commandList);
                 }
-                // signal that data are ready to be send (SendToViewerThread)
+                // signal that data are ready to be sent (SendToViewerThread)
                 DataReady.Set();
             }
             else
@@ -816,10 +801,11 @@ namespace TraceTool
                 DataReady.WaitOne(1000);
 
                 // lock the message queue and swap _msgQueue with the empty local queue (workQueue)
-                lock (DataReady)
+                lock (MessageQueueLocker)
                 {
                     //swap = swap + "Begin at " + DateTime.Now.ToString("HH:mm:ss:fff") + " : " + MsgQueue.Count ;
 
+                    // ReSharper disable once SwapViaDeconstruction
                     var tempList = workQueue; // used for swap queue
                     workQueue = _msgQueue;    // MsgQueue is the list of message to send
                     _msgQueue = tempList;
@@ -828,7 +814,7 @@ namespace TraceTool
                 if (_isSocketError && Options.SendMode == SendMode.Socket)
                 {
                     long actTime = DateTime.Now.Ticks;
-                    if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                    if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                         _isSocketError = false;
                 }
 
@@ -838,7 +824,7 @@ namespace TraceTool
                     if (StopEvent.WaitOne(0))
                         break;
 
-                    // special case : the CST_FLUSH message is handled by the sender thread, not to be send
+                    // special case : the CST_FLUSH message is handled by the sender thread, not to be sent
                     if (commandList.Count > 0) // only one message
                     {
                         string msg = commandList[0];
@@ -928,7 +914,7 @@ namespace TraceTool
 
         private static async Task SendToViewerAsync(List<string> newCommandList)
         {
-            lock (DataReady)    // don't lock the MsgQue, because we can swap with workQueue
+            lock (MessageQueueLocker)    
             {
                 _msgQueue.Add(newCommandList);
                 if (_isAsyncRunning)
@@ -936,11 +922,9 @@ namespace TraceTool
                     //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} already in SendToViewerAsync. Message added to Queue {_msgQueue.Count}");                  
                     return; // already waiting connection or sending message
                 }
-                else
-                {
-                    //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} entering SendToViewerAsync");
-                    _isAsyncRunning = true;
-                }
+
+                //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} entering SendToViewerAsync");
+                _isAsyncRunning = true;
             }
 
             List<List<string>> workQueue = new List<List<string>>();
@@ -949,11 +933,12 @@ namespace TraceTool
                 if (StopEvent.WaitOne(0))   // remaining messages are lost 
                     break;
 
-                // lock the message queue and swap _msgQueue with the empty local queue (workQueue)
-                lock (DataReady)
+                // swap _msgQueue with the empty local queue (workQueue)
+                lock (MessageQueueLocker)
                 {
                     //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToViewerAsync : Sending {_msgQueue.Count} message");
 
+                    // ReSharper disable once SwapViaDeconstruction
                     var tempList = workQueue; // used for swap queue
                     workQueue = _msgQueue;    // MsgQueue is the list of message to send
                     _msgQueue = tempList;
@@ -962,7 +947,7 @@ namespace TraceTool
                 if (_isSocketError && Options.SendMode == SendMode.Socket)
                 {
                     long actTime = DateTime.Now.Ticks;
-                    if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                    if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                         _isSocketError = false;
                 }
 
@@ -972,7 +957,7 @@ namespace TraceTool
                     if (StopEvent.WaitOne(0))
                         break;
 
-                    // special case : the CST_FLUSH message is handled by the sender thread, not to be send
+                    // special case : the CST_FLUSH message is handled by the sender thread, not to be sent
                     if (commandList.Count > 0) // only one message
                     {
                         string msg = commandList[0];
@@ -1058,17 +1043,17 @@ namespace TraceTool
 
                 if (_msgQueue.Count == 0)
                 {
-                    lock (DataReady)   // not needed to use lock. Blazor Single thread
+                    lock (MessageQueueLocker)   // not needed to use lock. Blazor Single thread
                     {
                         //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} workQueue message are sent and _msgQueue empty, leaving SendToViewerAsync");
                         _isAsyncRunning = false;
                     }
                     return;
                 }
-                else
-                {
-                    //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} some messages waiting on main queue. continue the SendToViewerAsync loop");                    
-                }
+                //else
+                //{
+                //    //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} some messages waiting on main queue. continue the SendToViewerAsync loop");                    
+                //}
             }   // infinite loop 
 
             if (Options.SendMode == SendMode.Socket)
@@ -1099,7 +1084,7 @@ namespace TraceTool
             {
                 long actTime = DateTime.Now.Ticks;
 
-                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                     _isSocketError = false;
                 else
                     return;  // lose message
@@ -1147,7 +1132,7 @@ namespace TraceTool
 
                 _webSocketClient.SendAsync(sendBuffer, WebSocketMessageType.Binary, endOfMessage: true, cancellationToken: CancellationToken.Token)
                   .Wait();
-                //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToWebSocketAsync : is send");
+                //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToWebSocketAsync : is sent");
             }
             catch (Exception ex)
             {
@@ -1167,7 +1152,7 @@ namespace TraceTool
             {
                 long actTime = DateTime.Now.Ticks;
 
-                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                     _isSocketError = false;
                 else
                     return;  // lose message
@@ -1211,7 +1196,7 @@ namespace TraceTool
                 var sendBuffer = new ArraySegment<byte>(_buffToSend);
 
                 await _webSocketClient.SendAsync(sendBuffer, WebSocketMessageType.Binary, endOfMessage: true, cancellationToken: CancellationToken.Token);
-                //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToWebSocketAsync : is send");
+                //Console.WriteLine($"{DateTime.Now.ToString("hh:mm:ss.fff")} SendToWebSocketAsync : is sent");
             }
             catch (Exception ex)
             {
@@ -1233,7 +1218,7 @@ namespace TraceTool
 
             var flushEvent = new TaskCompletionSource<string>();
             FlushList.Add(key, flushEvent);
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_FLUSH, key));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_FLUSH, key));
 
             await SendToViewerAsync(commandList);
             await flushEvent.Task;
@@ -1258,14 +1243,14 @@ namespace TraceTool
             var flushEvent = new TaskCompletionSource<string>();
             FlushList.Add(key, flushEvent);
 
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_FLUSH, key));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_FLUSH, key));
 
-            lock (DataReady)    // don't lock the MsgQue, because we can swap with workQueue
+            lock (MessageQueueLocker)    
             {
                 _msgQueue.Add(commandList);
             }
 
-            // signal that data are ready to be send
+            // signal that data are ready to be sent
             DataReady.Set();
 
             var key2 = flushEvent.Task.Result;   // wait sync
@@ -1305,54 +1290,49 @@ namespace TraceTool
 
             int intMsgLen = message.Length * 2; // number of bytes in the message : message len * 2 (unicode)
 
-            int c = 0;
-            if (c == 0)  // force new version
-            {
-                // new version : 
-                // write the init byte (WMD = 123d) then message length (4 bytes) as a DWORD then the message
+            // new version : 
+            // write the init byte (WMD = 123d) then message length (4 bytes) as a DWORD then the message
 
-                _buffToSend = new byte[5 + intMsgLen]; // create the buffer : WMD byte + message len as a DWORD + message
-                                                       // write the WMD byte into the buffer
-                _buffToSend[0] = TraceConst.WMD;       // the WMD byte ensure the message is valid.
-                                                       // Append the intMsgLen into the buffer
-                byte[] byteArray = BitConverter.GetBytes(intMsgLen);
-                for (c = 0; c <= 3; c++)
-                    _buffToSend[c + 1] = byteArray[c];  // start at 1
-                c = 5;  // jump over WMD byte and DWORD
-            }
-            else
-            {
-                // old version :
-                // insert the length followed by the null terminator and the message.
-                // for compatibility issue, the length is coded as a AnsiString (single byte)
+            _buffToSend = new byte[5 + intMsgLen]; // create the buffer : WMD byte + message len as a DWORD + message
+                                                   // write the WMD byte into the buffer
+            _buffToSend[0] = TraceConst.WMD;       // the WMD byte ensure the message is valid.
+                                                   // Append the intMsgLen into the buffer
+            byte[] byteArray = BitConverter.GetBytes(intMsgLen);
+            int c;
+            for (c = 0; c <= 3; c++)
+                _buffToSend[c + 1] = byteArray[c];  // start at 1
+            c = 5;  // jump over WMD byte and DWORD
 
-                string strMsgLen = intMsgLen.ToString();
-                _buffToSend = new byte[strMsgLen.Length + 1 + intMsgLen]; // create the buffer : message len as an ASCII string + '\0' + message
+            //// old version :
+            //// insert the length followed by the null terminator and the message.
+            //// for compatibility issue, the length is coded as a AnsiString (single byte)
 
-                for (c = 0; c < strMsgLen.Length; c++)
-                {
-                    char charNum = strMsgLen[c];
-                    byte byteNum;
-                    switch (charNum)
-                    {
-                        case '0': byteNum = 48; break;
-                        case '1': byteNum = 49; break;
-                        case '2': byteNum = 50; break;
-                        case '3': byteNum = 51; break;
-                        case '4': byteNum = 52; break;
-                        case '5': byteNum = 53; break;
-                        case '6': byteNum = 54; break;
-                        case '7': byteNum = 55; break;
-                        case '8': byteNum = 56; break;
-                        case '9': byteNum = 57; break;
-                        default: byteNum = 32; break;// space
-                    }
-                    _buffToSend[c] = byteNum;
-                }
-                c = strMsgLen.Length;
-                _buffToSend[c] = 0;  // add null term
-                c++;
-            }
+            //string strMsgLen = intMsgLen.ToString();
+            //_buffToSend = new byte[strMsgLen.Length + 1 + intMsgLen]; // create the buffer : message len as an ASCII string + '\0' + message
+
+            //for (c = 0; c < strMsgLen.Length; c++)
+            //{
+            //    char charNum = strMsgLen[c];
+            //    byte byteNum;
+            //    switch (charNum)
+            //    {
+            //        case '0': byteNum = 48; break;
+            //        case '1': byteNum = 49; break;
+            //        case '2': byteNum = 50; break;
+            //        case '3': byteNum = 51; break;
+            //        case '4': byteNum = 52; break;
+            //        case '5': byteNum = 53; break;
+            //        case '6': byteNum = 54; break;
+            //        case '7': byteNum = 55; break;
+            //        case '8': byteNum = 56; break;
+            //        case '9': byteNum = 57; break;
+            //        default: byteNum = 32; break;// space
+            //    }
+            //    _buffToSend[c] = byteNum;
+            //}
+            //c = strMsgLen.Length;
+            //_buffToSend[c] = 0;  // add null term
+            //c++;
 
             char[] chars = message.ToString().ToCharArray();
             Encoding.Unicode.GetBytes(
@@ -1373,7 +1353,7 @@ namespace TraceTool
             {
                 long actTime = DateTime.Now.Ticks;
 
-                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                     _isSocketError = false;
                 else
                     return;  // lose message
@@ -1394,11 +1374,11 @@ namespace TraceTool
                     _udpSocket = new UdpClient(Options.SocketHost, Options.SocketPort);
                 try
                 {
-                    _udpSocket.Send(_buffToSend, _buffToSend.Length);
+                    await _udpSocket.SendAsync(_buffToSend, _buffToSend.Length);
                 }
                 catch (Exception ex)
                 {
-                    // With Udp, the only exception that can be throw isd the following :
+                    // With Udp, the only exception that can be thrown is the following :
                     //    "A message sent on a datagram socket was larger than the internal message 
                     //    buffer or some other network limit, or the buffer used to receive a datagram 
                     //    into was smaller than the datagram itself"
@@ -1410,14 +1390,14 @@ namespace TraceTool
                 }
                 return;
             }
-            // the socket must be connected in the sender thread !!! not here..  to do
+            // the socket must be connected in the sender thread !!! not here.  
             if (_socket == null)
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             // if the socket is disconnect since the last use, reopen it
             if (_socket.Connected == false)
             {
                 // resolve address
-                IPHostEntry hostEntry = Dns.GetHostEntry(Options.SocketHost);
+                IPHostEntry hostEntry = await Dns.GetHostEntryAsync(Options.SocketHost);
                 // Don't get the first address. It's perhaps a IPv6 address.
                 // Thanks BCheng for the IPV4 fix.
                 IPEndPoint endPoint = null;
@@ -1473,7 +1453,7 @@ namespace TraceTool
             {
                 long actTime = DateTime.Now.Ticks;
 
-                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions of ticks (100 nano sec).
+                if (actTime - _errorTime > 50000000) // 5 secs = 50 millions ticks (100 nano sec).
                     _isSocketError = false;
                 else
                     return;  // lose message
@@ -1500,7 +1480,7 @@ namespace TraceTool
                 }
                 catch (Exception ex)
                 {
-                    // With Udp, the only exception that can be throw isd the following :
+                    // With Udp, the only exception that can be thrown is the following :
                     //    "A message sent on a datagram socket was larger than the internal message 
                     //    buffer or some other network limit, or the buffer used to receive a datagram 
                     //    into was smaller than the datagram itself"
@@ -1513,7 +1493,7 @@ namespace TraceTool
                 return;
             }
 
-            // the socket must be connected in the sender thread !!! not here..  to do
+            // the socket must be connected in the sender thread !!! not here.
             if (_socket == null)
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             // if the socket is disconnect since the last use, reopen it
@@ -1605,7 +1585,7 @@ namespace TraceTool
             if (commandList.Count > 0) // only one message
             {
                 string msg = commandList[0];
-                command = Int32.Parse(msg.Substring(0, 5));
+                command = int.Parse(msg.Substring(0, 5));
                 commandParams = msg.Substring(5, msg.Length - 5);
 
                 if (command == TraceConst.CST_USE_TREE)
@@ -1619,7 +1599,7 @@ namespace TraceTool
             // stop parsing if the winForm is not registered or the winForm don't need to be saved
             // 3, Local log is disabled
             // 4, Local log enabled. No size limit.
-            // 5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+            // 5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
             if (traceForm == null || traceForm.LogFileType == 3)
                 return;
 
@@ -1637,16 +1617,16 @@ namespace TraceTool
 
             foreach (string msg in commandList)
             {
-                command = Int32.Parse(msg.Substring(0, 5));
+                command = int.Parse(msg.Substring(0, 5));
                 commandParams = msg.Substring(5, msg.Length - 5);
                 switch (command)
                 {
                     case TraceConst.CST_WATCH_NAME: return;  // Bypass watches
                     case TraceConst.CST_MESSAGE_TIME: messageTime = commandParams; break;
                     case TraceConst.CST_PROCESS_NAME: processName = commandParams; break;
-                    case TraceConst.CST_THREAD_ID: threadId = "0x" + Int32.Parse(commandParams).ToString("X2"); break;
+                    case TraceConst.CST_THREAD_ID: threadId = "0x" + int.Parse(commandParams).ToString("X2"); break;
                     case TraceConst.CST_THREAD_NAME: threadId = commandParams; break;
-                    case TraceConst.CST_ICO_INDEX: treeIcon = Int32.Parse(commandParams); break;
+                    case TraceConst.CST_ICO_INDEX: treeIcon = int.Parse(commandParams); break;
                     case TraceConst.CST_TRACE_ID: traceId = commandParams; break;
                     case TraceConst.CST_LEFT_MSG: leftMsg = commandParams; break; // param : msg
                     case TraceConst.CST_RIGHT_MSG: rightMsg = commandParams; break;   // param : msg
@@ -1678,7 +1658,7 @@ namespace TraceTool
                         }
                         break;
                     case TraceConst.CST_MEMBER_VIEWER_KIND:
-                        if (Int32.Parse(commandParams) != TraceConst.CST_VIEWER_NONE)
+                        if (int.Parse(commandParams) != TraceConst.CST_VIEWER_NONE)
                             memberXml.Append("<ViewerKind>").Append(commandParams).Append("</ViewerKind>");
                         break;
                     case TraceConst.CST_ADD_MEMBER:
@@ -1767,10 +1747,11 @@ namespace TraceTool
             //string FileToWrite = "";
             if (traceForm.LogFileType == 3)
             {            // 3, Local log disabled.
-                         // should not happens. Detected before parsing
+                         // should not happen. Detected before parsing
                 return;
             }
-            else if (traceForm.LogFileType == 4)
+
+            if (traceForm.LogFileType == 4)
             {     // 4, Local log enabled. No size limit.
                 traceForm.LastLocalLogFileName = traceForm.LogFileName;
                 if (traceForm.CurrentFileNumber != 0)
@@ -1784,7 +1765,7 @@ namespace TraceTool
                 }
             }
             else
-            {                                     // 5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+            {   // 5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
                 string fileExt = Path.GetExtension(traceForm.LogFileName);  // include the dot
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.Append(traceForm.LogFileName.Substring(0, traceForm.LogFileName.Length - fileExt.Length));
@@ -1958,7 +1939,7 @@ namespace TraceTool
         /// milliseconds. The results from FormatDateWithoutMillis() are
         /// cached and FormatDateWithoutMillis() is called at most once
         /// per second.</para>
-        /// <para>Sub classes should override FormatDateWithoutMillis()
+        /// <para>Subclass should override FormatDateWithoutMillis()
         /// rather than FormatDate().</para>
         /// </remarks>
         /// <param name="dateToFormat">The date to render into a string.</param>
@@ -2010,30 +1991,16 @@ namespace TraceTool
 
     internal class InternalWinTrace
     {
-        public string Id;
-        public bool IsMultiColTree;
-        public int MainCol;
-        public string TitleList;
-        public string LogFileName;
-        public string LastLocalLogFileName;  // last opened file
-        public int LogFileType;
-        public int MaxLines;// Max number of lines before starting a new file      
-        public int CurrentFileNumber;// Current file number, when MaxLines is set       
-        public int LinesWritten;// Number of lines written , when MaxLines is set
-
-        public InternalWinTrace()
-        {
-            Id = "";
-            IsMultiColTree = false;
-            MainCol = 0;
-            TitleList = "";
-            LogFileName = "";
-            LastLocalLogFileName = "";
-            LogFileType = 3;
-            MaxLines = -1;// Max number of lines before starting a new file       
-            CurrentFileNumber = 0;// Current file number, when MaxLines is set       
-            LinesWritten = 0;// Number of lines written , when MaxLines is set 
-        }
+        public string Id = "";
+        public bool IsMultiColTree; // = false
+        public int MainCol = 0;
+        public string TitleList = "";
+        public string LogFileName = "";
+        public string LastLocalLogFileName = "";  // last opened file
+        public int LogFileType = 3;
+        public int MaxLines = -1;     // Max number of lines before starting a new file       
+        public int CurrentFileNumber; // = 0 Current file number, when MaxLines is set       
+        public int LinesWritten;      // = 0 Number of lines written , when MaxLines is set 
     }
 
     //------------------------------------------------------------------------------
@@ -2091,7 +2058,7 @@ namespace TraceTool
         /// </summary>
         public bool SendCustomAttributes;            // ShowCustomAttributes = 8  ,
         /// <summary>
-        /// indicate if the reflection should display non public (private and protected) members
+        /// indicate if the reflection should display non-public (private and protected) members
         /// </summary>
         public bool SendNonPublic;                   // ShowNonPublic        = 16 ,
         /// <summary>
@@ -2107,7 +2074,7 @@ namespace TraceTool
         /// </summary>
         public bool SendFunctions;                   //  ShowMethods         = 128,
         /// <summary>
-        /// indicate if the reflection should display documentation for type, fields, methods,..
+        /// indicate if the reflection should display documentation for type, fields, methods,...
         /// </summary>
         public bool SendDoc;                         // ShowDoc              = 256
 
@@ -2125,7 +2092,7 @@ namespace TraceTool
         public bool SendTypeWithValue = true;
 
         /// <summary>
-        /// indicate if the process name must be send. Displayed on the status bar.
+        /// indicate if the process name must be sent. Displayed on the status bar.
         /// </summary>
         public bool SendProcessName;
         
@@ -2139,7 +2106,7 @@ namespace TraceTool
 #endif
         private bool _sendDate;
         /// <summary>
-        /// indicate if the date must be send with the time.
+        /// indicate if the date must be sent with the time.
         /// </summary>
         public bool SendDate
         {
@@ -2152,7 +2119,7 @@ namespace TraceTool
         }
 
         /// <summary>
-        /// indicate if the thread id must be send.
+        /// indicate if the thread id must be sent.
         /// </summary>
         public bool SendThreadId = true;
 
@@ -2222,7 +2189,7 @@ namespace TraceTool
     //------------------------------------------------------------------------------
 
     /// <summary>
-    /// TextWriter output. For Linq to SQL for example : NORTHWNDDataContext.Log = TTrace.Out 
+    /// TextWriter output. 
     /// </summary>
     // ReSharper disable once InconsistentNaming
     internal class TTraceWriter : TextWriter

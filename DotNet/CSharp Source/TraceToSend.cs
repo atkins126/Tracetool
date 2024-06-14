@@ -32,7 +32,7 @@ namespace TraceTool
 
     /// TraceToSend methods create new traces and send it to the viewer
     /// Common base class for TraceNode and WinTrace
-    /// TTrace.warning, debug and error are TraceNode
+    /// TTrace.Warning, Debug and Error are TraceNode
     public abstract class TraceToSend : TraceNodeBase   // no base constructor
     {
 
@@ -58,7 +58,7 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return new TraceNode(this);
-            // create a node with same properties as "this" with new ID
+            // create a node with same properties as "this" with new Id
             TraceNodeEx result = new TraceNodeEx(this, true);
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             TTrace.SendToWinTraceClient(commandList, WinTraceId);
@@ -82,7 +82,7 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return new TraceNode(this);
-            // create a node with same properties as "this" with new ID
+            // create a node with same properties as "this" with new Id
             TraceNodeEx result = new TraceNodeEx(this, true);
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             if (rightMsg != "")
@@ -125,7 +125,7 @@ namespace TraceTool
             else
                 oType = objToSend.GetType();
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -227,7 +227,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             // information are added to the Members array of the new created object the actual object.
@@ -267,7 +267,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             // detect null type
@@ -315,7 +315,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -339,7 +339,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -365,7 +365,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddBitmap(image);
@@ -388,7 +388,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddBitmap(image);
@@ -414,7 +414,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddDump(shortTitle, adr, 0, count);
@@ -436,7 +436,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             Helper.AddCommand(commandList, TraceConst.CST_BACKGROUND_COLOR, Helper.ARGB_to_BGR(color), "-1");      // param : color, colId
 
@@ -458,7 +458,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             Helper.AddCommand(commandList, TraceConst.CST_BACKGROUND_COLOR, Helper.ARGB_to_BGR(color), colId.ToString());      // param : color, colId
 
@@ -479,7 +479,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddXML(xml);
@@ -502,7 +502,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddTable(table);
@@ -525,7 +525,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddTable(table);
@@ -807,7 +807,7 @@ namespace TraceTool
 
             if (leftMsg != null || rightMsg != null)
             {
-                String nodeId = Helper.NewGuid().ToString();  // then give new ID
+                String nodeId = Helper.NewGuid().ToString();  // then give new Id
 
                 List<string> commandList = PrepareNewNode(leftMsg, nodeId);
 

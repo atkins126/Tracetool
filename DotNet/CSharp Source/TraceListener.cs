@@ -34,6 +34,7 @@ namespace TraceTool
     /// </summary>
 
     // ReSharper disable once InconsistentNaming
+    // ReSharper disable once UnusedType.Global
     public class TTraceListener : TraceListener
     {
 

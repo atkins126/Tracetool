@@ -8,7 +8,6 @@
 // Download :  http://sourceforge.net/projects/tracetool/
 // See License.txt for license information
 
-using System;
 using System.Collections.Generic;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -86,7 +85,7 @@ namespace TraceTool
 
             // create the trace window
             var commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_WINWATCH_NAME, winWatchText));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_WINWATCH_NAME, winWatchText));
             TTrace.SendToWinWatchClient(commandList, Id);
         }
 
@@ -98,7 +97,7 @@ namespace TraceTool
         public void DisplayWin()
         {
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}", TraceConst.CST_DISPLAY_TREE));
+            commandList.Insert(0, string.Format("{0,5}", TraceConst.CST_DISPLAY_TREE));
             TTrace.SendToWinWatchClient(commandList, Id);
         }
 
@@ -110,7 +109,7 @@ namespace TraceTool
         public void ClearAll()
         {
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}", TraceConst.CST_CLEAR_ALL));
+            commandList.Insert(0, string.Format("{0,5}", TraceConst.CST_CLEAR_ALL));
             TTrace.SendToWinWatchClient(commandList, Id);
         }
 
@@ -122,7 +121,7 @@ namespace TraceTool
         public void Close()
         {
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}", TraceConst.CST_CLOSE_WIN));
+            commandList.Insert(0, string.Format("{0,5}", TraceConst.CST_CLOSE_WIN));
             TTrace.SendToWinWatchClient(commandList, Id);
         }
 
@@ -139,9 +138,9 @@ namespace TraceTool
                 return;
 
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_WATCH_NAME, watchName));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_WATCH_NAME, watchName));
 
-            // create a node with same properties as "self" with new ID
+            // create a node with same properties as "self" with new Id
             TraceNodeEx node = new TraceNodeEx(null, false);  // no parent, don't generate node id
 
             node.AddValue(watchValue, TTrace.Options.SendPrivate, TTrace.Options.ObjectTreeDepth, "");    // sendPrivate true , max 3 levels, no title

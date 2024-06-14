@@ -70,7 +70,7 @@
         </member>
         <member name="F:TraceTool.TraceDisplayFlags.ShowNonPublic">
             <summary>
-            show non public (private and protected) members
+            show non-public (private and protected) members
             </summary>
         </member>
         <member name="F:TraceTool.TraceDisplayFlags.ShowInheritedMembers">
@@ -90,7 +90,7 @@
         </member>
         <member name="F:TraceTool.TraceDisplayFlags.ShowDoc">
             <summary>
-            show documentation for type, fields, methods,..
+            show documentation for type, fields, methods,...
             </summary>
         </member>
         <member name="T:TraceTool.TraceConst">
@@ -330,7 +330,7 @@
             <summary>Watch Window name</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_WINWATCH_ID">
-            <summary>Watch Window ID</summary>
+            <summary>Watch Window Id</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_WATCH_NAME">
             <summary>watch name</summary>
@@ -369,7 +369,7 @@
             <summary>Close the viewer (shutdown)</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_TRACE_ID">
-            <summary>the unique ID (from the server point of view) of the node (preferably a GUID)</summary>
+            <summary>the unique Id (from the server point of view) of the node (preferably a GUID)</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_ICO_INDEX">
             <summary>the index of the Icon to use (CST_ICO_INFO, CST_ICO_WARNING,...)</summary>
@@ -399,7 +399,7 @@
             <summary>Delete children node on the viewer</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_THREAD_ID">
-            <summary>The Thread ID of the sender thread (optional).Used when tracing multiple thread (active by default)</summary>
+            <summary>The Thread Id of the sender thread (optional).Used when tracing multiple thread (active by default)</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_PROCESS_NAME">
             <summary>The process name (optional).Used when tracing multiple process </summary>
@@ -438,7 +438,7 @@
             <summary>Focus to the node</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_FONT_DETAIL">
-            <summary>Font detail : ColId Bold Italic Color(BGR) size  Fontname</summary>
+            <summary>Font detail : ColId Bold Italic Color(BGR) size  Font name</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_BACKGROUND_COLOR">
             <summary>Background color</summary>
@@ -447,7 +447,7 @@
             <summary>Command to create a member for the current trace node</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_MEMBER_FONT_DETAIL">
-            <summary>Member Font detail : ColId Bold Italic Color(BGR) size  Fontname</summary>
+            <summary>Member Font detail : ColId Bold Italic Color(BGR) size  Font name</summary>
         </member>
         <member name="F:TraceTool.TraceConst.CST_MEMBER_COL2">
             <summary>The text of the second member column</summary>
@@ -523,7 +523,7 @@
         </member>
         <member name="M:TraceTool.Helper.HtmlEncode(System.String,System.Text.StringBuilder)">
             <summary>
-            Html encode. To reduce dependencies, the HttpUtility.HtmlEncode is reproduce here, with StringBuilder as target (faster)
+            Html encode. To reduce dependencies, the HttpUtility.HtmlEncode is reproduced here, with StringBuilder as target (faster)
             </summary>
         </member>
         <member name="M:TraceTool.Helper.AddCommand(System.Collections.Generic.List{System.String},System.Int32)">
@@ -813,18 +813,18 @@
         </member>
         <member name="M:TraceTool.ReflectionHelper.MethodParams2String(System.Reflection.MethodBase)">
             <summary>
-            return the parameters name and type of a method
+            return the parameters name and type of method
             </summary>
         </member>
         <member name="M:TraceTool.ReflectionHelper.MethodParamsType2String(System.Reflection.MethodBase)">
             <summary>
-            return the parameters type of a method , useful to retrieve XML documentation for a method
+            return the parameters type of method , useful to retrieve XML documentation for a method
             parenthesis are included only if parameters exists
             </summary>
         </member>
         <member name="M:TraceTool.ReflectionHelper.PropertyParamsType2String(System.Reflection.PropertyInfo)">
             <summary>
-            return the parameters type of a property , useful to retrieve XML documentation for a property
+            return the parameters type of property , useful to retrieve XML documentation for a property
             parenthesis are included only if parameters exists
             </summary>
         </member>
@@ -895,14 +895,14 @@
         <member name="M:TraceTool.TraceNode.#ctor(TraceTool.TraceNode,System.Boolean)">
             <summary>
             Constructor. Use TTrace or TraceNodeEx class as entry point
-            Create a Node with an unique ID (true)
-            You can also recreated an already send node if you still have the id
+            Create a Node with unique Id (true)
+            You can also recreate an already send node if you still have the id
             </summary>
             <param name="parentNode">The parent node where to place that trace.
             The IconIndex and the enabled properties are also recopied
             Can be null : the root tree become the parent node, enabled is true and the default icon is used
             </param>
-            <param name="generateUniqueId">When true, a unique ID (a guid) is generated for the trace.
+            <param name="generateUniqueId">When true, a unique Id (a guid) is generated for the trace.
             </param>
         </member>
         <member name="M:TraceTool.TraceNode.#ctor(TraceTool.TraceToSend)">
@@ -1108,13 +1108,13 @@
         </member>
         <member name="F:TraceTool.TraceNodeBase.Id">
             <summary>
-            The unique ID. Normally it's a GUID, but can be replaced by something else for inter process traces.
+            The unique Id. Normally it's a GUID, but can be replaced by something else for inter process traces.
             </summary>
         </member>
         <member name="F:TraceTool.TraceNodeBase.Enabled">
             <summary>
             When Enabled is false, all traces are disabled. Default is true.
-            All node have a Enabled property, that lets you define group of Enabled trace.
+            All node have an Enabled property, that lets you define group of Enabled trace.
             For example set the TTrace.Debug.enabled to false but continue to accept Error and Warning traces
             </summary>
         </member>
@@ -1175,12 +1175,12 @@
         </member>
         <member name="M:TraceTool.TraceNodeEx.#ctor">
             <summary>
-            create a Node with an unique ID
+            create a Node with an unique Id
             </summary>
         </member>
         <member name="M:TraceTool.TraceNodeEx.#ctor(TraceTool.TraceToSend)">
             <summary>
-            create a Node with an unique ID (true)
+            create a Node with unique Id (true)
             </summary>
             <param name="parentNode">The parent node where to place that trace.
             The IconIndex and the enabled properties are also recopied
@@ -1264,7 +1264,7 @@
             </summary>
             <param name="objToSend">Object to display</param>
             <param name="sendPrivate">Display private fields</param>
-            <param name="maxLevel">Number of sub component to display in tree</param>
+            <param name="maxLevel">Number of subcomponent to display in tree</param>
         </member>
         <member name="M:TraceTool.TraceNodeEx.AddValue(System.Object,System.Boolean,System.Int32,System.String)">
             <summary>
@@ -1272,7 +1272,7 @@
             </summary>
             <param name="objToSend">Object to display</param>
             <param name="sendPrivate">Display private fields</param>
-            <param name="maxLevel">Number of sub component to display in tree</param>
+            <param name="maxLevel">Number of subcomponent to display in tree</param>
             <param name="objTitle">Title to display for the object</param>
         </member>
         <member name="M:TraceTool.TraceNodeEx.AddAllFieldsValue(System.Object,System.Type,TraceTool.TMemberNode,System.Boolean,System.Int32,TraceTool.ParsedObjectList)">
@@ -1456,7 +1456,7 @@
         <member name="T:TraceTool.TraceToSend">
             TraceToSend methods create new traces and send it to the viewer
             Common base class for TraceNode and WinTrace
-            TTrace.warning, debug and error are TraceNode
+            TTrace.Warning, Debug and Error are TraceNode
         </member>
         <member name="M:TraceTool.TraceToSend.Send(System.String)">
             <summary>
@@ -1658,11 +1658,11 @@
             Get the last context Id
             @return last context 
         </member>
-        <member name="M:TraceTool.TraceToSend.PushContext(System.String)">
-            Save the context
-            @param newContext the context to push
+        <member name="M:TraceTool.TraceToSend.PushContextId(System.String)">
+            Save the context Id
+            @param newContextId the context to push
         </member>
-        <member name="M:TraceTool.TraceToSend.DeleteLastContext">
+        <member name="M:TraceTool.TraceToSend.DeleteLastContextId">
             Delete the last context for the thread
         </member>
         <member name="P:TraceTool.TraceToSend.IndentLevel">
@@ -1821,7 +1821,7 @@
             <summary>
             TTrace is the entry point for all traces.
             TTrace give 3 'TraceNode' doors : Warning , Error and Debug.
-            Theses 3 doors are displayed with a special icon (all of them have the 'enabled' property set to true.
+            Theses 3 doors are displayed with a special icon (all of them have the 'enabled' property set to true).
             That class is fully static.
             </summary>
         </member>
@@ -1855,7 +1855,7 @@
             Set the global search criteria. You must call TTrace.Wintrace.FindNext to position to the next or previous matching node
             </summary>
             <param name="text">Text to search</param>
-            <param name="sensitive">Search is case sensitive</param>
+            <param name="sensitive">Search is case-sensitive</param>
             <param name="wholeWord">match only whole word</param>
             <param name="highlight">Highlight results</param>
             <param name="searchInAllPages">call to FindNext will search also in other traces windows if true</param>
@@ -1908,7 +1908,7 @@
         </member>
         <member name="P:TraceTool.TTrace.Out">
             <summary>
-            TextWriter output. For Linq to SQL for example : NORTHWNDDataContext.Log = TTrace.Out 
+            TextWriter output. 
             </summary>
         </member>
         <member name="M:TraceTool.TTrace.FlushAsync">
@@ -1944,7 +1944,7 @@
             milliseconds. The results from FormatDateWithoutMillis() are
             cached and FormatDateWithoutMillis() is called at most once
             per second.</para>
-            <para>Sub classes should override FormatDateWithoutMillis()
+            <para>Subclass should override FormatDateWithoutMillis()
             rather than FormatDate().</para>
             </remarks>
             <param name="dateToFormat">The date to render into a string.</param>
@@ -2004,7 +2004,7 @@
         </member>
         <member name="F:TraceTool.TTraceOptions.SendNonPublic">
             <summary>
-            indicate if the reflection should display non public (private and protected) members
+            indicate if the reflection should display non-public (private and protected) members
             </summary>
         </member>
         <member name="F:TraceTool.TTraceOptions.SendInherited">
@@ -2024,7 +2024,7 @@
         </member>
         <member name="F:TraceTool.TTraceOptions.SendDoc">
             <summary>
-            indicate if the reflection should display documentation for type, fields, methods,..
+            indicate if the reflection should display documentation for type, fields, methods,...
             </summary>
         </member>
         <member name="F:TraceTool.TTraceOptions.SendPrivate">
@@ -2044,7 +2044,7 @@
         </member>
         <member name="F:TraceTool.TTraceOptions.SendProcessName">
             <summary>
-            indicate if the process name must be send. Displayed on the status bar.
+            indicate if the process name must be sent. Displayed on the status bar.
             </summary>
         </member>
         <member name="P:TraceTool.TTraceOptions.Framework">
@@ -2054,12 +2054,12 @@
         </member>
         <member name="P:TraceTool.TTraceOptions.SendDate">
             <summary>
-            indicate if the date must be send with the time.
+            indicate if the date must be sent with the time.
             </summary>
         </member>
         <member name="F:TraceTool.TTraceOptions.SendThreadId">
             <summary>
-            indicate if the thread id must be send.
+            indicate if the thread id must be sent.
             </summary>
         </member>
         <member name="M:TraceTool.TTraceOptions.GetDefault">
@@ -2084,7 +2084,7 @@
         </member>
         <member name="T:TraceTool.TTraceWriter">
             <summary>
-            TextWriter output. For Linq to SQL for example : NORTHWNDDataContext.Log = TTrace.Out 
+            TextWriter output. 
             </summary>
         </member>
         <member name="T:TraceTool.WinTrace">
@@ -2095,12 +2095,12 @@
         <member name="M:TraceTool.WinTrace.#ctor">
             <summary>
             WinTrace constructor : you can map a WinTrace to an existing window
-            Nothing is send to the viewer
+            Nothing is sent to the viewer
             </summary>
         </member>
         <member name="M:TraceTool.WinTrace.#ctor(System.String,System.String)">
             <summary>
-            WinTrace constructor. The Window Trace is create on the viewer (if not already done)
+            WinTrace constructor. The Window Trace is created on the viewer (if not already done)
             </summary>
             <param name="winTraceId">Required window trace Id. If empty, a guid will be generated</param>
             <param name="winTraceText">The Window Title on the viewer.If empty, a default name will be used</param>
@@ -2194,10 +2194,10 @@
               The Mode can be one of the following :
               0, Viewer Log is disabled.
               1, Viewer log enabled. No size limit.
-              2, Viewer log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+              2, Viewer log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
               3, Local log is disabled
               4, Local log enabled. No size limit.
-              5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename).
+              5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename).
               </code>
               </summary>
               <param name="fileName">\File to open</param>
@@ -2213,10 +2213,10 @@
               The Mode can be one of the following :
               0, Viewer Log is disabled.
               1, Viewer log enabled. No size limit.
-              2, Viewer log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+              2, Viewer log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
               3, Local log is disabled
               4, Local log enabled. No size limit. 
-              5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename). 
+              5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename). 
               </code>
               </summary>
               <param name="fileName">\File to open</param>
@@ -2284,9 +2284,9 @@
              Add a filter to node. Multiple calls to this function can be done. Call ApplyFilter() to apply filtering
              </summary>
              <param name="column">Column to apply filter.<p/>
-               In multi column mode the first column start at 0 <p/>
+               In multi-column mode the first column start at 0 <p/>
                In normal mode : <p/>
-               col icone   = 999    <p/>
+               col icon    = 999    <p/>
                col time    = 1      <p/>
                col thread  = 2      <p/>
                col traces  = 3      <p/>
@@ -2294,10 +2294,10 @@
                col members = 998
              </param>
              <param name="compare">There is 5 kinds of filters : <p/>
-                Equal           = 0  <p/>
-                Not equal       = 1  <p/>
+                Equal          = 0  <p/>
+                Not equal      = 1  <p/>
                 contains       = 2  <p/>
-                Don't contains  = 3  <p/>
+                Don't contain  = 3  <p/>
                 (Ignore this filter) = 4 or -1
             </param>
              <param name="text">The text to search (insensitive) </param>
@@ -2306,7 +2306,7 @@
             <summary>
             Apply filters after calls to AddFilter().
             </summary>
-            <param name="conditionAnd">If true, use an 'AND' condition for each filters, else use a "OR" </param>
+            <param name="conditionAnd">If true, use an 'AND' condition for each filter, else use a "OR" </param>
             <param name="showMatch">If true, show node that match filter and hide others. If false hide matching node and show others</param>
             <param name="includeChildren">If true, search in subnodes</param>
         </member>
@@ -2384,7 +2384,7 @@
             When linked, the plugin can receive event (see ITracePlugin).
             </summary>
             <param name="pluginName">name of the plugin</param>
-            <param name="flags">Combinaison of CST_PLUG_ONACTION , CST_PLUG_ONBEFOREDELETE , CST_PLUG_ONTIMER</param>
+            <param name="flags">Combination of CST_PLUG_ONACTION , CST_PLUG_ONBEFOREDELETE , CST_PLUG_ONTIMER</param>
         </member>
         <member name="T:TraceTool.WinWatch">
             <summary>

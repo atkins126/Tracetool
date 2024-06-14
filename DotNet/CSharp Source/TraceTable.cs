@@ -83,7 +83,7 @@ namespace TraceTool
         public void AddRowData(string cell)
         {
             if (_currentRow == null)
-                AddRow();
+                _currentRow = _members.Add("");
 
             if (_currentRow.Col1 == "")
                 _currentRow.Col1 = cell;
