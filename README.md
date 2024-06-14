@@ -19,8 +19,8 @@ Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip")
 ![Viewer](/GithubFiles/Server1.jpg)
 
 * [What is TraceTool](#What-is-TraceTool "What is TraceTool")
-* [Viewer Installation](#Installation "Installation")
-* [Client Api](#ClientAPI "Client Api")
+* [Viewer Installation](#Viewer-Installation "Installation")
+* [Client Api](#Client-API "Client Api")
   * [DotNet](#DotNet)
   * [Blazor Client / Server](#Blazor-client--server)
   * [Java, Android](#Java)
@@ -57,7 +57,7 @@ Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip")
   * [Event Log Traces](#Event-Log-Traces "Event Log Traces")
   * [Save/Load to XML File](#Save-Load-to-XML-File "Save/Load to XML File")
 
-## What is TraceTool ?
+## What is TraceTool
 
 * A viewer that displays multiple kinds of sources (from the tracetool framework, log file, event log, or OutputDebugString)
 * A native language client framework (Dotnet, Java, Javasvript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
