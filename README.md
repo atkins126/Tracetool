@@ -60,7 +60,7 @@ Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip")
 ## What is TraceTool
 
 * A viewer that displays multiple kinds of sources (from the tracetool framework, log file, event log, or OutputDebugString)
-* A native language client framework (Dotnet, Java, Javasvript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
+* A native language client framework (Dotnet, Java, Javascript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
 
 ## Viewer Installation
 
