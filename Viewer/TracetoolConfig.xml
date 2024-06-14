@@ -16,10 +16,10 @@
 	<AppDisplay>
 		<SmallBut Value="true"/>
 		<ApplicationTitle Value="socket: 8090 / 4502,  Http : 85, WebSocket:8091"/>
-		<Left Value="78"/>
-		<Top Value="78"/>
-		<Width Value="697"/>
-		<Height Value="636"/>
+		<Left Value="35"/>
+		<Top Value="49"/>
+		<Width Value="1064"/>
+		<Height Value="730"/>
 		<StayOnTop Value="false"/>
 		<ShowOnstartup Value="true"/>
 		<ShowOnMessageReceived Value="false"/>
@@ -33,7 +33,7 @@
 		<ToolbarBookmark Value="true"/>
 		<ToolbarFilter Value="true"/>
 		<HideViewer Value="false"/>
-		<DisableInternalLog Value="false"/>
+		<DisableInternalLog Value="true"/>
 	</AppDisplay>
 	<Framework>
 		<ShowMembers Value="true"/>
@@ -105,7 +105,7 @@
 		<OpenFromFavorites Value="true"/>
 		<VisibleMenu Value="true"/>
 		<Favorites>
-			<FileName>D:\TraceTool\TempTraces\CacheODBC_cand.log</FileName><FileName>C:\INSTALL.LOG</FileName><FileName>D:\TraceTool\TempTraces\TracetoolInternalLog.txt</FileName><FileName>D:\TraceTool\TempTraces\test.txt</FileName><FileName>C:\TracetoolInternalLog.txt</FileName><FileName>C:\Windows\System32\LogFiles\Firewall\pfirewall.log</FileName><FileName>\\192.168.1.15\pi\Log\Error.log</FileName><FileName>\\192.168.1.15\pi\Log\Info.log</FileName><FileName>C:\temp\TracetoolInternalLog.txt</FileName><FileName>C:\temp\log.txt</FileName></Favorites>
+			<FileName>C:\temp\log.txt</FileName></Favorites>
 		<Trace>
 			<FontName Value="MS Sans Serif"/>
 			<FontSize Value="8"/>

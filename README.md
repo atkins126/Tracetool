@@ -14,6 +14,7 @@ https://www.codeproject.com/Articles/5498/TraceTool-The-Swiss-Army-Knife-of-Trac
 -->
 
 # Tracetool
+Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip") 
 
 ![Viewer](/GithubFiles/Server1.jpg)
 
@@ -63,7 +64,7 @@ https://www.codeproject.com/Articles/5498/TraceTool-The-Swiss-Army-Knife-of-Trac
 
 # Viewer Installation
 
-Download the [Viewer](/GithubFiles/Viewer64.zip "Viewer64.zip") and unpack the file into a folder of your chose(windows only).
+Download the [Viewer](/GithubFiles/Viewer32.zip "Viewer32.zip") and unpack the file into a folder of your chose (windows only).
 
 If you plan to use the "windows message" mode, you must start once the viewer to self register his location into the registry. For socket mode, the viewer must always be started manually
 
@@ -98,7 +99,7 @@ The "web socket" label is displayed in the trace window. Clicking on this label 
 In visual studio, reference the client Api nuget using "manage nuget packages","Manage Nuget Packages for solution" context menus or via the nuget console
 >Install-Package Tracetool.DotNet.Api
 
-The nuget contains DotNet4.7, Standard 1.6 and Standard 2.0 libraries
+The nuget contains DotNet4.8 and Standard 2.0 libraries
 
 Sample code
 
@@ -351,11 +352,14 @@ masterNode.Send("Detail 2");
 
 ## Indent
 
-Another way to have master detail is to use indent and UnIndent methods
+Another way to have master detail is to use Indent and UnIndent methods.
+Important Note, since the version 14, the Dotnet api introduce a breaking change:
+When async operations are used together with TTrace.Send() methods, the traces stays under the parent nodes. The ThiId column will show the new thread Id after async operations
 
 ``` C#
 TTrace.Debug.Indent ("Begin of procedure") ;
 TTrace.Debug.Send ("inside procedure" ) ;
+await Task.Delay(500);
 TTrace.Debug.Send ("Do some work" ) ;
 TTrace.Debug.UnIndent ("end of procedure") ;
 ```
