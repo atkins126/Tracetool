@@ -14,7 +14,7 @@ https://www.codeproject.com/Articles/5498/TraceTool-The-Swiss-Army-Knife-of-Trac
 -->
 
 # Tracetool
-Download the Viewer [here](/GithubFiles/Viewer32.zip "Viewer32.zip") 
+Download the Viewer [here](https://github.com/capslock66/Tracetool/raw/Develop/GithubFiles/Viewer32.zip "Viewer32.zip") 
 
 ![Viewer](/GithubFiles/Server1.jpg)
 
