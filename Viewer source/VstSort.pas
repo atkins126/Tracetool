@@ -20,7 +20,7 @@ interface
 {$endif COMPILER_7_UP}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, contnrs, VirtualTrees;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, contnrs, VirtualTrees, VirtualTrees.Types;
 
 type
   TSortColumn = class
@@ -36,7 +36,6 @@ type
     function  DoCompare(Node1, Node2: PVirtualNode): Integer;
     procedure DoNextColumnOrder (Column: TColumnIndex);
     function  GetSortColumn(Column: TColumnIndex): TSortColumn;
-    procedure ClearSortExcept(SortCol: TSortColumn);
   public
     SortColumns : TObjectList ; // array of TSortColumn. SortColumns is the owner
     Tree : TVirtualStringTree ;
@@ -45,6 +44,7 @@ type
 
     procedure Sort (Node: PVirtualNode; DoInit: Boolean = True);
     procedure Unsort (Node: PVirtualNode) ; // unsort node if the application provide an OnCompare methode with sort on the -1 column
+    procedure ClearSortExcept(SortCol: TSortColumn);
 
   public  // events
     procedure onHeaderDrawQueryElements (Sender: TVTHeader; var PaintInfo: THeaderPaintInfo; var Elements: THeaderPaintElements);
@@ -123,8 +123,12 @@ begin
       exit ;
 
    // no sort. Nothing to draw
-   if SortColumns.Count = 0 then
-      exit ;
+   try
+     if SortColumns.Count = 0 then
+        exit ;
+   except
+      exit;
+   end;
 
    // check if the column is in the SortColumns
    ColumnIndex := PaintInfo.Column.Index ;
@@ -289,13 +293,13 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
     begin
       if DoCompare(A, B) <= 0 then  // ascending. For descending use >= 0
       begin
-        Result.NextSibling := A;
+        Result.SetNextSibling(A);; //Result.NextSibling := A;
         Result := A;
         A := A.NextSibling;
       end
       else
       begin
-        Result.NextSibling := B;
+        Result.SetNextSibling(B);
         Result := B;
         B := B.NextSibling;
       end;
@@ -303,9 +307,9 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
 
     // Just append the list which is not nil (or set end of result list to nil if both lists are nil).
     if Assigned(A) then
-      Result.NextSibling := A
+      Result.SetNextSibling(A)
     else
-      Result.NextSibling := B;
+      Result.SetNextSibling(B);
     // return start of the new merged list
     Result := Dummy.NextSibling;
   end;
@@ -330,7 +334,7 @@ procedure TVstSort.Sort(Node: PVirtualNode; DoInit: Boolean = True);
     begin
       Result := Node;
       Node := Node.NextSibling;
-      Result.NextSibling := nil;
+      Result.SetNextSibling(nil);
     end;
   end;
 
@@ -382,17 +386,17 @@ begin
 
        // Consolidate the child list finally.
        Run := Node.FirstChild;
-       Run.PrevSibling := nil;
+       Run.SetPrevSibling(nil);
        Index := 0;
        repeat
-         Run.Index := Index;
+         Run.SetIndex(Index);
          Inc(Index);
          if Run.NextSibling = nil then
            Break;
-         Run.NextSibling.PrevSibling := Run;
+         Run.NextSibling.SetPrevSibling(Run);
          Run := Run.NextSibling;
        until False;
-       Node.LastChild := Run;
+       Node.SetLastChild(Run);
 
        //InvalidateCache;
        tree.TreeStates := tree.TreeStates + [tsValidationNeeded] - [tsUseCache];  // DoStateChange([tsValidationNeeded], [tsUseCache]);

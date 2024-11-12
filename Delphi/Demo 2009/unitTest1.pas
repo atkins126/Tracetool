@@ -242,6 +242,20 @@ implementation
 
 {$R *.DFM}
 
+
+function GetLongStr: string;
+var
+  I,J: Integer;
+begin
+  Result := 'My long text multi line'+ #13#10;
+  for I := 0 to 9 do begin
+     Result := Result + inttostr(I) + ' ';
+     for J := 1 to 700 do
+        Result := Result + inttostr(J) + 's';
+     Result := Result + #13#10;
+  end;
+end;
+
 // ------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
@@ -393,6 +407,7 @@ var
    myTlist: TList<TForm>;
 {$ENDIF COMPILER_12_UP}
 
+
 begin
 
    // the euro char is coded in $AC $20 in unicode and $80 in single byte
@@ -424,7 +439,7 @@ begin
    TTrace.Debug.Send('Single byte string', String(SingleByteString));
 
    // long text
-   TTrace.Debug.Send('qwerty  qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty qwerty ');
+   TTrace.Debug.Send('Long Text', GetLongStr());
    TTrace.Debug.Send('hello' + #13 + #10 + 'world');
 
    // single separator
@@ -523,7 +538,9 @@ begin
 
    // XML sample using Send
    // --------------------------------------------
-   TTrace.Debug.SendXml('xml', '<?xml version="1.0" ?><Data> Hello XML </Data>');
+   TTrace.Debug.SendXml('xml1', '<?xml version="1.0" ?><Data> Hello <Subnode> xml </Subnode></Data>');
+   TTrace.Debug.SendXml('xml2', '<Data> Hello <Subnode> Subnode <Subnode> sub sub node </Subnode> </Subnode></Data>');
+   TTrace.Debug.SendXml('Json', '{"arr":[{"prop1":"val1"},{"prop2":"val2"}]}');
 
    // Image sample using Send
    // --------------------------------------------
@@ -568,8 +585,13 @@ begin
 
    // add second line
    table.AddRow();
-   table.AddRowData('aa'#9'data second column'#9'cc'#9'dd'#9'ee');
+   table.AddRowData('z'#9'data second column'#9'{"minJson":true}'#9'dd'#9'ee');
    // add all columns data in a single step (tab separated)
+
+   // add third line
+   table.AddRow();
+   table.AddRowData('d'#9'data third column'#9'{"minJson":true}'#9'dd'#9'ee');
+
 
    // finally send the table
    TTrace.Debug.SendTable('Mytable', table);
@@ -580,9 +602,31 @@ begin
    TTrace.Debug.SendTable('memo1.lines', Memo1.lines);
 
    stringList := TStringList.create;
-   stringList.AddObject('self', self);
-   stringList.AddObject('self', self);
-   stringList.AddObject('self', self);
+   stringList.AddObject('self01', self);
+   stringList.AddObject('self02', self);
+   stringList.AddObject('self03', self);
+   stringList.AddObject('self04', self);
+   stringList.AddObject('self05', self);
+   stringList.AddObject('self06', self);
+   stringList.AddObject('self07', self);
+   stringList.AddObject('self08', self);
+   stringList.AddObject('self09', self);
+   stringList.AddObject('self10', self);
+   stringList.AddObject('self11', self);
+   stringList.AddObject('self12', self);
+   stringList.AddObject('self13', self);
+   stringList.AddObject('self14', self);
+   stringList.AddObject('self15', self);
+   stringList.AddObject('self16', self);
+   stringList.AddObject('self17', self);
+   stringList.AddObject('self18', self);
+   stringList.AddObject('self19', self);
+   stringList.AddObject('self20', self);
+   stringList.AddObject('self21', self);
+   stringList.AddObject('self22', self);
+   stringList.AddObject('self23', self);
+   stringList.AddObject('self24', self);
+   stringList.AddObject('self25', self);
    TTrace.Debug.SendTable('stringList as table', stringList);
    stringList.Free;
 
@@ -797,29 +841,44 @@ end;
 var lastTest: integer = 0;
 
 procedure Tform1.btnODSClick(Sender: TObject);
+  function GetLongStr: string;
+  var
+    I,J: Integer;
+  begin
+    Result := 'My long text multi line'+ #13#10;
+    for I := 0 to 9 do begin
+       Result := Result + inttostr(I) + ' ';
+       for J := 1 to 500 do
+          Result := Result + inttostr(J) + 's';
+       Result := Result + #13#10;
+    end;
+    Result := Result + #13#10 + 'Last line';
+  end;
 begin
    inc(lastTest);
    // the native version of OutputDebugString is ASCII. So the A and W versions write messages as ansiString.
    OutputDebugStringA(pAnsiChar(AnsiString('test Ansi String ' + inttostr(lastTest))));
    OutputDebugStringW(pWideChar('test Unicode String ' + inttostr(lastTest)));
+   OutputDebugStringW(pWideChar(GetLongStr()));
 end;
 
 // ------------------------------------------------------------------------------
 
 procedure Tform1.butTail1Click(Sender: TObject);
 const
-   fName: string = 'c:\log.txt';
+   fName: string = 'c:\temp\log.txt';
 var
    f: textfile;
 begin
    assignfile(f, fName);
-   if fileexists(fName)
-   then
-         append(f)
+   if fileexists(fName) then
+      append(f)
    else
-         rewrite(f);
+      rewrite(f);
    inc(lastTest);
    writeln(f, 'test ' + inttostr(lastTest) + #0 + 'x');
+   writeln(f, GetLongStr() );
+
    closefile(f);
 end;
 
@@ -827,16 +886,15 @@ end;
 
 procedure Tform1.butTail2Click(Sender: TObject);
 const
-   fName: string = 'c:\log.txt';
+   fName: string = 'c:\temp\log.txt';
 var
    f: textfile;
 begin
    assignfile(f, fName);
-   if fileexists(fName)
-   then
-         append(f)
+   if fileexists(fName) then
+      append(f)
    else
-         rewrite(f);
+      rewrite(f);
    inc(lastTest);
    write(f, 'A ' + inttostr(lastTest) + #0 + 'x');
    closefile(f);
@@ -846,16 +904,15 @@ end;
 
 procedure Tform1.butTail3Click(Sender: TObject);
 const
-   fName: string = 'c:\log.txt';
+   fName: string = 'c:\temp\log.txt';
 var
    f: textfile;
 begin
    assignfile(f, fName);
-   if fileexists(fName)
-   then
-         append(f)
+   if fileexists(fName) then
+      append(f)
    else
-         rewrite(f);
+      rewrite(f);
 
    writeln(f, Memo2.lines.Text);
    closefile(f);

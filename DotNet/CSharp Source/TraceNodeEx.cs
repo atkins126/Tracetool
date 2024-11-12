@@ -76,7 +76,7 @@ namespace TraceTool
 
         //----------------------------------------------------------------------
         /// <summary>
-        /// create a Node with an unique ID
+        /// create a Node with an unique Id
         /// </summary>
 
         public TraceNodeEx()
@@ -91,7 +91,7 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /// <summary>
-        /// create a Node with an unique ID (true)
+        /// create a Node with unique Id (true)
         /// </summary>
         /// <param name="parentNode">The parent node where to place that trace.
         /// The IconIndex and the enabled properties are also recopied
@@ -335,79 +335,35 @@ namespace TraceTool
                     if (oType.IsByRef)
                         classGroup.Add("IsByRef");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsCOMObject)
-#else
                     if (oType.IsCOMObject)
-#endif
                         classGroup.Add("IsCOMObject");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsImport)
-#else
                     if (oType.IsImport)
-#endif
                         classGroup.Add("IsImport");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsNotPublic)
-#else
                     if (oType.IsNotPublic)
-#endif
                         classGroup.Add("IsNotPublic");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsSpecialName)
-#else
                     if (oType.IsSpecialName)
-#endif
                         classGroup.Add("IsSpecialName");
 
-#if !NETSTANDARD1_6
                     if (oType.IsContextful)
                         classGroup.Add("IsContextful");
-#endif
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsMarshalByRef)
-#else
                     if (oType.IsMarshalByRef)
-#endif
                         classGroup.Add("IsMarshalByRef");
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsSerializable)
-#else
                     if (oType.IsSerializable)
-#endif
                         classGroup.Add("IsSerializable");
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsExplicitLayout)// Class layout
-#else
                     if (oType.IsExplicitLayout)// Class layout
-#endif
                         classGroup.Add("Class layout", "Explicit");
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsLayoutSequential)// Class layout
-#else
                     if (oType.IsLayoutSequential)// Class layout
-#endif
                         classGroup.Add("Class layout", "Sequential");
-
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsAutoLayout)// Class layout
-#else
                     if (oType.IsAutoLayout)// Class layout
-#endif
                         classGroup.Add("Class layout", "Auto");
 
                     // boolean and corresponding value
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsPrimitive)
-                  classGroup.Add("IsPrimitive", oType.GetTypeInfo().UnderlyingSystemType.ToString());
-#else
                     if (oType.IsPrimitive)
                         classGroup.Add("IsPrimitive", oType.UnderlyingSystemType.ToString());
-#endif
 
                     //if (oType.HasElementType)
                     //   ClassGroup.Add("HasElementType" , oType.GetElementType().ToString());
@@ -431,46 +387,26 @@ namespace TraceTool
                     }
 
                     // String Format
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsAnsiClass)
-#else
                     if (oType.IsAnsiClass)
-#endif
                         classGroup.Add("String Format", "Ansi");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsAutoClass)
-#else
                     if (oType.IsAutoClass)
-#endif
                         classGroup.Add("String Format", "Auto");
 
-#if NETSTANDARD1_6
-               if (oType.GetTypeInfo().IsUnicodeClass)
-#else
                     if (oType.IsUnicodeClass)
-#endif
                         classGroup.Add("String Format", "Unicode");
 
                     // show all other infos giving strings
-#if NETSTANDARD1_6
-                classGroup.Add("GUID", oType.GetTypeInfo().GUID.ToString());
-                if (oType.GetTypeInfo().TypeInitializer != null)
-                    classGroup.Add("TypeInitializer", oType.GetTypeInfo().TypeInitializer.ToString());
-#else
                     classGroup.Add("GUID", oType.GUID.ToString());
                     if (oType.TypeInitializer != null)
                         classGroup.Add("TypeInitializer", oType.TypeInitializer.ToString());
 
-#endif
                     if (oType.Namespace != null)
                         classGroup.Add("Namespace", oType.Namespace);
                     classGroup.Add("TypeHandle", oType.TypeHandle.ToString());
 
-#if !NETSTANDARD1_6
                     if (oType.ReflectedType != null)
                         classGroup.Add("ReflectedType", oType.ReflectedType.ToString());
-#endif
 
                     if (objToSend != null)
                         classGroup.Add("OBJ.HashCode", objToSend.GetHashCode().ToString("X2"));
@@ -480,18 +416,10 @@ namespace TraceTool
                     classGroup.Add("TypeCode", myTypeCode.ToString());
 
                     // Module, Assembly name, location and XML documentation file name
-#if NETSTANDARD1_6
-               classGroup.Add("Module", oType.GetTypeInfo().Module.ToString());
-#else
                     classGroup.Add("Module", oType.Module.ToString());
-#endif
                     try
                     {
-#if NETSTANDARD1_6
-                   classGroup.Add("Assembly", oType.GetTypeInfo().Assembly.ToString());
-#else
                         classGroup.Add("Assembly", oType.Assembly.ToString());
-#endif
                     }
                     catch (Exception e)
                     {
@@ -500,11 +428,7 @@ namespace TraceTool
 
                     try
                     {
-#if NETSTANDARD1_6
-                   classGroup.Add("Assembly location", oType.GetTypeInfo().Assembly.Location);
-#else
                         classGroup.Add("Assembly location", oType.Assembly.Location);
-#endif
                     }
                     catch (Exception e)
                     {
@@ -522,15 +446,9 @@ namespace TraceTool
                     // Custom attributes.
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-#if NETSTANDARD1_6
-                  //IEnumerable<Attribute> CusAttribList = oType.GetTypeInfo().GetCustomAttributes(inherit:true) ;
-                  //foreach (Attribute attr in CusAttribList)
-                  //   classGroup.Add("Custom attribute", attr.ToString());
-#else
-                        Attribute[] custAttribList = Attribute.GetCustomAttributes(oType, true);  // true : inherit
-                        foreach (Attribute attr in custAttribList)
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(oType, true);  // true : inherit
+                        foreach (Attribute attr in customAttribList)
                             classGroup.Add("Custom attribute", attr.ToString());
-#endif
                     }
                 }
 
@@ -620,10 +538,10 @@ namespace TraceTool
         */
 
         // to do : move that function to reflection.cs file and return a string list
-        // to do : if mi is not a member of the xml file, open the appropriate one. All XPathNavigator must be stored into an array
+        // to do : if mInfo is not a member of the xml file, open the appropriate one. All XPathNavigator must be stored into an array
         // to do : XML iteration must be changed to use sub tags (like <summary> <para> and <see>)
 
-        internal void AddDocumentation(Object documentation, TMemberNode group, Type oType, MemberInfo mi)
+        internal void AddDocumentation(object documentation, TMemberNode group, Type oType, MemberInfo mInfo)
         {
             try
             {
@@ -635,38 +553,38 @@ namespace TraceTool
                     string typeName = oType.FullName.Replace("+", ".");
 
                     string xpathString = "";
-                    if (mi == null)
+                    if (mInfo == null)
                     {
                         xpathString = "//member[@name='T:" + typeName + "']";
                     }
                     else
                     {
-                        switch (mi.MemberType)
+                        switch (mInfo.MemberType)
                         {
                             case MemberTypes.Constructor:
                                 xpathString = "//member[@name='M:" + typeName + ".#ctor" +
-                                              ReflectionHelper.MethodParamsType2String((MethodBase)mi) +
+                                              ReflectionHelper.MethodParamsType2String((MethodBase)mInfo) +
                                               "']";
                                 break;
                             case MemberTypes.Method:
-                                xpathString = "//member[@name='M:" + typeName + "." + mi.Name +
-                                              ReflectionHelper.MethodParamsType2String((MethodBase)mi);
+                                xpathString = "//member[@name='M:" + typeName + "." + mInfo.Name +
+                                              ReflectionHelper.MethodParamsType2String((MethodBase)mInfo);
 
-                                if (mi.Name == "op_Implicit" || mi.Name == "op_Explicit")
-                                    xpathString += "~" + ((MethodInfo)mi).ReturnType.FullName;
+                                if (mInfo.Name == "op_Implicit" || mInfo.Name == "op_Explicit")
+                                    xpathString += "~" + ((MethodInfo)mInfo).ReturnType.FullName;
 
                                 xpathString += "']";
                                 break;
                             case MemberTypes.Property:
-                                xpathString = "//member[@name='P:" + typeName + "." + mi.Name +
-                                              ReflectionHelper.PropertyParamsType2String((PropertyInfo)mi) +
+                                xpathString = "//member[@name='P:" + typeName + "." + mInfo.Name +
+                                              ReflectionHelper.PropertyParamsType2String((PropertyInfo)mInfo) +
                                               "']";
                                 break;
                             case MemberTypes.Field:
-                                xpathString = "//member[@name='F:" + typeName + "." + mi.Name + "']";
+                                xpathString = "//member[@name='F:" + typeName + "." + mInfo.Name + "']";
                                 break;
                             case MemberTypes.Event:
-                                xpathString = "//member[@name='E:" + typeName + "." + mi.Name + "']";
+                                xpathString = "//member[@name='E:" + typeName + "." + mInfo.Name + "']";
                                 break;
                         }
                     }
@@ -688,9 +606,9 @@ namespace TraceTool
                         {
                             string s2 = s.Trim("\r ".ToCharArray());
                             if (s2.Length != 0)
-                                if (mi == null)
+                                if (mInfo == null)
                                     group.Add("Documentation", s2);
-                                else // putting Documentation on the column 3 is to far, use space indentation in place.
+                                else // putting Documentation on the column 3 is too far, use space indentation in place.
                                     group.Add("Documentation", "            " + s2);
                         }
                     }
@@ -712,7 +630,7 @@ namespace TraceTool
                 if (attributeList.Length > 0)
                     foreach (Attribute attribute in attributeList)
                     {
-                        // putting attribute name on the column 3 is to far, use space indentation in place.
+                        // putting attribute name on the column 3 is too far, use space indentation in place.
                         memberNode.Add("Custom Attribute", "            " + attribute);
                     }
             }
@@ -749,7 +667,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="objToSend">Object to display</param>
         /// <param name="sendPrivate">Display private fields</param>
-        /// <param name="maxLevel">Number of sub component to display in tree</param>
+        /// <param name="maxLevel">Number of subcomponent to display in tree</param>
         public void AddValue(object objToSend, bool sendPrivate, int maxLevel)
         {
             string strModifier = "";
@@ -781,7 +699,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="objToSend">Object to display</param>
         /// <param name="sendPrivate">Display private fields</param>
-        /// <param name="maxLevel">Number of sub component to display in tree</param>
+        /// <param name="maxLevel">Number of subcomponent to display in tree</param>
         /// <param name="objTitle">Title to display for the object</param>
         public void AddValue(object objToSend, bool sendPrivate, int maxLevel, string objTitle)
         {
@@ -848,11 +766,7 @@ namespace TraceTool
                 // check primitive and well know type
                 // TO DO : use a MAP to store class to ignore
                 if (
-#if NETSTANDARD1_6
-                    oType.GetTypeInfo().IsPrimitive || oType.GetTypeInfo().IsEnum ||
-#else
                     oType.IsPrimitive || oType.IsEnum ||
-#endif
                     objToSend is string || objToSend is StringBuilder || objToSend is DateTime || objToSend is Decimal)  // 2014/10/23 : added Decimal 
                 {
                     upperNode.Col2 = objToSend.ToString();
@@ -1070,18 +984,10 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-                FieldInfo [] fi = oType.GetTypeInfo().GetFields(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  ) ;
-#else              
                 FieldInfo[] fi = oType.GetFields(
                   BindingFlags.Public | BindingFlags.NonPublic |
                   BindingFlags.Static | BindingFlags.Instance
                   );
-#endif
-
 
                 if (fi.Length <= 0)
                     return;
@@ -1114,11 +1020,8 @@ namespace TraceTool
 
                     var memberName = "";
                     // add the declaring type if not the actual type
-#if !NETSTANDARD1_6
                     if (member.DeclaringType != member.ReflectedType)
                         memberName += ReflectionHelper.Type2ShortString(member.DeclaringType) + "::";
-#endif
-
                     memberName += member.Name;
 
                     TMemberNode fieldNode = new TMemberNode(memberName, "", memberModifier);
@@ -1137,7 +1040,7 @@ namespace TraceTool
         internal Dictionary<string, TMemberNode> GetDependencyPropertiesValues(Object objToSend)
         {
             Dictionary<string, TMemberNode> result = new Dictionary<string, TMemberNode>();
-#if NETFULL && !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if NETFULL && !NETSTANDARD2_0
             try
             {
                 MarkupObject markupObject = MarkupWriter.GetMarkupObjectFor(objToSend);
@@ -1200,19 +1103,11 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              PropertyInfo [] pi = oType.GetTypeInfo().GetProperties(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  // | BindingFlags.FlattenHierarchy
-                  ) ;
-#else
                 PropertyInfo[] pi = oType.GetProperties(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     // | BindingFlags.FlattenHierarchy
                     );
-#endif
 
                 if (pi.Length <= 0)
                     return;
@@ -1315,18 +1210,14 @@ namespace TraceTool
                         string interfacesNames = "";
 
                         // return ALL interfaces, not only interfaces for the current type
-#if NETSTANDARD1_6
-                      Type[] typeInterfaceList = oType.GetTypeInfo().GetInterfaces();
-#else
                         Type[] typeInterfaceList = oType.GetInterfaces();
-#endif
 
-                        foreach (Type intf in typeInterfaceList)
+                        foreach (Type interF in typeInterfaceList)
                         {
                             if (interfacesNames == "")
-                                interfacesNames = intf.Name;
+                                interfacesNames = interF.Name;
                             else
-                                interfacesNames += "," + intf.Name;
+                                interfacesNames += "," + interF.Name;
                         }
 
                         if (basesGroup == null)
@@ -1338,11 +1229,7 @@ namespace TraceTool
 
                         basesGroup.Add(typeName, interfacesNames);
                     }
-#if NETSTANDARD1_6
-                  oType = oType.GetTypeInfo().BaseType ;
-#else
                     oType = oType.BaseType;
-#endif
                 }
             }
             catch (Exception e)
@@ -1357,17 +1244,10 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              Type[] nestedTypes = oType.GetTypeInfo().GetNestedTypes(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-              );
-#else
                 Type[] nestedTypes = oType.GetNestedTypes(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     );
-#endif
                 if (nestedTypes.Length <= 0)
                     return;
 
@@ -1377,7 +1257,7 @@ namespace TraceTool
 
                 foreach (var subType in nestedTypes)
                 {
-                    // don't check (yet) if the subtype is non public...
+                    // don't check (yet) if the subtype is non-public...
 
                     string strModifier = "", strName = "";
                     ReflectionHelper.Type2String(subType, ref strModifier, ref strName);
@@ -1398,17 +1278,10 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              FieldInfo [] fi = oType.GetTypeInfo().GetFields(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-              ) ;
-#else
                 FieldInfo[] fi = oType.GetFields(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     );
-#endif
 
                 if (fi.Length <= 0)
                     return;
@@ -1421,9 +1294,7 @@ namespace TraceTool
                     var member = fi[iProp];
 
                     if ((flags & TraceDisplayFlags.ShowInheritedMembers) != TraceDisplayFlags.ShowInheritedMembers
-#if !NETSTANDARD1_6
                       && (member.DeclaringType != member.ReflectedType)
-#endif
                   )
                         continue;
 
@@ -1473,13 +1344,8 @@ namespace TraceTool
 
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-#if NETSTANDARD1_6
-                      //Attribute [] CustomAttribs = Attribute.GetCustomAttributes (member , true);
-                      //displayCustomAttrib (MemberNode,CustomAttribs) ;
-#else
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
-#endif
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
 
@@ -1498,7 +1364,7 @@ namespace TraceTool
         {
             try
             {
-#if NETFULL && !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if NETFULL && !NETSTANDARD2_0
                 if (objToSend == null)
                     return;
 
@@ -1548,19 +1414,11 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              PropertyInfo [] pi = oType.GetTypeInfo().GetProperties(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  // | BindingFlags.FlattenHierarchy
-                  ) ;
-#else
                 PropertyInfo[] pi = oType.GetProperties(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     // | BindingFlags.FlattenHierarchy
                     );
-#endif
 
                 if (pi.Length <= 0)
                     return;
@@ -1574,10 +1432,7 @@ namespace TraceTool
                     var member = pi[iProp];
 
                     if ((flags & TraceDisplayFlags.ShowInheritedMembers) != TraceDisplayFlags.ShowInheritedMembers
-#if !NETSTANDARD1_6
-                        && (member.DeclaringType != member.ReflectedType)
-#endif
-                  )
+                        && (member.DeclaringType != member.ReflectedType))
                         continue;
 
                     // Try to retrieve instance property value
@@ -1625,13 +1480,8 @@ namespace TraceTool
                     AddDocumentation(documentationNav, memberNode, oType, member);
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-#if NETSTANDARD1_6
-                       //Attribute [] CustomAttribs = Attribute.GetCustomAttributes (member , true);
-                       //displayCustomAttrib (MemberNode,CustomAttribs) ;
-#else
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
-#endif
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1648,17 +1498,10 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              ConstructorInfo [] ci = oType.GetTypeInfo().GetConstructors (
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  ) ;
-#else
                 ConstructorInfo[] ci = oType.GetConstructors(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     );
-#endif
                 // no way to see inherited constructor directly from one type :-(
                 if (ci.Length <= 0)
                     return;
@@ -1685,20 +1528,15 @@ namespace TraceTool
                         Members.Add(constructorGroup);
                     }
 
-                    TMemberNode memberNode = new TMemberNode(memberModifier, memberName); // ci[iprop].ToString()) ;
+                    TMemberNode memberNode = new TMemberNode(memberModifier, memberName); 
                     constructorGroup.Add(memberNode);
 
                     // add doc and custom attribute
                     AddDocumentation(documentationNav, memberNode, oType, member);
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-#if NETSTANDARD1_6
-                      //Attribute [] CustomAttribs = Attribute.GetCustomAttributes (member , true);
-                      //displayCustomAttrib (MemberNode,CustomAttribs) ;
-#else
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
-#endif
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1716,17 +1554,10 @@ namespace TraceTool
         {
             try
             {
-#if NETSTANDARD1_6
-              MethodInfo [] miRaw = oType.GetTypeInfo().GetMethods(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  )  ;
-#else
                 MethodInfo[] miRaw = oType.GetMethods(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     );
-#endif
                 if (miRaw.Length <= 0)
                     return;
 
@@ -1750,10 +1581,7 @@ namespace TraceTool
                     {
 
                         if (((flags & TraceDisplayFlags.ShowInheritedMembers) != TraceDisplayFlags.ShowInheritedMembers)
-#if !NETSTANDARD1_6
-                            && (member.DeclaringType != member.ReflectedType)
-#endif
-                            )
+                            && (member.DeclaringType != member.ReflectedType))
                             continue;
 
                         if (member.IsPublic == false && (flags & TraceDisplayFlags.ShowNonPublic) != TraceDisplayFlags.ShowNonPublic)
@@ -1789,7 +1617,7 @@ namespace TraceTool
                             groupToUse = methodsGroup;
                         }
 
-                        TMemberNode memberNode = new TMemberNode(memberModifier, memberName);  //  mi[iprop].ToString()
+                        TMemberNode memberNode = new TMemberNode(memberModifier, memberName);  
                         groupToUse.Add(memberNode);
 
                         // add doc and custom attribute
@@ -1797,13 +1625,8 @@ namespace TraceTool
 
                         if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                         {
-#if NETSTANDARD1_6
-                          //Attribute [] CustomAttribs = Attribute.GetCustomAttributes(member, true);
-                          //displayCustomAttrib(MemberNode, CustomAttribs);
-#else
-                            Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                            DisplayCustomAttribute(memberNode, customAttribs);
-#endif
+                            Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                            DisplayCustomAttribute(memberNode, customAttribList);
                         }
                     }     // discard method used by properties
                 }        // for loop
@@ -1822,17 +1645,10 @@ namespace TraceTool
             try
             {
                 int iProp;
-#if NETSTANDARD1_6
-              EventInfo [] ei = oType.GetTypeInfo().GetEvents(
-                  BindingFlags.Public | BindingFlags.NonPublic |
-                  BindingFlags.Static | BindingFlags.Instance
-                  ) ;
-#else
                 EventInfo[] ei = oType.GetEvents(
                     BindingFlags.Public | BindingFlags.NonPublic |
                     BindingFlags.Static | BindingFlags.Instance
                     );
-#endif
 
                 if (ei.Length <= 0)
                     return;
@@ -1844,10 +1660,7 @@ namespace TraceTool
                     var member = ei[iProp];
 
                     if ((flags & TraceDisplayFlags.ShowInheritedMembers) != TraceDisplayFlags.ShowInheritedMembers
-#if !NETSTANDARD1_6
-                        && (member.DeclaringType != member.ReflectedType)
-#endif
-                      )
+                        && (member.DeclaringType != member.ReflectedType))
                         continue;
 
                     // events are public...
@@ -1877,13 +1690,8 @@ namespace TraceTool
 
                     if ((flags & TraceDisplayFlags.ShowCustomAttributes) != 0)
                     {
-#if NETSTANDARD1_6
-                      //Attribute [] CustomAttribs = Attribute.GetCustomAttributes (member , true);
-                      //displayCustomAttrib (MemberNode,CustomAttribs) ;
-#else
-                        Attribute[] customAttribs = Attribute.GetCustomAttributes(member, true);
-                        DisplayCustomAttribute(memberNode, customAttribs);
-#endif
+                        Attribute[] customAttribList = Attribute.GetCustomAttributes(member, true);
+                        DisplayCustomAttribute(memberNode, customAttribList);
                     }
                 }
             }
@@ -1918,20 +1726,7 @@ namespace TraceTool
                 group.ViewerKind = TraceConst.CST_VIEWER_STACK;
                 Members.Add(group);
 
-#if NETSTANDARD1_6
-              Exception ex;
-              try
-              {
-                  throw new Exception();
-              }
-              catch (Exception e)
-              {
-                  ex = e ;
-              }
-              StackTrace stackTrace = new StackTrace(ex,true);
-#else
                 StackTrace stackTrace = new StackTrace();
-#endif
                 StackFrame[] frames = stackTrace.GetFrames();
                 int i = 0;
                 if (frames == null)
@@ -1951,11 +1746,7 @@ namespace TraceTool
                         if (oneMethod.DeclaringType == null)   // lambda methods are not in type
                             assemblyName = "";
                         else
-#if NETSTANDARD1_6
-                         assemblyName = oneMethod.DeclaringType.GetTypeInfo().Assembly.GetName().Name;  
-#else
                             assemblyName = oneMethod.DeclaringType.Assembly.GetName().Name;
-#endif
                     }
                     catch (MethodAccessException)
                     {
@@ -1967,11 +1758,7 @@ namespace TraceTool
                     }
 
                     // discard methods from this assembly
-#if NETSTANDARD1_6
-                  if (oneMethod.DeclaringType == null || !Equals(oneMethod.DeclaringType.GetTypeInfo().Assembly, GetType().GetTypeInfo().Assembly))
-#else
                     if (oneMethod.DeclaringType == null || oneMethod.DeclaringType.Assembly != GetType().Assembly)
-#endif
                     {
                         if (oneMethod is MethodInfo)
                             ReflectionHelper.Method2String((MethodInfo)oneMethod, ref memberModifier, ref memberName);
@@ -2022,21 +1809,7 @@ namespace TraceTool
                 group.ViewerKind = TraceConst.CST_VIEWER_STACK;
                 Members.Add(group);
 
-
-#if NETSTANDARD1_6
-              Exception ex ;
-              try
-              {
-                  throw new Exception();
-              }
-              catch (Exception e)
-              {
-                  ex = e ;
-              }
-              StackTrace stackTrace = new StackTrace(ex,true);
-#else
                 StackTrace stackTrace = new StackTrace();
-#endif
                 StackFrame[] frames = stackTrace.GetFrames();
 
                 int i = 0;
@@ -2061,11 +1834,7 @@ namespace TraceTool
                     try
                     {
                         if (oneMethod.DeclaringType != null)
-#if NETSTANDARD1_6
-                         assemblyName = oneMethod.DeclaringType.GetTypeInfo().Assembly.GetName().Name; 
-#else
                             assemblyName = oneMethod.DeclaringType.Assembly.GetName().Name;
-#endif
                     }
                     catch (MethodAccessException)
                     {
@@ -2084,7 +1853,7 @@ namespace TraceTool
 
         //------------------------------------------------------------------------------
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
         /// <summary>
         /// Add a bitmap
         /// </summary>
@@ -2104,7 +1873,7 @@ namespace TraceTool
                 // 2) create a byte array from the stream
                 int sourceLength = (int)imgStream.Length;
                 byte[] sourceData = new byte[sourceLength];
-                imgStream.Read(sourceData, 0, sourceLength);
+                _ = imgStream.Read(sourceData, 0, sourceLength);
                 imgStream.Close();
 
                 // 3) encode (base 64) source array into another array
@@ -2125,7 +1894,7 @@ namespace TraceTool
 
         //------------------------------------------------------------------------------
 
-#if NETFULL && !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if NETFULL && !NETSTANDARD2_0
         /// <summary>
         /// Add a bitmap
         /// </summary>
@@ -2155,7 +1924,7 @@ namespace TraceTool
                 // 2) create a byte array from the stream
                 int sourceLength = (int)imgStream.Length;
                 byte[] sourceData = new byte[sourceLength];
-                imgStream.Read(sourceData, 0, sourceLength);
+                _ = imgStream.Read(sourceData, 0, sourceLength);
                 imgStream.Close();
 
                 // 3) encode (base 64) source array into another array
@@ -2218,7 +1987,7 @@ namespace TraceTool
                     while ((byteDumped < count) && (d < 16) && (c < bytes.Length))
                     {
                         byte oneByte = bytes[c];
-                        hexaRepresentation.Append(((Int32)oneByte).ToString("X2")).Append(" ");
+                        hexaRepresentation.Append(((int)oneByte).ToString("X2")).Append(" ");
 
                         // only the zero cannot be copied to the stream
                         //if (OneByte == 0)
@@ -2233,7 +2002,7 @@ namespace TraceTool
                     dumpGroup.Add(beginLine.ToString("X6"), hexaRepresentation.ToString()); // , Str_representation.ToString());
                     //.SetFontDetail(1,false,false,-1,0,"Lucida console") ;
                 }
-                dumpGroup.Col2 = byteDumped.ToString() + " byte(s) dumped";
+                dumpGroup.Col2 = byteDumped + " byte(s) dumped";
             }
             catch (Exception e)
             {
@@ -2290,16 +2059,12 @@ namespace TraceTool
             TMemberNode fCurrentRow = tableMembers.Add("");
             Type oType = itemObject.GetType();
 
-            // set first col if give. First col title is set by caller.
+            // set first col if given. First col title is set by caller.
             if (firstColValue != null)
                 fCurrentRow.Col1 = firstColValue;
 
             // special case for Primitive object
-#if NETSTANDARD1_6
-         if (oType.GetTypeInfo().IsPrimitive || oType.GetTypeInfo().IsEnum || itemObject is string || itemObject is StringBuilder || itemObject is DateTime)
-#else
             if (oType.IsPrimitive || oType.IsEnum || itemObject is string || itemObject is StringBuilder || itemObject is DateTime)
-#endif
             {
                 // Add Column Title if first line
                 if (isFirstRow)
@@ -2319,12 +2084,7 @@ namespace TraceTool
 
             //add Fields Value
             //----------------
-#if NETSTANDARD1_6
-         FieldInfo[] fi = itemObject.GetType().GetTypeInfo().GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
-#else
             FieldInfo[] fi = itemObject.GetType().GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
-#endif
-
             foreach (var member in fi)
             {
                 // Add Column Title if first line
@@ -2342,6 +2102,8 @@ namespace TraceTool
                 else
                     strMemberValue = memberValue.ToString();
 
+                strMemberValue = strMemberValue.Replace("\t","\\t");
+
                 if (isFirstCol)
                     fCurrentRow.Col1 = strMemberValue;
                 else
@@ -2350,17 +2112,7 @@ namespace TraceTool
             }
             // add Properties
             //-----------------
-#if NETSTANDARD1_6
-         PropertyInfo[] pi = itemObject.GetType().GetTypeInfo().GetProperties(
-            BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance
-            // | BindingFlags.FlattenHierarchy
-            );
-#else
-            PropertyInfo[] pi = itemObject.GetType().GetProperties(
-               BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance
-               // | BindingFlags.FlattenHierarchy
-               );
-#endif
+            PropertyInfo[] pi = itemObject.GetType().GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance); // | BindingFlags.FlattenHierarchy
             foreach (var field in pi)
             {
                 // Add Column Title if first line
@@ -2392,6 +2144,7 @@ namespace TraceTool
                     strMemberValue = "null";
                 else
                     strMemberValue = memberValue.ToString();
+                strMemberValue = strMemberValue.Replace("\t", "\\t");
 
                 if (isFirstCol)
                     fCurrentRow.Col1 = strMemberValue;
@@ -2403,7 +2156,7 @@ namespace TraceTool
             // add Dependency Properties
             //--------------------------
 
-#if NETFULL && !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if NETFULL && !NETSTANDARD2_0
             bool hasDependencyProperties = false;
             MarkupObject markupObject = MarkupWriter.GetMarkupObjectFor(itemObject);
 
@@ -2467,7 +2220,7 @@ namespace TraceTool
                 else if (list is IDictionary)
                 {
                     // Special case for IDictionary : display the Key on first column
-                    // IDictionary must be check before IEnumerable because IDictionary inherit from IEnumerable
+                    // IDictionary must be checked before IEnumerable because IDictionary inherit from IEnumerable
                     tableMembers.Col1 = "Key"; // set first col title
                     foreach (DictionaryEntry itemDic in (IDictionary)list)
                     {
@@ -2664,7 +2417,7 @@ namespace TraceTool
                     }
                     else
                     {
-                        tempStr.Append(String.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, fontDetail.ColId));
+                        tempStr.Append(string.Format("{0,5}{1,3}", TraceConst.CST_FONT_DETAIL, fontDetail.ColId));
 
                         if (fontDetail.Bold)
                             tempStr.Append("1");
@@ -2675,7 +2428,7 @@ namespace TraceTool
                             tempStr.Append("1");
                         else
                             tempStr.Append("0");
-                        tempStr.Append(String.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
+                        tempStr.Append(string.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
                         commandList.Add(tempStr.ToString());
                     }
                 }

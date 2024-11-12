@@ -26,6 +26,7 @@ type
     Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure AnyRadioButtonClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -47,10 +48,15 @@ uses registry, EventLog , Unt_Tool;
 
 //------------------------------------------------------------------------------
 
+procedure TFrmSelectEvent.AnyRadioButtonClick(Sender: TObject);
+begin
+   butOk.Enabled := true;
+end;
+
 procedure TFrmSelectEvent.FormCreate(Sender: TObject);
 var
    reg : TRegistry;
-   c  : integer ;                         
+   c  : integer ;
    RadioButton: TRadioButton;
 begin
    reg := TRegistry.Create (KEY_READ);
@@ -68,6 +74,7 @@ begin
             RadioButton.Width := ScrollBox.Width- 10 ;
             RadioButton.Anchors := [akLeft,akTop,akRight] ;
             RadioButton.parent := ScrollBox ;
+            RadioButton.OnClick := AnyRadioButtonClick;
             eventFiles.Objects [c] := RadioButton ;
          end ;
       end ;
@@ -80,11 +87,9 @@ end;
 
 procedure TFrmSelectEvent.FormShow(Sender: TObject);
 var
-   isOneValid : boolean ;
    c : integer ;
    RadioButton: TRadioButton;
 begin
-   isOneValid := false ;
    for c := 0 to eventFiles.Count - 1 do begin
       RadioButton := TRadioButton (eventFiles.Objects [c]) ;
       RadioButton.Checked := false ;
@@ -92,10 +97,9 @@ begin
          RadioButton.Enabled := false
       else begin
          RadioButton.Enabled := true ;
-         isOneValid := true ;
       end ;
    end ;
-   butOk.Enabled := isOneValid ;
+   butOk.Enabled := false ;
 end;
 
 //------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ type
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override ;
-    procedure copySelected() ; override;
+    function copySelected():boolean ; override;
   end;
 
 var
@@ -57,17 +57,18 @@ begin
    TFrm_Trace(Owner).CurrentViewers.add(self) ;
    //TFrm_Trace(Owner).BitmapVisible := true ;   // viewer will be visible
    //inc (TFrm_Trace(Owner).ViewerCount) ;       // need to know the number of viewer to display
-   TFrm_Trace(Owner).AddOneLineDetail('Image dimension',IntToStr(ImageViewer.Width)+'x'+IntToStr(ImageViewer.Height),'');
+   TFrm_Trace(Owner).AddOneLineDetail('Image dimension',IntToStr(ImageViewer.Width)+'x'+IntToStr(ImageViewer.Height),'',false,false);
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_BitmapDetails.copySelected;
+function Tframe_BitmapDetails.copySelected : boolean;
 var
    wFormat:word;
    wHandle:THandle;
    wPalette:HPalette;
 begin
+   result := true;
    ImageViewer.Picture.SaveToClipboardFormat (wformat,whandle,wpalette);
    ClipBoard.SetAsHandle(wFormat,wHandle);
 end;

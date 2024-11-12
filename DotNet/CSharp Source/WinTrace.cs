@@ -8,7 +8,6 @@
 // Download :  http://sourceforge.net/projects/tracetool/
 // See License.txt for license information
 
-using System;
 using System.Collections.Generic;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -42,7 +41,7 @@ namespace TraceTool
 
         /// <summary>
         /// WinTrace constructor : you can map a WinTrace to an existing window
-        /// Nothing is send to the viewer
+        /// Nothing is sent to the viewer
         /// </summary>
         public WinTrace()
         {
@@ -51,7 +50,7 @@ namespace TraceTool
 
         //------------------------------------------------------------------------------
         /// <summary>
-        /// WinTrace constructor. The Window Trace is create on the viewer (if not already done)
+        /// WinTrace constructor. The Window Trace is created on the viewer (if not already done)
         /// </summary>
         /// <param name="winTraceId">Required window trace Id. If empty, a guid will be generated</param>
         /// <param name="winTraceText">The Window Title on the viewer.If empty, a default name will be used</param>
@@ -72,7 +71,7 @@ namespace TraceTool
 
             // create the trace window
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_TREE_NAME, winTraceText));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_TREE_NAME, winTraceText));
             TTrace.SendToWinTraceClient(commandList, Id);
         }
 
@@ -85,7 +84,7 @@ namespace TraceTool
             Enabled = true;
             WinTraceId = Id;    // winTraceId need to be the same as 'id' if we want to call sendXxx() directly on WinTrace object
 
-            ContextList = new List<NodeContext>();
+            ContextList = new List<string>();
 
             //fWinTraceContext = null ;
 
@@ -170,10 +169,11 @@ namespace TraceTool
         /// Save the window tree traces to a text file
         /// </summary>
         /// <param name="fileName">file to save</param>
+        // ReSharper disable once IdentifierTypo
         public void SaveToTextfile(string fileName)
         {
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1}", TraceConst.CST_SAVETOTEXT, fileName));
+            commandList.Insert(0, string.Format("{0,5}{1}", TraceConst.CST_SAVETOTEXT, fileName));
             TTrace.SendToWinTraceClient(commandList, Id);
         }
 
@@ -225,7 +225,7 @@ namespace TraceTool
         public void DisplayWin()
         {
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}", TraceConst.CST_DISPLAY_TREE));
+            commandList.Insert(0, string.Format("{0,5}", TraceConst.CST_DISPLAY_TREE));
             TTrace.SendToWinTraceClient(commandList, Id);
         }
 
@@ -241,7 +241,7 @@ namespace TraceTool
             traceForm.IsMultiColTree = true;
 
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1,11}", TraceConst.CST_TREE_MULTI_COLUMN, 0));
+            commandList.Insert(0, string.Format("{0,5}{1,11}", TraceConst.CST_TREE_MULTI_COLUMN, 0));
             TTrace.SendToWinTraceClient(commandList, Id);
         }
 
@@ -260,7 +260,7 @@ namespace TraceTool
             traceForm.MainCol = mainColIndex;
 
             List<string> commandList = new List<string>();
-            commandList.Insert(0, String.Format("{0,5}{1,11}", TraceConst.CST_TREE_MULTI_COLUMN, mainColIndex));
+            commandList.Insert(0, string.Format("{0,5}{1,11}", TraceConst.CST_TREE_MULTI_COLUMN, mainColIndex));
             TTrace.SendToWinTraceClient(commandList, Id);
         }
 
@@ -275,10 +275,10 @@ namespace TraceTool
         ///   The Mode can be one of the following :
         ///   0, Viewer Log is disabled.
         ///   1, Viewer log enabled. No size limit.
-        ///   2, Viewer log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+        ///   2, Viewer log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
         ///   3, Local log is disabled
         ///   4, Local log enabled. No size limit.
-        ///   5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename).
+        ///   5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename).
         ///   </code>
         ///   </summary>
         ///   <param name="fileName">\File to open</param>
@@ -300,10 +300,10 @@ namespace TraceTool
         ///   The Mode can be one of the following :
         ///   0, Viewer Log is disabled.
         ///   1, Viewer log enabled. No size limit.
-        ///   2, Viewer log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+        ///   2, Viewer log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
         ///   3, Local log is disabled
         ///   4, Local log enabled. No size limit. 
-        ///   5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename). 
+        ///   5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename). 
         ///   </code>
         ///   </summary>
         ///   <param name="fileName">\File to open</param>
@@ -315,7 +315,7 @@ namespace TraceTool
         {
             // 3, Local log is disabled
             // 4, Local log enabled. No size limit.
-            // 5, Local log enabled. A new file is create each day (CCYYMMDD is appended to the filename)
+            // 5, Local log enabled. A new file is created each day (CCYYMMDD is appended to the filename)
             if (mode >= 3)
             {
                 InternalWinTrace traceForm = TTrace.GetInternalTraceForm(Id, true);
@@ -465,9 +465,9 @@ namespace TraceTool
         /// Add a filter to node. Multiple calls to this function can be done. Call ApplyFilter() to apply filtering
         /// </summary>
         /// <param name="column">Column to apply filter.<p/>
-        ///   In multi column mode the first column start at 0 <p/>
+        ///   In multi-column mode the first column start at 0 <p/>
         ///   In normal mode : <p/>
-        ///   col icone   = 999    <p/>
+        ///   col icon    = 999    <p/>
         ///   col time    = 1      <p/>
         ///   col thread  = 2      <p/>
         ///   col traces  = 3      <p/>
@@ -475,10 +475,10 @@ namespace TraceTool
         ///   col members = 998
         /// </param>
         /// <param name="compare">There is 5 kinds of filters : <p/>
-        ///    Equal           = 0  <p/>
-        ///    Not equal       = 1  <p/>
+        ///    Equal          = 0  <p/>
+        ///    Not equal      = 1  <p/>
         ///    contains       = 2  <p/>
-        ///    Don't contains  = 3  <p/>
+        ///    Don't contain  = 3  <p/>
         ///    (Ignore this filter) = 4 or -1
         ///</param>
         /// <param name="text">The text to search (insensitive) </param>
@@ -494,7 +494,7 @@ namespace TraceTool
         /// <summary>
         /// Apply filters after calls to AddFilter().
         /// </summary>
-        /// <param name="conditionAnd">If true, use an 'AND' condition for each filters, else use a "OR" </param>
+        /// <param name="conditionAnd">If true, use an 'AND' condition for each filter, else use a "OR" </param>
         /// <param name="showMatch">If true, show node that match filter and hide others. If false hide matching node and show others</param>
         /// <param name="includeChildren">If true, search in subnodes</param>
         public void ApplyFilter(bool conditionAnd, bool showMatch, bool includeChildren)
@@ -628,7 +628,7 @@ namespace TraceTool
         /// When linked, the plugin can receive event (see ITracePlugin).
         /// </summary>
         /// <param name="pluginName">name of the plugin</param>
-        /// <param name="flags">Combinaison of CST_PLUG_ONACTION , CST_PLUG_ONBEFOREDELETE , CST_PLUG_ONTIMER</param>
+        /// <param name="flags">Combination of CST_PLUG_ONACTION , CST_PLUG_ONBEFOREDELETE , CST_PLUG_ONTIMER</param>
 
         public void LinkToPlugin(string pluginName, int flags)
         {

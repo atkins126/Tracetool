@@ -2,29 +2,28 @@ object FrmPrintPreview: TFrmPrintPreview
   Left = 327
   Top = 252
   Caption = 'Print Preview'
-  ClientHeight = 564
-  ClientWidth = 800
+  ClientHeight = 563
+  ClientWidth = 796
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Arial'
   Font.Style = []
-  OldCreateOrder = True
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 14
   object Splitter1: TSplitter
     Left = 0
     Top = 2
     Width = 2
-    Height = 521
+    Height = 520
     MinSize = 110
+    ExplicitHeight = 521
   end
   object Bevel1: TBevel
     Left = 0
     Top = 0
-    Width = 800
+    Width = 796
     Height = 2
     Align = alTop
     ExplicitWidth = 792
@@ -32,17 +31,19 @@ object FrmPrintPreview: TFrmPrintPreview
   object PageControl: TPageControl
     Left = 2
     Top = 2
-    Width = 798
-    Height = 521
+    Width = 794
+    Height = 520
     ActivePage = tabParameters
     Align = alClient
     TabOrder = 0
     OnChange = PageControlChange
+    ExplicitWidth = 798
+    ExplicitHeight = 521
     object tabParameters: TTabSheet
       Caption = 'Parameters'
       DesignSize = (
-        790
-        492)
+        786
+        491)
       object Label2: TLabel
         Left = 8
         Top = 47
@@ -62,10 +63,11 @@ object FrmPrintPreview: TFrmPrintPreview
       object Panel4: TPanel
         Left = 0
         Top = 0
-        Width = 790
+        Width = 786
         Height = 41
         Align = alTop
         TabOrder = 0
+        ExplicitWidth = 790
         object ButSelectPrinter: TButton
           Left = 2
           Top = 8
@@ -90,7 +92,7 @@ object FrmPrintPreview: TFrmPrintPreview
       object ColumList: TCheckListBox
         Left = 24
         Top = 67
-        Width = 394
+        Width = 386
         Height = 190
         Anchors = [akLeft, akTop, akRight]
         ItemHeight = 14
@@ -158,15 +160,15 @@ object FrmPrintPreview: TFrmPrintPreview
       object Panel1: TPanel
         Left = 193
         Top = 39
-        Width = 597
-        Height = 453
+        Width = 593
+        Height = 452
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
         object PageNavigator: TTabSet
           Left = 0
-          Top = 426
-          Width = 597
+          Top = 425
+          Width = 593
           Height = 27
           Align = alBottom
           Font.Charset = DEFAULT_CHARSET
@@ -175,12 +177,14 @@ object FrmPrintPreview: TFrmPrintPreview
           Font.Name = 'Arial'
           Font.Style = [fsBold]
           OnChange = PageNavigatorChange
+          ExplicitTop = 426
+          ExplicitWidth = 597
         end
         object PrintPreview: TPrintPreview
           Left = 0
           Top = 0
-          Width = 597
-          Height = 426
+          Width = 593
+          Height = 425
           HorzScrollBar.Margin = 10
           HorzScrollBar.Tracking = True
           VertScrollBar.Margin = 10
@@ -208,7 +212,7 @@ object FrmPrintPreview: TFrmPrintPreview
       object Toolbar: TPanel
         Left = 0
         Top = 0
-        Width = 790
+        Width = 786
         Height = 39
         Align = alTop
         BevelOuter = bvNone
@@ -219,6 +223,7 @@ object FrmPrintPreview: TFrmPrintPreview
         Font.Style = []
         ParentFont = False
         TabOrder = 1
+        ExplicitWidth = 790
         object Label1: TLabel
           Left = 8
           Top = 13
@@ -270,26 +275,29 @@ object FrmPrintPreview: TFrmPrintPreview
         Left = 0
         Top = 39
         Width = 193
-        Height = 453
+        Height = 452
         TabOrder = 2
         PrintPreview = PrintPreview
         PaperView.ShadowWidth = 1
         Zoom = 20
+        ExplicitHeight = 453
       end
     end
   end
   object Panel2: TPanel
     Left = 0
-    Top = 523
-    Width = 800
+    Top = 522
+    Width = 796
     Height = 41
     Align = alBottom
     TabOrder = 1
+    ExplicitTop = 523
+    ExplicitWidth = 800
     DesignSize = (
-      800
+      796
       41)
     object ButCancel: TButton
-      Left = 705
+      Left = 697
       Top = 9
       Width = 75
       Height = 25
@@ -298,6 +306,7 @@ object FrmPrintPreview: TFrmPrintPreview
       Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 0
+      ExplicitLeft = 705
     end
     object PrintButton: TButton
       Left = 14

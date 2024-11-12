@@ -2,8 +2,8 @@ object FrmBase: TFrmBase
   Left = 405
   Top = 281
   Caption = 'FrmBase'
-  ClientHeight = 438
-  ClientWidth = 642
+  ClientHeight = 437
+  ClientWidth = 638
   Color = clBtnFace
   DragKind = dkDock
   Font.Charset = DEFAULT_CHARSET
@@ -11,11 +11,9 @@ object FrmBase: TFrmBase
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnEndDock = FormEndDock
   OnStartDock = FormStartDock
-  PixelsPerInch = 96
   TextHeight = 13
 end

@@ -39,7 +39,7 @@ uses
    , unt_utility
    , DebugOptions
    , unt_TraceConfig
-   , VirtualTrees ;
+   , VirtualTrees.BaseTree, VirtualTrees, VirtualTrees.Types ;
 
 
 // called only by the timer (then main thread) for each messages in the stack object list
@@ -77,64 +77,75 @@ var
    //StartNode, LastNode : PVirtualNode;
 
    //------------------------------------
-   function getStr : String ;
+   function lowGetInt(strVal:string; context:string): integer;
+   begin
+      var E: Integer;
+      Val(strVal, Result, E);
+      if E <> 0 then begin
+          Result := -1;
+          Frm_Tool.ShowParsedMessage(context + '\ Bad string: <' + strVal + '>') ;
+      end;
+
+   end;
+   //------------------------------------
+   function getStr() : String ;
    begin
       result := copy (SingleMsg,6,length (SingleMsg)-5);
       CorrectString(result) ;
    end ;
 
    //------------------------------------
-   function getIntAndStr (var intval : integer) : String ;
+   function getIntAndStr (var intval : integer; context:string) : String ;
    var
       First : String ;
    begin
       First := copy (SingleMsg,6,11) ;
-      intval := strtoint (String(First));
+      intval := lowGetInt (First, context + '\I1');
       result := copy (SingleMsg,17,length (SingleMsg)-16);
       CorrectString(result) ;
    end ;
 
    //------------------------------------
-   function get2IntAndStr (var intval1, intval2 : integer) : String ;
+   function get2IntAndStr (var intval1, intval2 : integer; context:string) : String ;
    var
       strVal : String ;
    begin
       strVal := copy (SingleMsg,6,11) ;
-      intval1 := strtoint (String(strVal));
+      intval1 := lowGetInt (strVal,context + '\I1');
 
       strVal := copy (SingleMsg,17,11) ;
-      intval2 := strtoint (String(strVal));
+      intval2 := lowGetInt (strVal,context + '\I2');
 
       result := copy (SingleMsg,28,length (SingleMsg)-27);
       CorrectString(result) ;
    end ;
 
    //------------------------------------
-   function get3IntAndStr (var intval1, intval2, intval3 : integer) : String ;
+   function get3IntAndStr (var intval1, intval2, intval3 : integer;context:string) : String ;
    var
       strVal : String ;
    begin
       strVal := copy (SingleMsg,6,11) ;
-      intval1 := strtoint (String(strVal));
+      intval1 := lowGetInt (strVal,context + '\I1');
 
       strVal := copy (SingleMsg,17,11) ;
-      intval2 := strtoint (String(strVal));
+      intval2 := lowGetInt (strVal,context + '\I2');
 
       strVal := copy (SingleMsg,28,11) ;
-      intval3 := strtoint (String(strVal));
+      intval3 := lowGetInt (strVal,context + '\I3');
 
       result := copy (SingleMsg,39,length (SingleMsg)-38);
       CorrectString(result) ;
    end ;
 
    //------------------------------------
-   function getInt : integer ;
+
+   function getInt (context:string) : integer ;
    var
       strVal : String ;
    begin
       strVal := copy (SingleMsg,6,11) ;
-      result := strtoint (strVal);
-      //result := StrToInt (String(getStr()));
+      result := lowGetInt (strVal, context + '\I1');
    end ;
 
    //------------------------------------
@@ -180,8 +191,8 @@ var
       color : integer ;
       ColId : integer ;
    begin
-      ColId := StrToInt(String(getIntAndStr(color))) ;
-      
+      var colIdStr : string := getIntAndStr(color,'CST_BACKGROUND_COLOR(Color:I1,ColId:I2)');
+      ColId := lowGetInt(colIdStr,'CST_BACKGROUND_COLOR(Color:I1,ColId:I2)\I2') ;
       found := false ;
       ArrayLen := length(FontDetails) ;
       for c := 0 to ArrayLen -1 do begin
@@ -211,37 +222,37 @@ var
       c,ArrayLen : integer ;
       found : boolean ;
    begin
-      // Cmd ColId Bold Italic Color size  Fontname
-      // %6  %3d   %c   %c     %11d  %11d  %s
-      // 0   6     9    10     11    22    33
+      // Cmd + ColId Bold Italic Color size  Fontname
+      // %6    %3d   %c   %c     %11d  %11d  %s
+      // 0     6     9    10     11    22    33
 
-      // get first int : the colum number
+      // 1) get first int : the colum number
       TempStr := String(copy (SingleMsg,6,3)) ;
-      TempInt := strtoint (TempStr);
+      TempInt := lowGetInt (TempStr, 'CST_FONT_DETAIL(6p)\colId:I1');
 
-      // get bold
+      // 2) get bold
       TempStr := String(copy (SingleMsg,9,1)) ;
       if tempStr = '1' then
          IsBold := true
       else
          IsBold := false ;
 
-      // get italic
+      // 3) get italic
       TempStr := String(copy (SingleMsg,10,1)) ;
       if tempStr = '1' then
          IsItalic := true
       else
          IsItalic := false ;
 
-      // get color
+      // 4) get color
       TempStr := String(copy (SingleMsg,11,11)) ;
-      TempInt2 := strtoint (TempStr);
+      TempInt2 := lowGetInt (TempStr,'CST_FONT_DETAIL(6p)\color:I2');
 
-      // get font size
+      // 5) get font size
       TempStr := String(copy (SingleMsg,22,11)) ;
-      TempInt3 := strtoint (TempStr);
+      TempInt3 := lowGetInt (TempStr,'CST_FONT_DETAIL(6p)\FontSize:I3');
 
-      // get fontname
+      // 6) get fontname
       TempStr := String(copy (SingleMsg,33, length (SingleMsg)-32)) ;
 
       found := false ;
@@ -292,7 +303,7 @@ var
       result.ID := TraceWinID ;
       if createMultiCol then begin
          result.IsMultiColTree := true ;
-         result.vstTrace.Header.Columns.Clear ;
+         result.VstMain.Header.Columns.Clear ;
       end ;
 
       result.Caption := String(TraceWinID) ;
@@ -339,7 +350,7 @@ begin
 
    try //try
       if TraceConfig.DebugMode then
-         Frm_Tool.ShowParsedMessage() ;
+         Frm_Tool.ShowParsedMessage('') ;   // no context, no need to save
 
       inc(Received);  // nb of messages received
 
@@ -389,8 +400,8 @@ begin
 
          CST_TREE_MULTI_COLUMN :  begin  // change the tree to display multiple column
                                      if Frm_Trace <> TraceForm then begin
-                                        TraceForm.vstTrace.Header.Columns.Clear ;
-                                        TraceForm.vstTrace.FocusedColumn := NoColumn ;
+                                        TraceForm.VstMain.Header.Columns.Clear ;
+                                        TraceForm.VstMain.FocusedColumn := NoColumn ;
                                         TraceForm.IsMultiColTree := true ;
                                         TraceForm.MainCol := getDefaultInt(-1) ;
                                      end ;
@@ -441,7 +452,7 @@ begin
                                      TraceForm.SetActivePage ;
                                   end ;
 
-         CST_SHOW :               if getint() = 1 then
+         CST_SHOW :               if getint('CST_SHOW(ShowOrhide:I1)') = 1 then
                                      Frm_Tool.actShowExecute (nil)
                                   else
                                      Frm_Tool.actHideExecute (nil)  ;
@@ -477,7 +488,7 @@ begin
 
          CST_PROCESS_NAME :       ProcessName := getStr() ;  // precede CST_NEW_NODE, not send by Java application
 
-         CST_THREAD_ID :          THID := '0x' + IntToHex (getInt(),3) ;  // precede CST_NEW_NODE, not send by Java application
+         CST_THREAD_ID :          THID := '0x' + IntToHex (getInt('CST_THREAD_ID(THID:I1)'),3) ;  // precede CST_NEW_NODE, not send by Java application
 
          CST_THREAD_NAME :        begin  // precede CST_NEW_NODE, send only by Java application in place of CST_THREAD_ID
                                      //if (Frm_Tool.StatusBar.Panels[STATUS_Thid].Width <= 45) then
@@ -494,10 +505,10 @@ begin
                                      end ;
 
                                      // convert CLSID to node ID
-                                     ActiveNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ActiveNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      // if the node is delete, the ActiveNode can then be nil
                                      if ActiveNode <> nil then begin
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         CurrentMember := TreeRec.Members ;
                                      end ;
 
@@ -514,7 +525,7 @@ begin
                                      end ;
 
                                      // convert CLSID to node ID
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr()), true) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr()), true) ;
 
                                      // put a number to all node for unsort
                                      if ParentCompoNode = nil then begin
@@ -522,25 +533,25 @@ begin
                                         NewOrder := TraceForm.LastChildOrder ;
                                         inc (TraceForm.LastChildOrder) ;
                                      end else begin
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ParentCompoNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ParentCompoNode) ;
                                         NewOrder := TreeRec.LastChildOrder ;
                                         inc (TreeRec.LastChildOrder) ;
                                      end ;
 
                                      // create the node and ensure node is initialized.
                                      // (Needed when the node is free to call onFreeNode)
-                                     ActiveNode := TraceForm.vstTrace.AddChild (ParentCompoNode) ;
+                                     ActiveNode := TraceForm.VstMain.AddChild (ParentCompoNode) ;
                                      ActiveNodeChanged := true ;  // for filtering
-                                     TraceForm.vstTrace.ReinitNode(ActiveNode,false);
+                                     TraceForm.VstMain.ReinitNode(ActiveNode,false);
 
                                      // fill the record
-                                     TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                     TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                      InitTreeRec() ;  // set thread id, time,...
 
                                      // if date is gived, double the size of the time column, if not already done.
                                      if (TraceForm.IsDateTimeResized = false) and (Length(TreeRec.Time) > 12) then begin
                                         TraceForm.IsDateTimeResized := true ;
-                                        TraceForm.vstTrace.Header.Columns[1].Width := TraceForm.vstTrace.Header.Columns[1].Width * 2 ;
+                                        TraceForm.VstMain.Header.Columns[1].Width := TraceForm.VstMain.Header.Columns[1].Width * 2 ;
                                      end ;
 
                                      // autosort parent if at least one column in sort
@@ -562,14 +573,14 @@ begin
 
          CST_ICO_INDEX :          begin
                                       if ActiveNode <> nil then begin
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
-                                        TreeRec.TreeIcon := getInt() ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
+                                        TreeRec.TreeIcon := getInt('CST_ICO_INDEX(ColId:I1)') ;
                                       end ;
                                   end ;
 
          CST_TRACE_ID :           begin
                                      if ActiveNode <> nil then begin
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         TreeRec.TraceID := AnsiString(getStr()) ;
                                         CurrentMember := TreeRec.Members ;
                                      end ;
@@ -579,7 +590,7 @@ begin
                                      TempStr := getStr() ;
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
 
                                         if TraceForm.IsMultiColTree then begin
                                            if TreeRec.Columns <> nil then
@@ -592,7 +603,7 @@ begin
                                            TreeRec.LeftMsg := TempStr ;
                                         end ;
                                         CurrentMember := TreeRec.Members ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
 
@@ -600,17 +611,17 @@ begin
                                      TempStr := getStr() ;
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         TreeRec.RightMsg := TempStr ;
                                         CurrentMember := TreeRec.Members ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
          CST_APPEND_LEFT_MSG :    begin   // param : msg
                                      TempStr := getStr() ;
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
 
                                         if TraceForm.IsMultiColTree then begin
                                            if TreeRec.Columns = nil then  // line is empty
@@ -627,7 +638,7 @@ begin
                                            TreeRec.LeftMsg := TreeRec.LeftMsg + TempStr ;
                                         end ;
                                         CurrentMember := TreeRec.Members ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
 
@@ -635,39 +646,39 @@ begin
                                      TempStr := getStr() ;
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         TreeRec.RightMsg := TreeRec.RightMsg + TempStr ;
                                         CurrentMember := TreeRec.Members ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
 
-         CST_BACKGROUND_COLOR   : begin   // param : background color
+         CST_BACKGROUND_COLOR   : begin   // param : background color, col
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         CurrentMember := TreeRec.Members ;
                                         ParseBackgroundFont(TreeRec.FontDetails) ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
 
          CST_FONT_DETAIL :        begin
                                      if ActiveNode <> nil then begin
                                         ActiveNodeChanged := true ;    // for filtering
-                                        TreeRec := TraceForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        TreeRec := TraceForm.VstMain.GetNodeData(ActiveNode) ;
                                         CurrentMember := TreeRec.Members ;
                                         ParseFontDetail(TreeRec.FontDetails) ;
-                                        TraceForm.vstTrace.InvalidateNode(ActiveNode);
+                                        TraceForm.VstMain.InvalidateNode(ActiveNode);
                                      end ;
                                   end ;
 
          CST_SET_BOOKMARK :       begin
                                      if ActiveNode <> nil then begin   // SetBookmark (bool enabled)  param : int
-                                        if getInt() = 1 then begin   // add
+                                        if getInt('CST_SET_BOOKMARK(Enabled:I1)') = 1 then begin   // add
                                            if TraceForm.bookmarks.IndexOf(ActiveNode) = -1 then begin
                                               TraceForm.bookmarks.Add(ActiveNode) ;
-                                              TraceForm.vstTrace.InvalidateNode(ActiveNode) ;
+                                              TraceForm.VstMain.InvalidateNode(ActiveNode) ;
                                            end ;
                                         end else begin              // remove
                                            TempInt := TraceForm.bookmarks.IndexOf(ActiveNode) ;
@@ -679,7 +690,7 @@ begin
 
          CST_VISIBLE_NODE :       begin
                                      if ActiveNode <> nil then begin   // SetVisible  (bool visible)  param : int
-                                        TraceForm.vst.IsVisible [ActiveNode] := (getInt() = 1) ;
+                                        TraceForm.vst.IsVisible [ActiveNode] := (getInt('CST_VISIBLE_NODE(Visible:I1)') = 1) ;
                                      end ;
                                   end ;
 
@@ -693,16 +704,16 @@ begin
                                      IsWatch := true ;
                                      IsFirstMember := true ;  // first member must be merged with watch
                                      TempStr := getStr() ;
-                                     WatchNode := WatchForm.CheckWatch (WatchForm.vstTrace.RootNode, TempStr) ;
+                                     WatchNode := WatchForm.CheckWatch (WatchForm.VstMain.RootNode, TempStr) ;
                                      if WatchNode <> nil then
-                                        WatchExpanded := WatchForm.vstTrace.Expanded [WatchNode] ;
+                                        WatchExpanded := WatchForm.VstMain.Expanded [WatchNode] ;
 
                                      ActiveNode := WatchNode ;
                                      if ActiveNode = nil then begin
-                                        ActiveNode := WatchForm.vstTrace.AddChild (nil) ;
+                                        ActiveNode := WatchForm.VstMain.AddChild (nil) ;
                                         // ensure node is initialized. Needed when the node is free to call onFreeNode
-                                        WatchForm.vstTrace.ReinitNode(ActiveNode,false);
-                                        TreeRec := WatchForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        WatchForm.VstMain.ReinitNode(ActiveNode,false);
+                                        TreeRec := WatchForm.VstMain.GetNodeData(ActiveNode) ;
                                         TreeRec.ProcessName := ProcessName ;
                                         TreeRec.Columns := TStringList.create() ;
                                         TreeRec.Columns.Add (MessageTime) ;     // 0 MessageTime
@@ -711,8 +722,8 @@ begin
                                         TreeRec.Columns.Add ('') ;              // 3 col2
                                         TreeRec.Columns.Add ('') ;              // 4 col3
                                      end else begin // watch already exist
-                                        //WatchForm.vstTrace.DeleteChildren(ActiveNode);
-                                        TreeRec := WatchForm.vstTrace.GetNodeData(ActiveNode) ;
+                                        //WatchForm.VstMain.DeleteChildren(ActiveNode);
+                                        TreeRec := WatchForm.VstMain.GetNodeData(ActiveNode) ;
                                         TreeRec.Columns[0] := MessageTime ;     // 0 MessageTime
                                         TreeRec.Columns[1] := THID ;            // 1 THID
                                      end ;
@@ -739,13 +750,13 @@ begin
                                            newLevel := TLevel.Create() ;
 
                                            if CurrentLevel.CurrentChild = nil then begin
-                                              ActiveNode := WatchForm.vstTrace.AddChild (CurrentLevel.Node) ;
+                                              ActiveNode := WatchForm.VstMain.AddChild (CurrentLevel.Node) ;
                                               newLevel.Node := ActiveNode ;
                                               newLevel.CurrentChild := nil ;
 
                                               // ensure node is initialized. Needed when the node is free to call onFreeNode
-                                              WatchForm.vstTrace.ReinitNode(newLevel.Node,false);
-                                              TreeRec := WatchForm.vstTrace.GetNodeData(newLevel.Node) ;
+                                              WatchForm.VstMain.ReinitNode(newLevel.Node,false);
+                                              TreeRec := WatchForm.VstMain.GetNodeData(newLevel.Node) ;
                                               TreeRec.Columns := TStringList.create() ;
                                               TreeRec.Columns.Add ('') ;       // 0 MessageTime
                                               TreeRec.Columns.Add ('') ;       // 1 THID
@@ -759,8 +770,8 @@ begin
                                               newLevel.Node := ActiveNode ;
                                               newLevel.CurrentChild := ActiveNode.FirstChild ;
                                               // ensure node is initialized. Needed when the node is free to call onFreeNode
-                                              WatchForm.vstTrace.ReinitNode(newLevel.Node,false);
-                                              TreeRec := WatchForm.vstTrace.GetNodeData(newLevel.Node) ;
+                                              WatchForm.VstMain.ReinitNode(newLevel.Node,false);
+                                              TreeRec := WatchForm.VstMain.GetNodeData(newLevel.Node) ;
 
                                               if tempStr <> '' then begin
                                                  TreeRec.Columns[2] := tempStr ;    // to do : change color if <>
@@ -801,7 +812,7 @@ begin
 
          CST_MEMBER_VIEWER_KIND : begin
                                     if IsWatch = false then
-                                        CurrentMember.ViewerKind := getInt() ;
+                                        CurrentMember.ViewerKind := getInt('CST_MEMBER_VIEWER_KIND(ViewKind:I1)') ;
                                   end ;
 
          CST_MEMBER_FONT_DETAIL : begin
@@ -820,7 +831,7 @@ begin
                                         while CurrentLevel.CurrentChild <> nil do begin
                                            ActiveNode := CurrentLevel.CurrentChild ;
                                            CurrentLevel.CurrentChild := CurrentLevel.CurrentChild.NextSibling ;
-                                           WatchForm.vstTrace.DeleteNode(ActiveNode);
+                                           WatchForm.VstMain.DeleteNode(ActiveNode);
                                         end ;
 
                                         if stack.Count <> 0 then begin
@@ -846,9 +857,9 @@ begin
                                         Frm_Tool.actViewMainTracesExecute(nil) ;
                                      end ;
 
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
-                                     if (ParentCompoNode <> nil) and (TraceForm.vstTrace.IsVisible[ParentCompoNode]) then begin
-                                        TraceForm.vstTrace.ScrollIntoView (ParentCompoNode,true);
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
+                                     if (ParentCompoNode <> nil) and (TraceForm.VstMain.IsVisible[ParentCompoNode]) then begin
+                                        TraceForm.VstMain.ScrollIntoView (ParentCompoNode,true);
                                      end ;
                                   end ;
 
@@ -859,26 +870,26 @@ begin
                                      end ;
 
                                      TraceForm.SetActivePage() ;
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_CLEAR_NODE :         begin   // param : the node to clear
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
-                                     TraceForm.vstTrace.DeleteNode(ParentCompoNode);
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
+                                     TraceForm.VstMain.DeleteNode(ParentCompoNode);
                                   end ;
 
          CST_CLEAR_SUBNODES :     begin   // param : the parent node
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      // clear children : get first and last child
                                      if ParentCompoNode <> nil then
-                                        TraceForm.vstTrace.DeleteChildren(ParentCompoNode,true);
+                                        TraceForm.VstMain.DeleteChildren(ParentCompoNode,true);
 
                                   end ;
 
@@ -894,7 +905,7 @@ begin
                                      // Find (text, bool Sensitive, bool WholeWord , bool highlight, bool SearchInAllPages)
                                      // Search criteria are independant of the window. You must call CST_FIND_NEXT to position to next matching node
                                      // param : int (Sensitive<<3+WholeWord<<2+highlight<<1+SearchInAllPages) , string
-                                     TempStr := getIntAndStr (TempInt) ;
+                                     TempStr := getIntAndStr (TempInt,'CST_FIND_TEXT(Flags:I1)') ;
                                      unt_search.SearchText := TempStr ;
                                      unt_search.UpperCaseSearchText := AnsiUpperCase(unt_search.SearchText) ;
                                      unt_search.LenSearchText       := length (unt_search.SearchText) ;
@@ -930,98 +941,98 @@ begin
                                      end ;
                                   end ;
          CST_FIND_NEXT :          // WinTrace.FindNext(bool forward)  param : int
-                                  if getInt() > 0 then  // search the next record
+                                  if getInt('CST_FIND_NEXT(NextOrPrevious:I1)') > 0 then  // search the next record
                                      TraceForm.getPageContainer().actFindNext.Execute()          // TraceForm.SearchNext(false)
                                   else
                                      TraceForm.getPageContainer().actFindPrevious.Execute() ;    // TraceForm.SearchPrevious(false)
 
          CST_GOTO_NEXTSIBLING :   begin // ITraceNode.GotoNextSibling ()                                               param : node
                                      TraceForm.SetActivePage() ;
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      ParentCompoNode := ParentCompoNode.NextSibling ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_GOTO_PREVSIBLING :   begin // ITraceNode.GotoPrevSibling ()                                               param : node
                                       TraceForm.SetActivePage() ;
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      ParentCompoNode := ParentCompoNode.PrevSibling ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                  end ;
 
          CST_GOTO_FIRST_CHILD :   begin // ITraceNode.GotoFirstChild  ()                                               param : node
                                      TraceForm.SetActivePage() ;
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      ParentCompoNode := ParentCompoNode.FirstChild ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_GOTO_LAST_CHILD  :   begin // ITraceNode.GotoLastChild   ()                                               param : node
                                      TraceForm.SetActivePage() ;
-                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.vstTrace.RootNode, AnsiString(getStr())) ;
+                                     ParentCompoNode := TraceForm.CheckNode (TraceForm.VstMain.RootNode, AnsiString(getStr())) ;
                                      ParentCompoNode := ParentCompoNode.LastChild ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_GOTO_FIRST_NODE :    begin  // WinTrace.GotoFirstNode()  // param : none
                                      TraceForm.SetActivePage() ;
                                      ParentCompoNode := TraceForm.vst.GetFirst() ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_GOTO_LAST_NODE  :    begin   // WinTrace.GotoLastNode() ;                                                   param : node
                                      TraceForm.SetActivePage() ;
                                      ParentCompoNode := TraceForm.vst.GetLast() ;
-                                     TraceForm.vstTrace.ClearSelection();
-                                     if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                        TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                     TraceForm.VstMain.ClearSelection();
+                                     if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                        TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                         TraceForm.NodeToFocus := ParentCompoNode ;
                                         // in case of the node was already selected, force display of properties
-                                        TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                        TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                      end ;
                                   end ;
 
          CST_GOTO_BOOKMARK   :    begin   // WinTrace.GotoBookmark(pos : integer);
                                      TraceForm.SetActivePage() ;
-                                     TempInt := getInt() ;
+                                     TempInt := getInt('CST_GOTO_BOOKMARK(pos:I1)') ;
                                      if TempInt < TraceForm.bookmarks.Count then begin
                                         ParentCompoNode := TraceForm.bookmarks[TempInt] ;
-                                        TraceForm.vstTrace.ClearSelection();
-                                        if TraceForm.vstTrace.IsVisible[ParentCompoNode] then begin
-                                           TraceForm.vstTrace.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
+                                        TraceForm.VstMain.ClearSelection();
+                                        if TraceForm.VstMain.IsVisible[ParentCompoNode] then begin
+                                           TraceForm.VstMain.Selected [ParentCompoNode] := true ;   // ParentCompoNode can be nil
                                            TraceForm.NodeToFocus := ParentCompoNode ;
                                            // in case of the node was already selected, force display of properties
-                                           TraceForm.vstTraceChange(TraceForm.vstTrace,  ParentCompoNode);
+                                           TraceForm.VstMainChange(TraceForm.VstMain,  ParentCompoNode);
                                         end ;
                                      end ;
                                   end ;
@@ -1044,12 +1055,12 @@ begin
                                      TraceForm.InitColumns() ;            // fill filter.columnsNameList with column names
                                      TraceForm.filter.FillColumns();      // fill combobox in each filter row with column names
                                      // compare and text are separated by a Tab
-                                     TempStr := get2IntAndStr(TempInt,TempInt2) ;
+                                     TempStr := get2IntAndStr(TempInt,TempInt2,'CST_ADD_FILTER(ColId:I1,Compare:I2)') ;
                                      TraceForm.filter.AddRow(tempint,tempint2,tempStr) ;
                                   end ;
 
          CST_APPLY_FILTER    :    begin   // WinTrace.ApplyFilter(ConditionAnd, ShowMatch,IncludeChildren) ;        param : integer (3 bool)
-                                     TempInt := getInt() ;
+                                     TempInt := getInt('CST_APPLY_FILTER(ConditionalAnd:I1)') ;
                                      TraceForm.filter.ApplyFilter(TempInt) ; // ConditionAnd, ShowMatch,IncludeChildren)
                                   end ;
 
@@ -1090,7 +1101,7 @@ begin
          CST_LOGFILE :            begin
                                      // param1 : Mode
                                      // param2 : filename
-                                     TempStr := get2IntAndStr (TempInt,TempInt2) ;
+                                     TempStr := get2IntAndStr (TempInt,TempInt2,'CST_LOGFILE(LogFileType:I1,MaxLines:I2)') ;
                                      TraceForm.LogFileName := TempStr ;
 
                                      //// TempStr : filename and styleSheet
@@ -1111,7 +1122,7 @@ begin
          CST_LINKTOPLUGIN :       begin
                                      // param 1 : flags (int)
                                      // param 2 : plugin name (string)
-                                     TempStr := getIntAndStr (TempInt) ;
+                                     TempStr := getIntAndStr (TempInt,'CST_LINKTOPLUGIN(Flags:I1)') ;
                                      TraceForm.AddPlugin (AnsiString(TempStr) , TempInt) ;
                                   end ;
 
@@ -1120,19 +1131,19 @@ begin
                                      // param 2 : resource type  (int)
                                      // param 3 : resource width (int)
                                      // param 4 : resource text  (string)
-                                     TempStr := get3IntAndStr (TempInt,TempInt2,TempInt3) ;
+                                     TempStr := get3IntAndStr (TempInt,TempInt2,TempInt3,'CST_CREATE_RESOURCE(resId:I1,resType:I2,resWidth:I3)') ;
                                      TraceForm.CreateResource (TempInt,TempInt2,TempInt3,TempStr);
                                   end ;
 
          CST_SET_TEXT_RESOURCE:   begin
                                      // param 1 : resource id (int)
                                      // param 2 : resource text (string)
-                                     TempStr := getIntAndStr (TempInt) ;
+                                     TempStr := getIntAndStr (TempInt,'CST_SET_TEXT_RESOURCE(resId:I1)') ;
                                      TraceForm.SetTextResource (TempInt,TempStr);
                                   end ;
          CST_DISABLE_RESOURCE :   begin
                                      // param 1 : resource id (int)
-                                     TraceForm.DisableResource(getInt());
+                                     TraceForm.DisableResource(getInt('CST_DISABLE_RESOURCE(resId:I1)'));
                                   end ;
 
 
@@ -1145,16 +1156,16 @@ begin
          CurrentLevel.free ;
 
       if WatchNode <> nil then
-         WatchForm.vstTrace.Expanded [WatchNode] := WatchExpanded ;
+         WatchForm.VstMain.Expanded [WatchNode] := WatchExpanded ;
 
       // if new node then save to log file
       if IsNewNode then begin
          TraceForm.AddToLog (ActiveNode , ParentCompoNode ) ;
       end ;
 
-      if ActiveNodeChanged and TraceForm.vstTrace.IsVisible[ActiveNode] and TraceForm.vstTrace.Selected [ActiveNode] then begin
+      if ActiveNodeChanged and TraceForm.VstMain.IsVisible[ActiveNode] and TraceForm.VstMain.Selected [ActiveNode] then begin
          // refresh if needed
-         TraceForm.vstTraceChange(TraceForm.vstTrace,  ActiveNode);
+         TraceForm.VstMainChange(TraceForm.VstMain,  ActiveNode);
       end ;
 
       // filtering
@@ -1163,13 +1174,13 @@ begin
             ActiveNode := WatchNode ;
             TraceForm := WatchForm ;
          end ;
-         if ActiveNode.Parent = TraceForm.vstTrace.RootNode then begin      // parent is root
+         if ActiveNode.Parent = TraceForm.VstMain.RootNode then begin      // parent is root
             TraceForm.filter.CheckNode(ActiveNode)
          end else if TraceForm.filter.chkCheckChildren.checked then begin
             ParentCompoNode := ActiveNode.Parent ;
             ParentNodeVisible := true ;
-            while ParentCompoNode <> TraceForm.vstTrace.RootNode do begin   // check if all parent are visibles
-               if TraceForm.vstTrace.IsVisible[ParentCompoNode] = false then begin
+            while ParentCompoNode <> TraceForm.VstMain.RootNode do begin   // check if all parent are visibles
+               if TraceForm.VstMain.IsVisible[ParentCompoNode] = false then begin
                   ParentNodeVisible := false ;  // don't wast time to check for filter if the parent node is not visible
                   break ;
                end ;

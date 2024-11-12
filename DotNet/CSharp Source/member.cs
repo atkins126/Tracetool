@@ -9,7 +9,6 @@
 // See License.txt for license information
 //
 
-using System;
 using System.Text;         // StringBuilder
 using System.Collections.Generic;
 
@@ -263,7 +262,7 @@ namespace TraceTool
                 {
                     StringBuilder tempStr = new StringBuilder();
 
-                    tempStr.Append(String.Format("{0,5}{1,3}", TraceConst.CST_MEMBER_FONT_DETAIL, fontDetail.ColId));
+                    tempStr.Append(string.Format("{0,5}{1,3}", TraceConst.CST_MEMBER_FONT_DETAIL, fontDetail.ColId));
 
 
                     if (fontDetail.Bold)
@@ -292,7 +291,7 @@ namespace TraceTool
                         colorValue = (b << 0x10) + (g << 8) + r;
                     }
 
-                    tempStr.Append(String.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
+                    tempStr.Append(string.Format("{0,11}{1,11}", colorValue, fontDetail.Size)).Append(fontDetail.FontName);
                     commandList.Add(tempStr.ToString());
 
                 }

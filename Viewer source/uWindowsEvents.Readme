@@ -1,0 +1,43 @@
+Here are some examples of how to use the output classes.
+
+To write to the Events Log.
+
+procedure TfrmWindowsEvents.AddLogBtnClick(Sender: TObject);
+begin
+  fWindowsEvents.Writer.WriteInformationToWindowsEvents(MessageEdt.Text);
+end;
+
+To read from the Events Log
+
+procedure TfrmWindowsEvents.StringBtnClick(Sender: TObject);
+var
+  stringsReader: IRBEventReaderOutput;
+begin
+  stringsReader := TStringsReaderOutput.Create;
+
+  fWindowsEvents.Reader.PopulateEvents(stringsReader);
+  stringsReader.SaveToFile('stringsoutput.txt');
+  MemoEvents.Lines.CommaText := stringsReader.OutputString;
+end;
+
+procedure TfrmWindowsEvents.JsonBtnClick(Sender: TObject);
+var
+  jsonReader: IRBEventReaderOutput;
+begin
+  jsonReader := TJSONReaderOutput.Create;
+
+  fWindowsEvents.Reader.PopulateEvents(jsonReader);
+  jsonReader.SaveToFile('jsonoutput.txt');
+  MemoEvents.Lines.Text := jsonReader.OutputString;
+end;
+
+procedure TfrmWindowsEvents.CsvBtnClick(Sender: TObject);
+var
+  csvReader: IRBEventReaderOutput;
+begin
+  csvReader := TCSVReaderOutput.Create;
+
+  fWindowsEvents.Reader.PopulateEvents(csvReader);
+  csvReader.SaveToFile('csvoutput.csv');
+  MemoEvents.Lines.Text := csvReader.OutputString;
+end;

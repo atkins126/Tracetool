@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   StdCtrls, ExtCtrls, Tabs, Preview, Dialogs, jpeg, ImgList,
-  ComCtrls, CheckLst, VirtualTrees, Math, unt_base;
+  ComCtrls, CheckLst, VirtualTrees, VirtualTrees.Types, Math, unt_base;
 
 type
   TFrmPrintPreview = class(TForm)
@@ -76,7 +76,7 @@ implementation
 {$R *.DFM}
 
 uses
-  Printers, unt_TraceWin, Unt_Tool; //, unt_TraceWin;
+  Printers, System.UiTypes, unt_TraceWin, Unt_Tool; //, unt_TraceWin;
 
 //var
 //  Frm_Trace : TFrm_Trace ;
@@ -360,7 +360,11 @@ begin
                   TFrm_Trace(TraceWin).ChangeFontDetail (not TFrm_Trace(TraceWin).IsWatch, PrintPreview.Canvas, c , TreeRec.FontDetails, {selected}false) ;
 
                if treeview.header.Columns[treeview.Header.MainColumn] = col then
-                  xText := NodePosX + ConvertUnits(treeview.Indent * treeview.GetNodeLevel(Node), Screen.PixelsPerInch, {InUnits}mmLoEnglish, {OutUnits} PrintPreview.Units)   // for main column : add indent
+                  xText := NodePosX + ConvertUnits(
+                     Integer(treeview.Indent) * Integer(treeview.GetNodeLevel(Node)),
+                     Screen.PixelsPerInch,
+                     {InUnits}mmLoEnglish,
+                     {OutUnits} PrintPreview.Units)   // for main column : add indent
                else
                   xText := NodePosX  ;
                inc (xText,IconOffset) ;

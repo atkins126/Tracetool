@@ -8,7 +8,6 @@
 
 program TraceTool;
 
-
 uses
   fastmm5,
   madExcept,
@@ -46,15 +45,19 @@ uses
   unt_editor in 'unt_editor.pas',
   unt_Details_base in 'unt_Details_base.pas' {frame_BaseDetails: TFrame},
   unt_Details_bitmap in 'unt_Details_bitmap.pas' {frame_BitmapDetails: TFrame},
-  unt_Details_xml in 'unt_Details_xml.pas' {Frame_XML: TFrame},
   unt_Details_Classic in 'unt_Details_Classic.pas' {frame_Classic: TFrame},
   unt_Details_table in 'unt_Details_table.pas' {frame_Table: TFrame},
+  unt_Decode in 'unt_Decode.pas',
   untPrintPreview in 'untPrintPreview.pas' {FrmPrintPreview},
   Application6 in 'Application6.pas',
   Preview in 'Preview\Preview.pas',
-  //FileViewer in 'dependencyviewer\FileViewer.pas',
   Config in 'Config.pas',
-  unt_TraceConfig in 'unt_TraceConfig.pas';
+  unt_TraceConfig in 'unt_TraceConfig.pas',
+  unt_AddLine in 'unt_AddLine.pas' {Frm_AddLine},
+  unt_detailPopup in 'unt_detailPopup.pas' {DetailPopupForm},
+  unt_FrameMemo in 'unt_FrameMemo.pas' {FrameMemo: TFrame},
+  uWindowsEvents in 'uWindowsEvents.pas',
+  VstSelector in 'VstSelector.pas';
 
 {$R *.res}
 
@@ -87,9 +90,10 @@ begin
    Application.CreateForm(TFrmTraceWinProp, FrmTraceWinProp);
    Application.CreateForm(TFrmSearch, FrmSearch);
    Application.CreateForm(TFrmPrintPreview, FrmPrintPreview);
-
+   Application.CreateForm(TFrm_AddLine, Frm_AddLine);
    if Frm_Tool.InitError <> '' then
       exit ;
    //LowTrace ('Application.Run') ;
+   //Application.MainFormOnTaskBar := true;
    Application.Run;
 end.

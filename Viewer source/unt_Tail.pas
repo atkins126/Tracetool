@@ -17,10 +17,14 @@ interface
 
 uses
   system.Contnrs , system.types, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, pscMenu ,
-  Dialogs, ExtCtrls, VirtualTrees, StdCtrls, ComCtrls , dirmon, ToolWin, unt_TraceWin,
-  Buttons, Clipbrd, unt_base , unt_pageContainer ,  unt_editor , VstSort,unt_filter, unt_tool,
+  Dialogs, ExtCtrls, VirtualTrees, VirtualTrees.Types, StdCtrls, ComCtrls , dirmon, ToolWin, unt_TraceWin,
+  Buttons, Clipbrd, unt_base , unt_pageContainer ,  unt_editor ,
+  VstSort,
+  VstSelector,
+  unt_filter, unt_tool,
   generics.collections,
-  Menus, untPrintPreview;
+  Menus, untPrintPreview, unt_FrameMemo, VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree, VirtualTrees.AncestorVCL;
 
 const
    //BUFSIZE = 1024 {400h} ;
@@ -30,18 +34,18 @@ type
 
   PTailRec = ^TTailRec ;
   TTailRec = record
-     OriginalOrder  : cardinal ;     // Original order when inserted. Used to Unsort nodes
+     OriginalOrder  : integer ;      // Original order when inserted. Used to Unsort nodes
      Msg            : string ;       // a line
      Time           : string ;       // time of read (nothing to do with time of file write)
      Columns        : TStringList ;  // multi columns strings
   end ;
 
-  TTail = class
-     OriginalOrder  : cardinal ;     // Original order when inserted. Used to Unsort nodes
-     Msg            : string ;       // a line
-     Time           : string ;       // time of read (nothing to do with time of file write)
-     Columns        : TStringList ;  // multi columns strings
-  end;
+//  TTail = class
+//     OriginalOrder  : cardinal ;     // Original order when inserted. Used to Unsort nodes
+//     Msg            : string ;       // a line
+//     Time           : string ;       // time of read (nothing to do with time of file write)
+//     Columns        : TStringList ;  // multi columns strings
+//  end;
 
   TBlockMem = class
     buf:array[1..BUFSIZE + 5] of byte;
@@ -50,7 +54,7 @@ type
   end;
 
   TFrmTail = class(TFrmBase)
-    VstTail: TVirtualStringTree;
+    VstMain: TVirtualStringTree;
     GroupPanel: TPanel;
     PanelTraceInfo: TPanel;
     VSplitter: TSplitter;
@@ -74,12 +78,14 @@ type
     MenuItem3: TMenuItem;
     N2: TMenuItem;
     MenuItem1: TMenuItem;
+    SplitterH: TSplitter;
+    FrameMemo: TFrameMemo;
     procedure FormCreate(Sender: TObject);
-    procedure VstTailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VstMainChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure butReloadClick(Sender: TObject);
     procedure butCloseClick(Sender: TObject);
-    procedure VstTailFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
-    procedure VstTailPaintText(Sender: TBaseVirtualTree;
+    procedure VstMainFreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VstMainPaintText(Sender: TBaseVirtualTree;
       const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure VstDetailCreateEditor(Sender: TBaseVirtualTree;
@@ -92,54 +98,63 @@ type
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure VstDetailEditing(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
-    procedure VstTailHeaderDragged(Sender: TVTHeader; Column: TColumnIndex;
+    procedure VstMainHeaderDragged(Sender: TVTHeader; Column: TColumnIndex;
       OldPosition: Integer);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure butClearContentClick(Sender: TObject);
-    procedure VstTailDblClick(Sender: TObject);
-    procedure VstTailCreateEditor(Sender: TBaseVirtualTree;
+    procedure VstMainDblClick(Sender: TObject);
+    procedure VstMainCreateEditor(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
-    procedure VstTailEditCancelled(Sender: TBaseVirtualTree;
+    procedure VstMainEditCancelled(Sender: TBaseVirtualTree;
       Column: TColumnIndex);
-    procedure VstTailEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure VstMainEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex);
-    procedure VstTailKeyAction(Sender: TBaseVirtualTree;
+    procedure VstMainKeyAction(Sender: TBaseVirtualTree;
       var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-    procedure VstTailAfterPaint(Sender: TBaseVirtualTree;
+    procedure VstMainAfterPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas);
-    procedure VstTailCompareNodes(Sender: TBaseVirtualTree; Node1,
+    procedure VstMainCompareNodes(Sender: TBaseVirtualTree; Node1,
       Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
-    procedure VstTailAfterItemPaint(Sender: TBaseVirtualTree;
+    procedure VstMainAfterItemPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
-    procedure VstTailBeforeCellPaint(Sender: TBaseVirtualTree;
+    procedure VstMainBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    procedure VstTailAfterCellPaint(Sender: TBaseVirtualTree;
+    procedure VstMainAfterCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellRect: TRect);
     procedure VstDetailFreeNode(Sender: TBaseVirtualTree;
       Node: PVirtualNode);
     procedure PanelGutterDblClick(Sender: TObject);
-    procedure VstTailMeasureItem(Sender: TBaseVirtualTree;
+    procedure VstMainMeasureItem(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
     procedure VstDetailGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: String);
-    procedure VstTailGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;  Column: TColumnIndex;
+    procedure VstMainGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;  Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: string);
     procedure VstDetailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
     procedure VstDetailBeforeCellPaint(Sender: TBaseVirtualTree;
       TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
       CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-    procedure VstTailEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
+    procedure VstMainEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
       Column: TColumnIndex; var Allowed: Boolean);
+    procedure VstDetailColumnClick(Sender: TBaseVirtualTree;
+      Column: TColumnIndex; Shift: TShiftState);
+    procedure VstDetailFocusChanged(Sender: TBaseVirtualTree;
+      Node: PVirtualNode; Column: TColumnIndex);
+    procedure VSplitterCanResize(Sender: TObject; var NewSize: Integer;
+      var Accept: Boolean);
+    procedure GroupPanelCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
   private
-    Sorter : TVstSort ;
-    LastChildOrder : cardinal ;     // Order of the last child, used to insert sub nodes and unsort them
+    FirstChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
+    LastChildOrder: integer; // Order of the last child, used to insert sub nodes and unsort them
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
     procedure WMStartEditingTrace(var Message: TMessage); message WM_STARTEDITING_TRACE;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
     function AddTrace(PtrBeg,PtrEnd: PAnsiChar; Ontop,IsNotCompleted : boolean): pVirtualNode;
     function getDelimitedStringsfromLine (SourceBegin : pAnsiChar; SourceEnd : pAnsiChar = nil) : TStringList ; overload ;
-    function getDelimitedStringsfromWLine (SourceBegin : pChar; SourceEnd : pChar = nil) : TStringList ; overload ;
+    function getDelimitedStringsfromWLine (SourceBegin : pWideChar; SourceEnd : pWideChar = nil) : TStringList ; overload ;
     procedure readFirstLine ;
     function GotoBeginLine(source, bufferBegin: PAnsiChar): PAnsiChar;
     function GotoEndOfPreviousLine(source, bufferBegin: PAnsiChar): PAnsiChar;
@@ -149,8 +164,11 @@ type
     procedure AddRedComment(comment: string);
     { Private declarations }
   public   // directory monitor
+    Sorter : TVstSort ;
+    VstDetailSelector: TVstSelector;
     Gutter: TImage;
     NodeToFocus : PVirtualNode ;
+    rightPercent : extended;
     IsPaused : boolean ;
     DirMon : TDirMon;
     lastpos : Longint  ;
@@ -173,8 +191,8 @@ type
     DetectTitleOnFirstLine      : boolean ;
     IsFixedColumns              : boolean ;
     FixedColCount               : integer ;
-    TextQualifier               : ansiChar ;
-    ColSeparator                : ansiChar ;
+    TextQualifier               : AnsiString ;
+    ColSeparator                : AnsiString ;
     // ColCount : integer ;
 
   public
@@ -193,7 +211,7 @@ type
     procedure PauseWin ; override ;
     procedure ViewTraceInfo ; override ;
     procedure ViewProperty ; override ;
-    procedure CopySelected ; override ;
+    function  CopySelected: boolean; override ;
     procedure CopyCurrentCell ; override ;
     procedure DeleteSelected ; override ;
     procedure SelectAll ; override ;
@@ -205,8 +223,9 @@ type
     procedure RefreshView ;       override ;
     procedure ShowFilter ;        override ;
     procedure ApplyFont ; override ;
+    procedure InsertRow ; override;
     function  getMembers(Node : PVirtualNode) : TMember ; override ;
-    function  SearchNext(start:boolean) : boolean ;        override ;
+    function  SearchNext(start:boolean) : boolean ;       override ;
     function  SearchPrevious (atEnd:boolean) : boolean ;  override ;
   end;
 
@@ -222,7 +241,7 @@ uses
   , unt_utility
   , Unt_TailProgress
   , unt_search
-  , unt_selectTail;
+  , unt_selectTail, unt_AddLine;
 
 
 {$R *.dfm}
@@ -232,41 +251,52 @@ uses
 procedure TFrmTail.FormCreate(Sender: TObject);
 begin
    inherited ;
+   FrameMemo.Height := 120 ;
    ApplyFont() ;  // set font name and size for the 2 trees (from XMLConfig)
 
-   vst := VstTail ;
+   if PanelTraceInfo.Width < 50 then
+      PanelTraceInfo.Width := 50;
+   var accept : boolean;
+   var size := PanelTraceInfo.Width;
+   VSplitterCanResize(self,size,accept); // calculated once left and right percent
+
+   vst := VstMain ;
    with TPSCMenu.create (self) do begin
       DimLevel := 0 ;    // don't gray icon
       Active := true ;
    end ;
 
    // initialize sort
+   FirstChildOrder := -1 ;
    LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
+
    Sorter := TVstSort.create (self) ;
-   Sorter.tree := VstTail ;
+   Sorter.tree := VstMain ;
    Sorter.UtilityImages := Frm_Tool.UtilityImages ;
    Sorter.canUnsort := true ;
 
    // redirect some events to the sorter
-   VstTail.onHeaderClick             := sorter.OnHeaderClick ;
-   VstTail.OnKeyUp                   := sorter.OnKeyUp ;
-   VstTail.onHeaderDrawQueryElements := sorter.OnHeaderDrawQueryElements ;
-   VstTail.onAdvancedHeaderDraw      := sorter.OnAdvancedHeaderDraw ;
-   // tips : don't forget to include the hoOwnerDraw in the VstTail.Header.Options
+   VstMain.onHeaderClick             := sorter.OnHeaderClick ;
+   VstMain.OnKeyUp                   := sorter.OnKeyUp ;
+   VstMain.onHeaderDrawQueryElements := sorter.OnHeaderDrawQueryElements ;
+   VstMain.onAdvancedHeaderDraw      := sorter.OnAdvancedHeaderDraw ;
+   // tips : don't forget to include the hoOwnerDraw in the VstMain.Header.Options
 
    TailList.Add (self) ;
 
    // copy all options from main form
-   VstTail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstTail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
-   VstTail.NodeDataSize := sizeof (TTailRec) ;
-   VstTail.TreeOptions.AutoOptions      := Frm_Trace.vstTrace.TreeOptions.AutoOptions ;
-   VstTail.TreeOptions.SelectionOptions := Frm_Trace.vstTrace.TreeOptions.SelectionOptions ;
-   VstTail.TreeOptions.MiscOptions      := Frm_Trace.vstTrace.TreeOptions.MiscOptions ;
-   VstTail.TreeOptions.PaintOptions     := Frm_Trace.vstTrace.TreeOptions.PaintOptions
-                                           - [toShowRoot] ; // don't show Root
+   VstMain.Colors.UnfocusedColor                := Frm_Trace.VstMain.Colors.UnfocusedColor ;
+   VstMain.Colors.UnfocusedSelectionColor       := Frm_Trace.VstMain.Colors.UnfocusedSelectionColor ;
+   VstMain.Colors.UnfocusedSelectionBorderColor := Frm_Trace.VstMain.Colors.UnfocusedSelectionBorderColor ;
+   VstMain.NodeDataSize := sizeof (TTailRec) ;
 
-   VstTail.Header.Options := VstTail.Header.Options
+   VstMain.TreeOptions.AutoOptions      := Frm_Trace.VstMain.TreeOptions.AutoOptions ;
+   VstMain.TreeOptions.SelectionOptions := Frm_Trace.VstMain.TreeOptions.SelectionOptions ;
+   VstMain.TreeOptions.MiscOptions      := Frm_Trace.VstMain.TreeOptions.MiscOptions ;
+   VstMain.TreeOptions.PaintOptions     := Frm_Trace.VstMain.TreeOptions.PaintOptions
+      - [toShowRoot] ; // don't show Root
+
+   VstMain.Header.Options := VstMain.Header.Options
       + [hoColumnResize]     // resizing columns is allowed
       + [hoDblClickResize]   // allows a column to resize itself to its largest entry
       + [hoDrag]             // dragging columns is allowed
@@ -280,20 +310,24 @@ begin
       - [hoShowImages]       // show images
       - [hoShowSortGlyphs] ; // show sort glyphs
 
-
    VstDetail.NodeDataSize := sizeof (TDetailRec) ;
    VstDetail.Header.MainColumn := 0 ;
    VstDetail.Header.AutoSizeIndex := -1 ;     // 2
    VstDetail.Header.Columns.Items[0].text := '' ;   // header must be visible to enable resize !
    VstDetail.Header.Columns.Items[1].text := '' ;
-   VstDetail.Header.Options               := Frm_Trace.VstDetail.Header.Options ;
-   VstDetail.TreeOptions.AutoOptions      := Frm_Trace.VstDetail.TreeOptions.AutoOptions ;
-   VstDetail.TreeOptions.PaintOptions     := Frm_Trace.VstDetail.TreeOptions.PaintOptions ;
-   VstDetail.TreeOptions.SelectionOptions := Frm_Trace.VstDetail.TreeOptions.SelectionOptions ;
-   VstDetail.TreeOptions.MiscOptions      := Frm_Trace.VstDetail.TreeOptions.MiscOptions ;
-   VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.vstTrace.Colors.UnfocusedSelectionBorderColor ;
+   VstDetail.Header.Options                       := Frm_Trace.VstDetail.Header.Options ;
+   VstDetail.TreeOptions.AutoOptions              := Frm_Trace.VstDetail.TreeOptions.AutoOptions ;
+   VstDetail.TreeOptions.PaintOptions             := Frm_Trace.VstDetail.TreeOptions.PaintOptions ;
+   VstDetail.TreeOptions.SelectionOptions         := Frm_Trace.VstDetail.TreeOptions.SelectionOptions ;
+   VstDetail.TreeOptions.MiscOptions              := Frm_Trace.VstDetail.TreeOptions.MiscOptions ;
+   VstDetail.Colors.UnfocusedColor                := Frm_Trace.VstMain.Colors.UnfocusedColor ;
+   VstDetail.Colors.UnfocusedSelectionColor       := Frm_Trace.VstMain.Colors.UnfocusedSelectionColor ;
+   VstDetail.Colors.UnfocusedSelectionBorderColor := Frm_Trace.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
+   // multiple selection handler
+   VstDetailSelector := TVstSelector.Create(self);   // self is owner
+   VstDetailSelector.Init(VstDetail);
+   VstDetailSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 
    DirMon := TDirMon.Create (self);  // owned by form
    DirMon.OnCreated := DirMon1Created ;
@@ -361,7 +395,7 @@ end;
 
 procedure TFrmTail.butReloadClick(Sender: TObject);
 begin
-   VstTail.Clear ;
+   VstMain.Clear ;
    LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
    NotCompleteNode := nil ;
    lastpos := 0 ;
@@ -379,33 +413,33 @@ begin
    TitleOffset := 0 ;
    // normal way to display lines
    if ShowTimeAndLines then begin
-      VstTail.Header.MainColumn := 1 ;
-      VstTail.Header.AutoSizeIndex := -1 ;  // auto
+      VstMain.Header.MainColumn := 1 ;
+      VstMain.Header.AutoSizeIndex := -1 ;  // auto
    end else if ShowOnlyLines then begin   // don't display time
-      VstTail.header.Columns.Delete(0);
-      VstTail.Header.MainColumn := 0 ;
-      VstTail.FocusedColumn := 0 ;
+      VstMain.header.Columns.Delete(0);
+      VstMain.Header.MainColumn := 0 ;
+      VstMain.FocusedColumn := 0 ;
    end else begin // ShowManycolumns
 
       if DetectSeparatorOnfirstLine then begin
          readFirstLine () ;
       end else if DetectSeparatorOnEachLine then begin
-         VstTail.header.Columns.Clear ;
+         VstMain.header.Columns.Clear ;
       end else if IsFixedColumns then begin
-         VstTail.header.Columns.Clear ;
+         VstMain.header.Columns.Clear ;
          for c := 0 to FixedColCount-1 do begin
-            col := VstTail.header.Columns.Add ;
+            col := VstMain.header.Columns.Add ;
             col.options  := col.options + [coAllowFocus] ;  // ensure user can focus to this column
             col.MinWidth := 50 ;
             col.MaxWidth := 10000 ;
             //col.Width := 100 ;
             col.Text  := 'Col ' + inttostr (c) ;
          end ;
-         VstTail.Header.MainColumn := 0 ; // FixedColCount-1 ;
-         VstTail.Header.AutoSizeIndex := -1 ;  // auto
+         VstMain.Header.MainColumn := 0 ; // FixedColCount-1 ;
+         VstMain.Header.AutoSizeIndex := -1 ;  // auto
          // size must be changed after adding all columns
          for c := 0 to FixedColCount-1 do begin
-            col := VstTail.header.Columns[c] ;
+            col := VstMain.header.Columns[c] ;
             if c = FixedColCount-1 then
                col.Width := 3000
             else
@@ -480,9 +514,9 @@ begin
    dec(ptrEnd) ;
    strCols := getDelimitedStringsfromLine (PtrBeg, ptrEnd) ;    // Ansi version
 
-   VstTail.header.Columns.Clear ;
+   VstMain.header.Columns.Clear ;
    for c := 0 to strCols.Count-1 do begin
-      col := VstTail.header.Columns.Add ;
+      col := VstMain.header.Columns.Add ;
       col.options  := col.options + [coAllowFocus] ;  // ensure user can focus to this column
       if DetectTitleOnFirstLine then
          col.Text := strCols.Strings[c] ;
@@ -490,12 +524,12 @@ begin
       col.MaxWidth := 10000 ;
       col.Width := 100 ;
    end ;
-   VstTail.Header.MainColumn := 0 ; // FixedColCount-1 ;
-   VstTail.Header.AutoSizeIndex := -1 ;  // auto
+   VstMain.Header.MainColumn := 0 ; // FixedColCount-1 ;
+   VstMain.Header.AutoSizeIndex := -1 ;  // auto
 
    // size must be changed after adding all columns
    for c := 0 to strCols.Count-1 do begin
-      col := VstTail.header.Columns[c] ;
+      col := VstMain.header.Columns[c] ;
       if c = strCols.Count-1 then
          col.Width := 3000
       else
@@ -503,7 +537,7 @@ begin
    end ;
    strCols.free ;
 
-   //AutosizeAll (VstTail) ;      // use only the header text to determine column width
+   //AutosizeAll (VstMain) ;      // use only the header text to determine column width
 end ;
 
 //------------------------------------------------------------------------------
@@ -514,6 +548,7 @@ var
    PtrBeg,ptrEnd : pAnsiChar ;
 begin
    result := TStringList.create ;
+   var sep : AnsiChar :=  ColSeparator[1];
 
    ptrEnd := SourceBegin ;
    if TextQualifier = '' then begin
@@ -534,7 +569,7 @@ begin
          if (ptrEnd^ = ColSeparator) then begin       // separator
             ptrEnd^ := #0 ;
             result.Add(String(PtrBeg)) ;
-            ptrEnd^ := ColSeparator ;                 // restore separator
+            ptrEnd^ := sep;                 // restore separator
             inc (ptrEnd) ;
             PtrBeg := ptrEnd ;
          end else begin
@@ -612,6 +647,14 @@ begin
    if SourceBegin = nil then
       exit ;
 
+   var sep : WideChar := char(0);
+   if (Length(ColSeparator) >= 1) then
+     sep := WideChar(ColSeparator[1]);
+
+   var textQualif : WideChar := Char(0);
+   if (Length(TextQualifier) >= 1) then
+     textQualif := WideChar(TextQualifier[1]);
+
    ptrEnd := SourceBegin ;
    if TextQualifier = '' then begin
       PtrBeg := ptrEnd ;
@@ -629,11 +672,11 @@ begin
             break ;
          end ;
 
-         if (ptrEnd^ = char(ColSeparator)) then begin       // separator
+         if (ptrEnd^ = sep) then begin       // separator
             ptrEnd^ := #0 ;
             result.Add(String(PtrBeg)) ;
 
-            ptrEnd^ := char(ColSeparator) ;    // restore separator
+            ptrEnd^ := sep ;    // restore separator
             inc (ptrEnd) ;
             PtrBeg := ptrEnd ;
          end else begin
@@ -654,7 +697,7 @@ begin
             if (ptrEnd^ = #0) then begin                          // empty line ?
                result.Add(String(PtrBeg)) ;
                exit ;
-            end else if (ptrEnd^ = char(TextQualifier)) then begin      // TextQualifier Q1
+            end else if (ptrEnd^ = textQualif) then begin      // TextQualifier Q1
                inc (ptrEnd) ;
                PtrBeg := ptrEnd ;
                break ;
@@ -671,7 +714,7 @@ begin
             if (ptrEnd^ = #0) then begin                          // empty line ?
                result.Add(String(PtrBeg)) ;
                exit ;
-            end else if (ptrEnd^ = char(TextQualifier)) then begin      // TextQualifier Q2
+            end else if (ptrEnd^ = textQualif) then begin      // TextQualifier Q2
                ptrEnd^ := #0 ;
                result.Add(String(PtrBeg)) ;
                inc (ptrEnd) ;
@@ -687,7 +730,7 @@ begin
                exit ;
             end else if (ptrEnd^ = ' ') then begin                // space before TextQualifier Q1
                inc (ptrEnd) ;
-            end else if (ptrEnd^ = char(ColSeparator)) then begin       // TextQualifier Q2
+            end else if (ptrEnd^ = Sep) then begin               // TextQualifier Q2
                inc (ptrEnd) ;
                break ;
             end else begin                                      // bad line , restart steps from here
@@ -775,9 +818,9 @@ var
       TailRec : PTailRec ;
       node : pvirtualNode ;
    begin
-      Node := VstTail.GetFirst;
+      Node := VstMain.GetFirst;
       while Node <> nil do begin
-         TailRec := VstTail.GetNodeData(node) ;
+         TailRec := VstMain.GetNodeData(node) ;
          if TailRec.OriginalOrder = 0 then begin
             TailRec.OriginalOrder := LastChildOrder ;
             inc (LastChildOrder) ;
@@ -791,9 +834,9 @@ var
       TailRec : PTailRec ;
       node : pvirtualNode ;
    begin
-      Node := VstTail.GetLastChild(nil);
+      Node := VstMain.GetLastChild(nil);
       while Node <> nil do begin
-         TailRec := VstTail.GetNodeData(node) ;
+         TailRec := VstMain.GetNodeData(node) ;
          if TailRec.OriginalOrder = 0 then begin
             TailRec.OriginalOrder := LastChildOrder ;
             inc (LastChildOrder) ;
@@ -886,7 +929,7 @@ var
 
 
          // check if no more lines
-         if PtrEnd = PAnsiChar(@blockMem.buf) then begin
+         if PtrEnd < PAnsiChar(@blockMem.buf) then begin
          //if PtrEnd = blockMem.Ptr then begin
             if BeginBlock = 0 then  // begin of file (block start at zero)
                EndBlock := 0 ;      // force quit the 2 loops
@@ -925,7 +968,7 @@ begin
    LastShowTime := DateTimeToTimeStamp(now).Time ;
    LastLine := nil ;
 
-   VstTail.BeginUpdate ;
+   VstMain.BeginUpdate ;
    try
       File_Size := filesize(f) ;
 
@@ -990,7 +1033,7 @@ begin
       Sorter.sort (nil) ;  // Unsort
       CheckAutoClear() ;
       if IsColumnWidthChanged then begin
-         //AutosizeAll(VstTail);
+         //AutosizeAll(VstMain);
          IsColumnWidthChanged := false ;
       end ;
 
@@ -999,7 +1042,7 @@ begin
          NotCompleteNode := LastLine ;
 
       FrmTailProgress.hide ;
-      VstTail.endUpdate ;
+      VstMain.endUpdate ;
       closefile(f);
       BlockMemList.Clear ;   // owner
    end ;
@@ -1065,7 +1108,7 @@ begin
    end ;
 
    //TFrm_Trace.InternalTrace(FormatDateTime('hh:mm:ss:zzz',now), 'begin display. Lines : ' + inttostr(LastChildOrder)) ;
-   VstTail.BeginUpdate ;
+   VstMain.BeginUpdate ;
    try
       while true do begin    // loop until end of file
          File_Size := filesize(f) ;
@@ -1083,7 +1126,7 @@ begin
          // special case : if new file size is lower than saved saved : we can supose that the file was rewrited.
          if lastpos > File_Size then begin
             LastChildOrder := 1 ;   // 0 is reserved for not yet ordered lines
-            VstTail.Clear ;
+            VstMain.Clear ;
             lastpos := 0 ;
          end ;
 
@@ -1140,13 +1183,13 @@ begin
          Sorter.sort (nil) ;
 
       if IsColumnWidthChanged then begin
-         AutosizeAll(VstTail);
+         AutosizeAll(VstMain);
          IsColumnWidthChanged := false ;
       end ;
 
    finally
       closefile(f);
-      VstTail.EndUpdate ;
+      VstMain.EndUpdate ;
       BlockMemList.Clear ;   // owner
    end ;
 end ;
@@ -1165,12 +1208,12 @@ begin
    Appended := false ;
 
    if OnTop then begin   // onTop is true when the file is loaded the first time
-      result := VstTail.AddChild (nil) ;
+      result := VstMain.AddChild (nil) ;
    end else if NotCompleteNode <> nil then begin
       result := NotCompleteNode ;
       Appended := true ;
    end else begin
-      result := VstTail.AddChild (nil) ;
+      result := VstMain.AddChild (nil) ;
    end ;
 
    if IsNotCompleted then
@@ -1179,13 +1222,12 @@ begin
       NotCompleteNode := nil ;
 
    // ensure node is initialized. Needed when the node is free to call onFreeNode
-   VstTail.ReinitNode(result,false);
+   VstMain.ReinitNode(result,false);
 
    if TraceConfig.AppDisplay_FocusToReceivedMessage then
       NodeToFocus := result ;
 
-
-   TailRec := VstTail.GetNodeData(result) ;
+   TailRec := VstMain.GetNodeData(result) ;
 
    if Appended then begin
       // append text to last record
@@ -1210,9 +1252,9 @@ begin
       TailRec.Columns := getDelimitedStringsfromWLine(pWidechar(TailRec.Msg)) ;  // use here the unicode version
 
       // detect new columns if in DetectSeparatorOnEachLine mode
-      if (DetectSeparatorOnEachLine) and (TailRec.Columns <> nil) and (TailRec.Columns.Count > VstTail.Header.Columns.Count) then begin
-         for c := VstTail.Header.Columns.Count to TailRec.Columns.Count-1 do begin
-            col := VstTail.header.Columns.Add ;
+      if (DetectSeparatorOnEachLine) and (TailRec.Columns <> nil) and (TailRec.Columns.Count > VstMain.Header.Columns.Count) then begin
+         for c := VstMain.Header.Columns.Count to TailRec.Columns.Count-1 do begin
+            col := VstMain.header.Columns.Add ;
             col.options  := col.options + [coAllowFocus] ;  // ensure user can focus to this column
             col.MinWidth := 10 ;
             col.MaxWidth := 10000 ;
@@ -1220,11 +1262,11 @@ begin
          end ;
          IsColumnWidthChanged := true ;   // force autosize columns
 
-         VstTail.Header.MainColumn := 0 ; // FixedColCount-1 ;
-         VstTail.Header.AutoSizeIndex := -1 ;  // auto
+         VstMain.Header.MainColumn := 0 ; // FixedColCount-1 ;
+         VstMain.Header.AutoSizeIndex := -1 ;  // auto
 
          // force last column width to maximum
-         //VstTail.Header.Columns[VstTail.Header.Columns.Count-1].Width := 9000 ;
+         //VstMain.Header.Columns[VstMain.Header.Columns.Count-1].Width := 9000 ;
 
       end ;
    end ;
@@ -1243,17 +1285,84 @@ end ;
 
 //------------------------------------------------------------------------------
 
+procedure TFrmTail.InsertRow;
+var
+   selectedNode: PVirtualNode;
+   selectedTreeRec: PTailRec;
+   newTreeNode: PVirtualNode;
+   newTailRec : PTailRec;
+   newOrder : integer ;
+   //newTime : string;
+begin
+
+   selectedNode := VstMain.GetFirstSelected;
+   selectedTreeRec := nil;
+
+   if selectedNode <> nil then begin
+      selectedTreeRec := VstMain.GetNodeData(selectedNode);
+      Frm_AddLine.EditTime.Text := selectedTreeRec.Time;
+   end;
+
+   Frm_AddLine.SetTailMode;
+   Frm_AddLine.ShowModal;
+   if Frm_AddLine.ModalResult = mrCancel then
+      exit;
+
+   if (Frm_AddLine.InsertWhere.ItemIndex = 0) then begin          // on first line
+      newTreeNode := VstMain.InsertNode(nil,amAddChildFirst);
+      dec (FirstChildOrder) ;
+      NewOrder := FirstChildOrder ;
+
+   end else if (Frm_AddLine.InsertWhere.ItemIndex = 1) then begin // Before selected line
+      if selectedNode = nil then begin
+         newTreeNode := VstMain.InsertNode(nil,amAddChildFirst);
+         dec (FirstChildOrder) ;
+         NewOrder := FirstChildOrder ;
+
+      end else begin
+         newTreeNode := VstMain.InsertNode(selectedNode,amInsertBefore);
+         newOrder := selectedTreeRec.originalOrder-1 ;
+         if newOrder = 0 then  // 0 is reserved
+            dec(newOrder);
+      end;
+
+   end else if (Frm_AddLine.InsertWhere.ItemIndex = 2) then begin  // After selected line
+      if selectedNode = nil then begin
+         newTreeNode := VstMain.AddChild(nil);
+         NewOrder := LastChildOrder ;
+         inc (LastChildOrder) ;
+
+      end else begin
+         newTreeNode := VstMain.InsertNode(selectedNode,amInsertAfter);
+         newOrder := selectedTreeRec.originalOrder+1 ;
+      end;
+
+   end else begin                                                 // 3: At the end
+      newTreeNode := VstMain.AddChild(nil);
+      NewOrder := LastChildOrder ;
+      inc (LastChildOrder) ;
+   end;
+
+   VstMain.ReinitNode(newTreeNode, false);
+   newTailRec := VstMain.GetNodeData(newTreeNode);
+   newTailRec.Msg  := Frm_AddLine.EditTrace.Text;
+   newTailRec.Time := Frm_AddLine.EditTime.Text;
+   newTailRec.OriginalOrder := NewOrder;
+end;
+
+//------------------------------------------------------------------------------
+
 // called by DirMon1Created(), DirMon1Deleted() and Display() when buffer > 65000
 procedure TFrmTail.AddSeparator ();
 var
    TailRec : PTailRec ;
    node : pvirtualNode ;
 begin
-   node := VstTail.AddChild (nil) ;
+   node := VstMain.AddChild (nil) ;
    // ensure node is initialized. Needed when the node is free to call onFreeNode
-   VstTail.ReinitNode(node,false);
+   VstMain.ReinitNode(node,false);
 
-   TailRec := VstTail.GetNodeData(node) ;
+   TailRec := VstMain.GetNodeData(node) ;
    tailrec.Columns := TStringList (-2) ; // -2 indicate a Separator message
    TailRec.Msg := '' ;
    TailRec.OriginalOrder := LastChildOrder ;
@@ -1267,11 +1376,11 @@ var
    TailRec : PTailRec ;
    node : pvirtualNode ;
 begin
-   node := VstTail.AddChild (nil) ;
+   node := VstMain.AddChild (nil) ;
    // ensure node is initialized. Needed when the node is free to call onFreeNode
-   VstTail.ReinitNode(node,false);
+   VstMain.ReinitNode(node,false);
 
-   TailRec := VstTail.GetNodeData(node) ;
+   TailRec := VstMain.GetNodeData(node) ;
    tailrec.Columns := TStringList (-1) ; // -2 indicate a Separator message
    TailRec.Msg := comment ;
    TailRec.OriginalOrder := LastChildOrder ;
@@ -1281,7 +1390,7 @@ end ;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailFreeNode(Sender: TBaseVirtualTree;  Node: PVirtualNode);
+procedure TFrmTail.VstMainFreeNode(Sender: TBaseVirtualTree;  Node: PVirtualNode);
 var
    TailRec : PTailRec ;
    idx : integer ;
@@ -1317,7 +1426,7 @@ begin
       NodeToFocus := nil ;  
 end;
 
-procedure TFrmTail.VstTailGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+procedure TFrmTail.VstMainGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
 var
    TailRec : PTailRec ;
@@ -1368,7 +1477,7 @@ begin
       if Column < tailrec.Columns.Count then begin
          CellText := tailrec.Columns[Column] ;
          // if last col and remaining strings...
-         if (Column = VstTail.Header.Columns.Count-1) then begin
+         if (Column = VstMain.Header.Columns.Count-1) then begin
             for c := Column+1 to tailrec.Columns.Count-1 do
                CellText := CellText + ' ' + string(ColSeparator) + tailrec.Columns[c] ;
          end ;
@@ -1376,23 +1485,27 @@ begin
             CellText := ' ' ;
       end ;
    end ;
+   if toEditable in vstDetail.TreeOptions.MiscOptions then
+      exit;
 
+   if Length(CellText) > 400 then
+      CellText := Copy(CellText, 1, 400) + '...'
 end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailHeaderDragged(Sender: TVTHeader;
+procedure TFrmTail.VstMainHeaderDragged(Sender: TVTHeader;
   Column: TColumnIndex; OldPosition: Integer);
 begin
-   VstTailChange (VstTail,nil);
+   VstMainChange (VstMain,nil);
    if ShowManycolumns then
-      VstTail.Header.MainColumn := VstTail.Header.Columns.GetFirstVisibleColumn ;
-   AutosizeAll (VstTail) ;
+      VstMain.Header.MainColumn := VstMain.Header.Columns.GetFirstVisibleColumn ;
+   AutosizeAll (VstMain) ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailCompareNodes(Sender: TBaseVirtualTree; Node1,
+procedure TFrmTail.VstMainCompareNodes(Sender: TBaseVirtualTree; Node1,
   Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
 var
    TailRec1,TailRec2    : PTailRec ;
@@ -1415,7 +1528,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailAfterItemPaint(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainAfterItemPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
 var
    TailRec : PTailRec ;
@@ -1438,7 +1551,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailBeforeCellPaint(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
@@ -1453,7 +1566,7 @@ begin
    if (SearchText = '') or (SearchKind <> mrYesToAll) then
       exit ;
 
-   TailRec := VstTail.GetNodeData(Node) ;
+   TailRec := VstMain.GetNodeData(Node) ;
    if (unt_search.SearchInAllPages) or (ActiveTracePage = self) then
       if CheckSearchRecord (TailRec) then     // check if the node or one of his child match the search text
          DrawHighlight (TargetCanvas, CellRect,false) ;
@@ -1461,7 +1574,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailAfterCellPaint(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainAfterCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellRect: TRect);
 var
@@ -1470,7 +1583,7 @@ var
    middle : integer ;
 begin
    //TailRec := Sender.GetNodeData(Node) ;
-   VstTailGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
+   VstMainGetText(Sender, Node,Column,ttStatic,CellText);   // ttStatic is used to get the real text
    if IsSeparator(CellText) then begin
       TargetCanvas.Pen.Color := clBlack;
       middle := CellRect.Bottom div 2 ;
@@ -1488,7 +1601,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+procedure TFrmTail.VstMainChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
 var
    TailRec : PTailRec ;
    FirstSelect : PVirtualNode ;
@@ -1519,19 +1632,24 @@ begin
    if Node <> nil then
       Sender.ScrollIntoView (Node,false,false);     // center and horizontally false
 
+   vstdetail.Clear ;
+   frameMemo.SetMemoText('',false,false);
+   VstDetailSelector.ResetSelection;
+
    // get first then second. If second is not nil then it's multiselect : disable info panel
-   FirstSelect := VstTail.GetNextSelected (nil) ;
+   FirstSelect := VstMain.GetNextSelected (nil) ;
    if FirstSelect = nil then
       exit ;
 
-   SecondSelect := VstTail.GetNextSelected (FirstSelect) ;
-   if SecondSelect <> nil then
+   SecondSelect := VstMain.GetNextSelected (FirstSelect) ;
+   if SecondSelect <> nil then begin
+      AddOneLineDetail(inttostr(VstMain.SelectedCount) + ' lines selected', '');
       exit ;
+   end;
 
    if PanelTraceInfo.Visible = false then
       exit ;
 
-   vstdetail.Clear ;
 
    TailRec := TVirtualStringTree (Sender).GetNodeData(FirstSelect) ; // node
 
@@ -1539,6 +1657,7 @@ begin
    if TailRec.Columns = nil then begin
       AddOneLineDetail ('Time '  , TailRec.Time) ;
       AddOneLineDetail ('Msg  '  , TailRec.Msg) ;
+      frameMemo.SetMemoText(TailRec.Msg,false,false);
    end else begin
 
       // -1 indicate a RED TailRec.Msg message
@@ -1551,19 +1670,19 @@ begin
 
       // check if titles are empty
       NoTitle := true ;
-      ColIdx := vstTail.Header.Columns.GetFirstVisibleColumn ;
+      ColIdx := VstMain.Header.Columns.GetFirstVisibleColumn ;
       while ColIdx <> InvalidColumn do begin
-         col := vstTail.header.Columns[ColIdx] ;
+         col := VstMain.header.Columns[ColIdx] ;
          if col.text <> '' then begin
             NoTitle := false ;
             break ;
          end ;
-         ColIdx := vstTail.Header.Columns.GetNextVisibleColumn(ColIdx) ;
+         ColIdx := VstMain.Header.Columns.GetNextVisibleColumn(ColIdx) ;
       end ;
 
-      ColIdx := vstTail.Header.Columns.GetFirstVisibleColumn ;
+      ColIdx := VstMain.Header.Columns.GetFirstVisibleColumn ;
       while ColIdx <> InvalidColumn do begin
-         col := vstTail.header.Columns[ColIdx] ;
+         col := VstMain.header.Columns[ColIdx] ;
 
          if NoTitle then
             coltitle := 'Col ' + inttostr (ColIdx+1)
@@ -1571,18 +1690,19 @@ begin
             coltitle := col.Text ;
 
          // tailRec can contain less column than the tree
-         if ColIdx < TailRec.Columns.count then
-            AddOneLineDetail (coltitle , RemoveLastCRLF(TailRec.Columns[ColIdx]))
-         else
+         if ColIdx < TailRec.Columns.count then begin
+            AddOneLineDetail (coltitle , RemoveLastCRLF(TailRec.Columns[ColIdx]));
+            frameMemo.SetMemoText(TailRec.Columns[ColIdx],false,false);
+         end else
             AddOneLineDetail (coltitle, '') ;
-         ColIdx := vstTail.Header.Columns.GetNextVisibleColumn(ColIdx) ;
+         ColIdx := VstMain.Header.Columns.GetNextVisibleColumn(ColIdx) ;
       end ;
 
       // if more TreeRec.Columns than vst.Header.Columns then add lines
-      for c := vstTail.Header.Columns.Count to TailRec.Columns.count-1 do begin
+      for c := VstMain.Header.Columns.Count to TailRec.Columns.count-1 do begin
          AddOneLineDetail ('', TailRec.Columns[c]) ;
+         frameMemo.SetMemoText(TailRec.Columns[c],false,false);
       end ;
-
    end ;
 end;
 
@@ -1620,6 +1740,7 @@ begin
    PageContainer.actClear        .Enabled := true ;
    PageContainer.actSaveToFile   .Enabled := false ;  // no sense to save something already on disk
    PageContainer.actViewTraceInfo.Enabled := true ;
+   PageContainer.actFocus        .Enabled := true  ;
    PageContainer.actPause        .Enabled := true  ;
    PageContainer.actCopy         .Enabled := true  ;
    PageContainer.actSelectAll    .Enabled := true  ;
@@ -1632,6 +1753,7 @@ begin
    PageContainer.actClearFileContent.Visible := true ;
 
    PageContainer.actViewTraceInfo.checked := PanelTraceInfo.Visible ;
+   PageContainer.actFocus        .checked := TraceConfig.AppDisplay_FocusToReceivedMessage;
    PageContainer.actPause        .checked := self.IsPaused ;
 end;
 
@@ -1646,7 +1768,7 @@ end;
 
 procedure TFrmTail.ResizeColumns;
 begin
-   AutosizeAll (vstTail) ;
+   AutosizeAll (VstMain) ;
 end;
 
 //------------------------------------------------------------------------------
@@ -1657,11 +1779,25 @@ begin
       PanelTraceInfo.Visible := true ;
       VSplitter.Visible := true ;
       PanelTraceInfo.Left := VSplitter.Left + 10 ;
-      VstTailChange(VstTail,nil);
+      VstMainChange(VstMain,nil);
    end else begin
       PanelTraceInfo.Visible := false ;
       VSplitter.Visible := false ;
    end ;
+end;
+
+procedure TFrmTail.VSplitterCanResize(Sender: TObject;  var NewSize: Integer; var Accept: Boolean);
+begin
+   rightPercent := NewSize / (GroupPanel.Width - vsplitter.width);
+   if (Width - NewSize < 105) then
+      NewSize := Width - 105;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrmTail.GroupPanelCanResize(Sender: TObject; var NewWidth,  NewHeight: Integer; var Resize: Boolean);
+begin
+   PanelTraceInfo.Width := Round(GroupPanel.Width * rightPercent);
 end;
 
 //------------------------------------------------------------------------------
@@ -1682,7 +1818,7 @@ begin
       TracesInfo.Caption := TimeToStr(LastModified)
                          + '  File size : ' + inttostr(File_Size)
                          //+ ', Read : ' + inttostr (lastpos)
-                         + ', not filtered lines : ' + inttostr(VstTail.RootNode.ChildCount)
+                         + ', not filtered lines : ' + inttostr(VstMain.RootNode.ChildCount)
                          + '   ' + TailFile ;
 
    TracesInfo.Hint := TracesInfo.Caption ;
@@ -1691,10 +1827,10 @@ begin
    // if autoclear is enabled, the NodeToFocus may be inexisting
    try
       if NodeToFocus <> nil then begin
-         VstTail.ClearSelection();
-         VstTail.Selected [NodeToFocus] := true ;
-         VstTail.FocusedNode := NodeToFocus;
-         VstTail.ScrollIntoView (NodeToFocus,false,false);
+         VstMain.ClearSelection();
+         VstMain.Selected [NodeToFocus] := true ;
+         VstMain.FocusedNode := NodeToFocus;
+         VstMain.ScrollIntoView (NodeToFocus,false,false);
       end;
    except
    end ;
@@ -1709,19 +1845,19 @@ var
    NodeTodelete , next : PVirtualNode ;
    nodeCount : integer ;
 begin
-   nodeCount := VstTail.RootNode.ChildCount ;
+   nodeCount := VstMain.RootNode.ChildCount ;
    if TraceConfig.Tail_AutoClear and (nodeCount > TraceConfig.Tail_MaxNode) then begin
-      VstTail.BeginUpdate ;
+      VstMain.BeginUpdate ;
       try
          if sorter.SortColumns.Count <> 0 then     // unsort before deleting old traces
             sorter.Unsort(nil);
 
-         NodeTodelete := VstTail.RootNode.FirstChild ;
+         NodeTodelete := VstMain.RootNode.FirstChild ;
          while nodeCount > TraceConfig.Tail_MinNode do begin
             next := NodeTodelete.NextSibling ;
             if NodeTodelete = NodeToFocus then  // will be also checked in OnFreeNode
                NodeToFocus := nil ;
-            VstTail.DeleteNode(NodeTodelete,false) ;
+            VstMain.DeleteNode(NodeTodelete,false) ;
             dec (nodeCount) ;
             NodeTodelete := next ;
          end ;
@@ -1729,7 +1865,7 @@ begin
          if sorter.SortColumns.Count <> 0 then      // resort
             sorter.Sort(nil);
       finally
-         VstTail.EndUpdate ;
+         VstMain.EndUpdate ;
       end ;
    end ;
 end;
@@ -1744,21 +1880,21 @@ end;
 procedure TFrmTail.SelectAll;
 begin
    // normally when the VstEditor is not nil, he is visible
-   if ((VstTail.IsEditing) or VstDetail.IsEditing) and (IVstEditor <> nil) and (TMoveMemoEditLink(IVstEditor).IsVisible) then begin
+   if ((VstMain.IsEditing) or VstDetail.IsEditing) and (IVstEditor <> nil) and (TMoveMemoEditLink(IVstEditor).IsVisible) then begin
       VstEditor.SelectAll() ;  // TMoveMemoEditLink(IVstEditor).SelectAll() ;
       exit ;
    end ;
-   if VstTail.Focused = true then
-      VstTail.SelectAll(true)       // select all visible items (don't select filtered items)
+   if VstMain.Focused = true then
+      VstMain.SelectAll(true)       // select all visible items (don't select filtered items)
    else if VstDetail.Focused then
       VstDetail.SelectAll(false) ;  // select all (visible or invisible)
 end;
 
 //------------------------------------------------------------------------------
-// CTRL C : Copy selected
-procedure TFrmTail.CopySelected;
+// CTRL C : Copy selected. Return true if element is focused
+function TFrmTail.CopySelected : boolean;
 var
-   CopyStrings: TStrings;
+   CopyStrings: TStringList;
    CopyText: PChar;
    NewLine: string;
    IsFirst : boolean ;
@@ -1773,8 +1909,8 @@ var
       ColIdx : TColumnIndex ;
       c : integer ;
    begin
-      if VstTail.Selected [TestNode] then begin
-         TailRec := VstTail.GetNodeData(TestNode) ;
+      if VstMain.Selected [TestNode] then begin
+         TailRec := VstMain.GetNodeData(TestNode) ;
          LeftMsg := TailRec.Msg ;
          // -1 indicate a RED TailRec.Msg message
          if integer (tailrec.Columns) = -1 then
@@ -1803,7 +1939,7 @@ var
          end ;
 
          if ShowManycolumns then begin
-            ColIdx := VstTail.Header.Columns.GetFirstVisibleColumn ;
+            ColIdx := VstMain.Header.Columns.GetFirstVisibleColumn ;
             while ColIdx <> InvalidColumn do begin
                if ColIdx < TailRec.Columns.Count  then begin  // check if more header than data
                   if IsFirst = false then
@@ -1811,10 +1947,10 @@ var
                   NewLine := NewLine + String(TextQualifier) + RemoveLastCRLF (TailRec.Columns[ColIdx]) + String(TextQualifier) ;
                   IsFirst := false ;
                end ;
-               ColIdx := VstTail.Header.Columns.GetNextVisibleColumn(ColIdx) ;
+               ColIdx := VstMain.Header.Columns.GetNextVisibleColumn(ColIdx) ;
             end ;
             // if more data than header : append data
-            ColIdx := VstTail.Header.Columns.GetLastVisibleColumn ;
+            ColIdx := VstMain.Header.Columns.GetLastVisibleColumn ;
             for c := ColIdx+1 to TailRec.Columns.Count-1 do
                NewLine := NewLine + String(TextQualifier) + RemoveLastCRLF (TailRec.Columns[c]) + String(TextQualifier) ;
         end ;
@@ -1829,39 +1965,43 @@ var
       end ;
    end ;
 
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      DetailRec : PDetailRec ;
-   begin
-      if VstDetail.Selected [TestNode] then begin
-
-         DetailRec := VstDetail.GetNodeData(TestNode) ;
-         NewLine := TraceConfig.TextExport_TextQualifier + DetailRec.Col1 + TraceConfig.TextExport_TextQualifier  +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col2 + TraceConfig.TextExport_TextQualifier +
-                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col3 + TraceConfig.TextExport_TextQualifier  ;
-
-         CopyStrings.Add(NewLine);
-      end ;
-
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
-      end ;
-   end ;
+//   procedure CopyDetail (TestNode : PVirtualNode);
+//   var
+//      node : PVirtualNode ;
+//      DetailRec : PDetailRec ;
+//   begin
+//      if VstDetail.Selected [TestNode] then begin
+//
+//         DetailRec := VstDetail.GetNodeData(TestNode) ;
+//         NewLine := TraceConfig.TextExport_TextQualifier + DetailRec.Col1 + TraceConfig.TextExport_TextQualifier  +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col2 + TraceConfig.TextExport_TextQualifier +
+//                    TraceConfig.TextExport_Separator + TraceConfig.TextExport_TextQualifier + DetailRec.Col3 + TraceConfig.TextExport_TextQualifier  ;
+//
+//         CopyStrings.Add(NewLine);
+//      end ;
+//
+//      // multi select
+//      node := TestNode.FirstChild ;
+//      while Node <> nil do begin
+//         CopyDetail (node) ;
+//         node := node.NextSibling ;
+//      end ;
+//   end ;
 
 begin
+   result := false;
    // reroute CTRL-C to the focused component if it's not the master tree
-   if (VstDetail.Focused = false) and (VstTail.Focused = false) then begin
+   if (VstDetail.Focused = false) and (VstMain.Focused = false) then begin
       focusedComponent := GetFocus ;
-      if focusedComponent <> 0 then
+      if focusedComponent <> 0 then begin
          SendMessage(focusedComponent, WM_COPY, 0, 0);
+         result := false;
+      end;
       exit ;
    end ;
+   result := true;
 
-   if VstTail.GetFirstSelected = nil then
+   if VstMain.GetFirstSelected = nil then
       exit ;
 
    CopyStrings := TStringList.Create;
@@ -1869,7 +2009,9 @@ begin
    try
 
       if VstDetail.Focused then begin
-         CopyDetail (VstDetail.RootNode);
+         //CopyDetail (VstDetail.RootNode);
+        VstDetailSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+
       end else begin
          // add title if needed.
          if TraceConfig.TextExport_GenerateColumnHeader then begin
@@ -1892,13 +2034,13 @@ begin
 
             // copy column name if available
             if (ShowManycolumns) and (DetectTitleOnFirstLine) then begin
-               ColIdx := vsttail.Header.Columns.GetFirstVisibleColumn ;
+               ColIdx := VstMain.Header.Columns.GetFirstVisibleColumn ;
                while ColIdx <> InvalidColumn do begin
                   if IsFirst = false then
                      NewLine := NewLine + String(ColSeparator) ;
-                  NewLine := NewLine + String(TextQualifier) + vsttail.header.Columns[ColIdx].Text + String(TextQualifier) ;
+                  NewLine := NewLine + String(TextQualifier) + VstMain.header.Columns[ColIdx].Text + String(TextQualifier) ;
                   IsFirst := false ;
-                  ColIdx := VstTail.Header.Columns.GetNextVisibleColumn(ColIdx) ;
+                  ColIdx := VstMain.Header.Columns.GetNextVisibleColumn(ColIdx) ;
                end ;
             end ;
 
@@ -1906,7 +2048,7 @@ begin
          end ;
 
          // add node starting from the invisible root node (recursive)
-         CheckIfNodeSelected (VstTail.RootNode) ;
+         CheckIfNodeSelected (VstMain.RootNode) ;
       end ;
       CopyText := CopyStrings.GetText;
       try
@@ -1929,11 +2071,11 @@ var
    wCellText: String ;
    CellText : string ;
 begin
-   if VstTail.Focused then begin
-      Node := VstTail.FocusedNode ;
+   if VstMain.Focused then begin
+      Node := VstMain.FocusedNode ;
       if node = nil then
          exit ;
-      VstTailGetText(VstTail, Node, VstTail.FocusedColumn,ttStatic,wCellText);   // ttStatic is used to get the real text
+      VstMainGetText(VstMain, Node, VstMain.FocusedColumn,ttStatic,wCellText);   // ttStatic is used to get the real text
    end else if VstDetail.Focused then begin
       Node := VstDetail.FocusedNode ;
       if node = nil then
@@ -1951,7 +2093,7 @@ end;
 
 procedure TFrmTail.ClearWin;
 begin
-   VstTail.Clear ;
+   VstMain.Clear ;
    vstdetail.Clear ;
 end;
 
@@ -1960,22 +2102,22 @@ procedure TFrmTail.DeleteSelected;
 var
    node : PVirtualNode ;
 begin
-   if VstTail.Focused = false then
+   if VstMain.Focused = false then
      exit ;
-   node := VstTail.GetFirstSelected ;
+   node := VstMain.GetFirstSelected ;
    if node = nil then  // no node selected
       exit ;
-   node := VstTail.GetPreviousVisible(node) ;
-   VstTail.DeleteSelectedNodes ;
+   node := VstMain.GetPreviousVisible(node) ;
+   VstMain.DeleteSelectedNodes ;
 
    // case of the first node : GetPreviousVisible is nil ...
    if node = nil then
-      node := VstTail.GetFirst
-   else if VstTail.GetNextVisible(node) <> nil then
-      node := VstTail.GetNextVisible(node) ;
+      node := VstMain.GetFirst
+   else if VstMain.GetNextVisible(node) <> nil then
+      node := VstMain.GetNextVisible(node) ;
 
-   VstTail.FocusedNode := node ;
-   VstTail.Selected [node] := true ;
+   VstMain.FocusedNode := node ;
+   VstMain.Selected [node] := true ;
    if node = nil then
       vstdetail.Clear ;
 end;
@@ -2050,6 +2192,56 @@ begin
 end;
 
 //------------------------------------------------------------------------------
+procedure TFrmTail.VstDetailSelectorSelectionChanged(Sender: TVstSelector;  selectionAsText: string);
+begin
+   frameMemo.LabelSelect.Caption := selectionAsText;
+   if (frameMemo.LabelSelect.Caption <> '') then
+      FrameMemo.SetMemoText('',false,false);
+end;
+
+procedure TFrmTail.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
+var
+   DetailRec : PDetailRec ;
+   CellText: String;
+begin
+   if (Node = nil) then
+      exit;
+   DetailRec := Sender.GetNodeData(Node) ;
+   if DetailRec = nil then
+      exit ;
+   case Column of
+      0 : CellText := DetailRec.Col1 ;
+      1 : CellText := DetailRec.Col2 ;
+      2 : CellText := DetailRec.Col3 ;
+   end ;
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrmTail.VstDetailColumnClick(Sender: TBaseVirtualTree;  Column: TColumnIndex; Shift: TShiftState);
+var
+   DetailRec : PDetailRec ;
+   CellText: String;
+   SelectedNode : PVirtualNode ;
+begin
+   SelectedNode := VstDetail.GetFirstSelected  ;
+   if SelectedNode = nil then
+     exit ;
+   DetailRec := Sender.GetNodeData(SelectedNode) ;
+   if DetailRec = nil then
+      exit ;
+   case Column of
+      0 : CellText := DetailRec.Col1 ;
+      1 : CellText := DetailRec.Col2 ;
+      2 : CellText := DetailRec.Col3 ;
+   end ;
+   if (frameMemo.LabelSelect.Caption = '') then
+      frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
 
 procedure TFrmTail.VstDetailGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
     TextType: TVSTTextType; var CellText: String);
@@ -2066,6 +2258,11 @@ begin
       1 : CellText := DetailRec.Col2 ;
       2 : CellText := DetailRec.Col3 ;
    end ;
+   if toEditable in VstDetail.TreeOptions.MiscOptions then
+      exit;
+
+   if Length(CellText) > 400 then
+      CellText := Copy(CellText, 1, 400) + '...'
 end;
 
 //------------------------------------------------------------------------------
@@ -2123,42 +2320,41 @@ var
 begin
    Node := Pointer(Message.WParam);
    if Assigned(Node) then
-      VstTail.EditNode(Node, VstTail.FocusedColumn);
+      VstMain.EditNode(Node, VstMain.FocusedColumn);
 end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
 // To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
-procedure TFrmTail.VstTailDblClick(Sender: TObject);
+// When the user double click the node, the flag is set
+procedure TFrmTail.VstMainDblClick(Sender: TObject);
 var
    P: TPoint;
    SelectedNode, MouseNode : PVirtualNode ;
    Dummy: Integer;
    TailRec : PTailRec ;
 begin
-   SelectedNode := VstTail.GetFirstSelected  ;
+   SelectedNode := VstMain.GetFirstSelected  ;
 
    // no node selected
    if SelectedNode = nil then
      exit ;
 
-   TailRec := VstTail.GetNodeData(SelectedNode) ;
+   TailRec := VstMain.GetNodeData(SelectedNode) ;
 
    // -2 indicate a line separator. No edit allow
    if integer (tailrec.Columns) = -2 then
       exit ;
 
    GetCursorPos(P);
-   P := VstTail.ScreenToClient(P);
-   MouseNode := VstTail.GetNodeAt(P.X, P.Y, True, Dummy) ;
+   P := VstMain.ScreenToClient(P);
+   MouseNode := VstMain.GetNodeAt(P.X, P.Y, True, Dummy) ;
 
    // the mouse under the cursor is not the selected node
    if SelectedNode <> MouseNode then
       exit ;
 
-   VstTail.TreeOptions.MiscOptions := VstTail.TreeOptions.MiscOptions + [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions + [toEditable] ;
 
    // We want to start editing the currently selected node. However it might well happen that this change event
    // here is caused by the node editor if another node is currently being edited. It causes trouble
@@ -2170,35 +2366,32 @@ end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
-// To not allow editing on simple click, the vst.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
-procedure TFrmTail.VstTailKeyAction(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainKeyAction(Sender: TBaseVirtualTree;
   var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
 begin
-   if CharCode = VK_F2 then
-      VstTail.TreeOptions.MiscOptions := VstTail.TreeOptions.MiscOptions + [toEditable] ;
+   if CharCode = VK_DELETE then
+      DeleteSelected() ;
 end;
 
 //------------------------------------------------------------------------------
 
 // After node is edited, reset the toEditable flag to not allow editing on simple click
-procedure TFrmTail.VstTailEditCancelled(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainEditCancelled(Sender: TBaseVirtualTree;
   Column: TColumnIndex);
 begin
-   VstTail.TreeOptions.MiscOptions := VstTail.TreeOptions.MiscOptions - [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
 // After node is edited, reset the toEditable flag to not allow editing on simple click
-procedure TFrmTail.VstTailEdited(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainEdited(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
 begin
-   VstTail.TreeOptions.MiscOptions := VstTail.TreeOptions.MiscOptions - [toEditable] ;
+   VstMain.TreeOptions.MiscOptions := VstMain.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
-procedure TFrmTail.VstTailEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
+procedure TFrmTail.VstMainEditing(Sender: TBaseVirtualTree; Node: PVirtualNode;
   Column: TColumnIndex; var Allowed: Boolean);
 begin
    Allowed := true;
@@ -2206,7 +2399,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailCreateEditor(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainCreateEditor(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
 begin
    if IVstEditor = nil then begin
@@ -2259,28 +2452,28 @@ begin
       exit ;
 
    if start = true then begin
-      currentNode := VstTail.GetFirstVisible() ;
+      currentNode := VstMain.GetFirstVisible() ;
    end else begin
-      currentNode := VstTail.GetFirstSelected ;
+      currentNode := VstMain.GetFirstSelected ;
       if currentNode = nil then
-         currentNode := VstTail.GetFirstVisible()
+         currentNode := VstMain.GetFirstVisible()
       else  // when start is false, we are searching in the current document
-         currentNode := VstTail.GetNextVisible(currentNode) ;   // skip the first selected
+         currentNode := VstMain.GetNextVisible(currentNode) ;   // skip the first selected
    end ;
 
    while currentNode <> nil do begin
-      TailRec := VstTail.GetNodeData(currentNode) ;
+      TailRec := VstMain.GetNodeData(currentNode) ;
       if CheckSearchRecord (TailRec) then begin
          if ActiveTracePage <> self then
             SetActivePage() ;
-         VstTail.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
-         VstTail.ClearSelection;
-         VstTail.Selected [currentNode] := true ;
-         VstTail.SetFocus() ;
+         VstMain.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
+         VstMain.ClearSelection;
+         VstMain.Selected [currentNode] := true ;
+         VstMain.SetFocus() ;
          result := true ;
          exit ;
       end ;
-      currentNode := VstTail.GetNextVisible(currentNode) ;
+      currentNode := VstMain.GetNextVisible(currentNode) ;
    end ;
 end;
 
@@ -2292,8 +2485,8 @@ var
    TailRec : PTailRec ;
    procedure CheckVisible () ;
    begin
-      while (currentNode <> nil) and (VstTail.IsVisible[currentNode] = false) do begin
-         currentNode := VstTail.GetPrevious(currentNode) ;
+      while (currentNode <> nil) and (VstMain.IsVisible[currentNode] = false) do begin
+         currentNode := VstMain.GetPrevious(currentNode) ;
       end ;
    end ;
 begin
@@ -2302,30 +2495,30 @@ begin
       exit ;
 
    if atEnd = true then begin
-      currentNode := VstTail.GetLast() ;
+      currentNode := VstMain.GetLast() ;
    end else begin
-      currentNode := VstTail.GetFirstSelected ;
+      currentNode := VstMain.GetFirstSelected ;
       if currentNode = nil then
-         currentNode := VstTail.GetLastVisible()
+         currentNode := VstMain.GetLastVisible()
       else  // when atEnd is false, we are searching in the current document
-         currentNode := VstTail.GetPrevious(currentNode) ;   // skip the first selected
+         currentNode := VstMain.GetPrevious(currentNode) ;   // skip the first selected
    end ;
 
    CheckVisible() ;
    while currentNode <> nil do begin
-      TailRec := VstTail.GetNodeData(currentNode) ;
+      TailRec := VstMain.GetNodeData(currentNode) ;
       if CheckSearchRecord (TailRec) then begin
          if ActiveTracePage <> self then
             SetActivePage() ;
          // fully visible ?
-         VstTail.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
-         VstTail.ClearSelection;
-         VstTail.Selected [currentNode] := true ;
-         VstTail.SetFocus() ;
+         VstMain.ScrollIntoView (currentNode,false);  // ensure the node is fully visible and displayed
+         VstMain.ClearSelection;
+         VstMain.Selected [currentNode] := true ;
+         VstMain.SetFocus() ;
          result := true ;
          exit ;
       end ;
-      currentNode := VstTail.GetPrevious(currentNode) ;
+      currentNode := VstMain.GetPrevious(currentNode) ;
       CheckVisible() ;
    end ;
 end;
@@ -2334,7 +2527,7 @@ end;
 
 procedure TFrmTail.RefreshView;
 begin
-   vstTail.Refresh ;
+   VstMain.Refresh ;
    VstDetail.Refresh ;
 end;
 
@@ -2342,7 +2535,7 @@ end;
 
 // if the paint area is modified, AfterPaint is called to redisplay the gutter
 
-procedure TFrmTail.VstTailAfterPaint(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas);
+procedure TFrmTail.VstMainAfterPaint(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas);
 var
    Node : pvirtualNode ;
    BaseOffset : Integer;  // top position of the top node to draw given in absolute tree coordinates
@@ -2356,12 +2549,12 @@ var
    BookmarkPos : integer ;
 begin
    // detect header height
-   if VstTail.Header.Columns.Count <> 0 then begin
+   if VstMain.Header.Columns.Count <> 0 then begin
       // get the header height from the first header column
       // since the VT.headerRect property is protected :-(
-      HeaderHeight := VstTail.Header.Columns[0].GetRect.Bottom ;
+      HeaderHeight := VstMain.Header.Columns[0].GetRect.Bottom ;
    end else begin  // should not happens
-      HeaderHeight := VstTail.header.Height + 2 ;  // plus somme bevels
+      HeaderHeight := VstMain.header.Height + 2 ;  // plus somme bevels
    end ;
 
    newgutter := timage.Create(self);
@@ -2379,10 +2572,10 @@ begin
 
    // Determine node to start drawing with.
    BaseOffset := 0 ;
-   Node := VstTail.GetNodeAt(0, 0, true, BaseOffset);
+   Node := VstMain.GetNodeAt(0, 0, true, BaseOffset);
    if node <> nil then begin    // nothing to display
       // get the first visible node rectangle.
-      DispRec := VstTail.GetDisplayRect (Node,NoColumn,false,false) ;
+      DispRec := VstMain.GetDisplayRect (Node,NoColumn,false,false) ;
 
       // We just need the TOP node position
       // This top position is zero or negative since the node can be partially visible
@@ -2394,8 +2587,8 @@ begin
 
       // draw each node
       while node <> nil do begin
-         NodeHeight := VstTail.NodeHeight[Node] ;
-         TailRec := VstTail.GetNodeData(Node) ;
+         NodeHeight := VstMain.NodeHeight[Node] ;
+         TailRec := VstMain.GetNodeData(Node) ;
 
          BookmarkPos := bookmarks.IndexOf(Node) ;
          if BookmarkPos <> -1 then begin
@@ -2420,7 +2613,7 @@ begin
          //   Frm_Tool.ilActions.Draw(gutterCanvas, 0 , Yposition , 15);
 
          inc (Yposition , NodeHeight) ;
-         Node := VstTail.GetNextVisible(Node) ;
+         Node := VstMain.GetNextVisible(Node) ;
       end ;
    end ;
 
@@ -2451,7 +2644,7 @@ begin
    if Filter = nil then
       Filter := TFrmFilter.create (self) ;
 
-   Filter.Vst := VstTail ;
+   Filter.Vst := VstMain ;
    Filter.base := self ;
    Filter.ColumnNameList.Clear ;
 
@@ -2461,8 +2654,8 @@ begin
    end else if ShowOnlyLines then begin
       Filter.ColumnNameList.AddObject('Lines', tObject(1)) ;
    end else if ShowManycolumns then begin
-      for c := 0 to VstTail.Header.Columns.Count-1 do begin
-         Title := VstTail.Header.Columns.Items[c].Text ;
+      for c := 0 to VstMain.Header.Columns.Count-1 do begin
+         Title := VstMain.Header.Columns.Items[c].Text ;
          if Title = '' then
             Title := 'Col' + inttostr(c) ;
          Filter.ColumnNameList.AddObject (Title , tObject(c)) ;
@@ -2490,8 +2683,8 @@ var
 begin
 
    GetCursorPos(P);
-   P := vstTail.ScreenToClient(P);
-   Node := vstTail.GetNodeAt(0, P.Y) ;
+   P := VstMain.ScreenToClient(P);
+   Node := VstMain.GetNodeAt(0, P.Y) ;
    if Node = nil then
       exit ;
 
@@ -2502,13 +2695,13 @@ begin
       bookmarks.Delete(index) ;
    end ;
 
-   vstTail.InvalidateNode(Node) ;
+   VstMain.InvalidateNode(Node) ;
 end;
 
 //------------------------------------------------------------------------------
 
 // main tree : fixed node height
-procedure TFrmTail.VstTailMeasureItem(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainMeasureItem(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
 begin
    NodeHeight := TraceConfig.Tail_Trace_NodeHeight ;
@@ -2516,7 +2709,7 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure TFrmTail.VstTailPaintText(Sender: TBaseVirtualTree;
+procedure TFrmTail.VstMainPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 var
@@ -2575,12 +2768,12 @@ end;
 
 procedure TFrmTail.ApplyFont;
 begin
-   VstTail.BeginUpdate ;
-   VstTail.Font.Name         := TraceConfig.Tail_Trace_FontName ;
-   VstTail.Font.Size         := TraceConfig.Tail_Trace_FontSize ;
-   VstTail.DefaultNodeHeight := TraceConfig.Tail_Trace_NodeHeight ;
-   VstTail.ReinitChildren (nil,true);
-   VstTail.EndUpdate ;
+   VstMain.BeginUpdate ;
+   VstMain.Font.Name         := TraceConfig.Tail_Trace_FontName ;
+   VstMain.Font.Size         := TraceConfig.Tail_Trace_FontSize ;
+   VstMain.DefaultNodeHeight := TraceConfig.Tail_Trace_NodeHeight ;
+   VstMain.ReinitChildren (nil,true);
+   VstMain.EndUpdate ;
 
    VstDetail.BeginUpdate ;
    VstDetail.Font.Name         := TraceConfig.Tail_Info_FontName ;
@@ -2592,7 +2785,7 @@ end;
 
 procedure TFrmTail.Print;
 begin
-   FrmPrintPreview.initialize(vstTail, nil) ;
+   FrmPrintPreview.initialize(VstMain, nil) ;
    FrmPrintPreview.ShowModal ;
 end;
 

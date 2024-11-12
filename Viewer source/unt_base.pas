@@ -16,7 +16,7 @@ interface
 
 uses
   system.Contnrs,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, unt_PageContainer, VirtualTrees, unt_tool, Menus, unt_filter;
+  Dialogs, ComCtrls, unt_PageContainer, VirtualTrees, VirtualTrees.Types, unt_tool, Menus, unt_filter;
 
 type
   // base class for all forms : ODS, Eventlog , FrmTail and Frm_Trace
@@ -45,23 +45,24 @@ type
     procedure PageControlChange (); virtual ; abstract ;
     //procedure PageControlChanging (); virtual ; abstract ;
 
-    procedure ClearWin ;          virtual ; abstract ;
-    procedure SaveWin ;           virtual ; abstract ;
-    procedure PauseWin ;          virtual ; abstract ;
-    procedure ViewTraceInfo ;     virtual ; abstract ;
-    procedure CopySelected ;      virtual ; abstract ;
-    procedure CopyCurrentCell ;   virtual ; abstract ;
-    procedure DeleteSelected ;    virtual ; abstract ;
-    procedure SelectAll ;         virtual ; abstract ;
-    procedure CheckAutoClear ;    virtual ; abstract ;
-    procedure TimerInfo ;         virtual ; abstract ;
-    procedure CloseWin ;          virtual ; abstract ;
-    procedure ResizeColumns ;     virtual ; abstract ;
-    procedure ViewProperty ;      virtual ; abstract ;
-    procedure RefreshView ;       virtual ; abstract ;
-    procedure ShowFilter ;        virtual ; abstract ;
-    procedure ApplyFont ;         virtual ; abstract ;
-    procedure Print ;             virtual ; abstract ;
+    procedure ClearWin ;             virtual ; abstract ;
+    procedure SaveWin ;              virtual ; abstract ;
+    procedure PauseWin ;             virtual ; abstract ;
+    procedure ViewTraceInfo ;        virtual ; abstract ;
+    function  CopySelected: boolean; virtual ; abstract ;
+    procedure CopyCurrentCell ;      virtual ; abstract ;
+    procedure DeleteSelected ;       virtual ; abstract ;
+    procedure SelectAll ;            virtual ; abstract ;
+    procedure CheckAutoClear ;       virtual ; abstract ;
+    procedure TimerInfo ;            virtual ; abstract ;
+    procedure CloseWin ;             virtual ; abstract ;
+    procedure ResizeColumns ;        virtual ; abstract ;
+    procedure ViewProperty ;         virtual ; abstract ;
+    procedure RefreshView ;          virtual ; abstract ;
+    procedure ShowFilter ;           virtual ; abstract ;
+    procedure ApplyFont ;            virtual ; abstract ;
+    procedure Print ;                virtual ; abstract ;
+    procedure InsertRow;             virtual ; abstract ;
     function  getMembers (Node : PVirtualNode) : TMember ;  virtual ; abstract ;
     function  SearchNext (start:boolean) : boolean ;  virtual ; abstract ;
     function  SearchPrevious (start:boolean) : boolean ;  virtual ; abstract ;

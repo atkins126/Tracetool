@@ -32,12 +32,12 @@ namespace TraceTool
 
     /// TraceToSend methods create new traces and send it to the viewer
     /// Common base class for TraceNode and WinTrace
-    /// TTrace.warning, debug and error are TraceNode
+    /// TTrace.Warning, Debug and Error are TraceNode
     public abstract class TraceToSend : TraceNodeBase   // no base constructor
     {
 
-        internal List<NodeContext> ContextList;              // context list
-        internal List<NodeContext> WinTraceContext = null;   // reference to winTrace Context (fContextList). Can be null
+        internal List<string> ContextList;              // context list
+        internal List<string> WinTraceContext = null;   // reference to winTrace Context (fContextList). Can be null
 
         /// <summary>
         /// The most useful function to send trace
@@ -58,7 +58,7 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return new TraceNode(this);
-            // create a node with same properties as "this" with new ID
+            // create a node with same properties as "this" with new Id
             TraceNodeEx result = new TraceNodeEx(this, true);
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             TTrace.SendToWinTraceClient(commandList, WinTraceId);
@@ -82,7 +82,7 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return new TraceNode(this);
-            // create a node with same properties as "this" with new ID
+            // create a node with same properties as "this" with new Id
             TraceNodeEx result = new TraceNodeEx(this, true);
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             if (rightMsg != "")
@@ -113,7 +113,7 @@ namespace TraceTool
         /// <param name="objToSend">The object to inspect</param>
         /// <param name="flags">what information to display</param>
         /// <returns>the new node</returns>
-        public TraceNode SendObject(string leftMsg, Object objToSend, TraceDisplayFlags flags)
+        public TraceNode SendObject(string leftMsg, object objToSend, TraceDisplayFlags flags)
         {
             Type oType;
 
@@ -125,7 +125,7 @@ namespace TraceTool
             else
                 oType = objToSend.GetType();
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -159,7 +159,7 @@ namespace TraceTool
         /// <param name="leftMsg">the message to display</param>
         /// <param name="objToSend">The object to show</param>
         /// <returns>the new node</returns>
-        public TraceNode SendValue(string leftMsg, Object objToSend)
+        public TraceNode SendValue(string leftMsg, object objToSend)
         {
             return SendValue(leftMsg, objToSend, TTrace.Options.SendPrivate);
         }
@@ -172,7 +172,7 @@ namespace TraceTool
         /// <param name="objToSend">The object to show</param>
         /// <param name="sendPrivate">Send Private fields (default is false)</param>
         /// <returns>the new node</returns>
-        public TraceNode SendValue(string leftMsg, Object objToSend, bool sendPrivate)
+        public TraceNode SendValue(string leftMsg, object objToSend, bool sendPrivate)
         {
             return SendValue(leftMsg, objToSend, sendPrivate, TTrace.Options.ObjectTreeDepth);
         }
@@ -186,7 +186,7 @@ namespace TraceTool
         /// <param name="sendPrivate">Send Private fields (default is false)</param>
         /// <param name="maxLevel">Max level to inspect (default is 3)</param>
         /// <returns>the new node</returns>
-        public TraceNode SendValue(string leftMsg, Object objToSend, bool sendPrivate, int maxLevel)
+        public TraceNode SendValue(string leftMsg, object objToSend, bool sendPrivate, int maxLevel)
         {
             string strModifier = "";
             string strName = "";
@@ -222,12 +222,12 @@ namespace TraceTool
         /// <param name="maxLevel">Max level to inspect (default is 3)</param>
         /// <param name="objTitle">Title of the object</param>
         /// <returns>the new node</returns>
-        public TraceNode SendValue(string leftMsg, Object objToSend, bool sendPrivate, int maxLevel, string objTitle)
+        public TraceNode SendValue(string leftMsg, object objToSend, bool sendPrivate, int maxLevel, string objTitle)
         {
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             // information are added to the Members array of the new created object the actual object.
@@ -267,7 +267,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             // detect null type
@@ -315,7 +315,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -339,7 +339,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
 
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
@@ -352,7 +352,7 @@ namespace TraceTool
 
         //------------------------------------------------------------------------------
 
-#if !NETSTANDARD1_6 && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
 
         /// <summary>
         /// Send a bitmap
@@ -365,7 +365,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddBitmap(image);
@@ -388,7 +388,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddBitmap(image);
@@ -414,7 +414,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddDump(shortTitle, adr, 0, count);
@@ -436,7 +436,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             Helper.AddCommand(commandList, TraceConst.CST_BACKGROUND_COLOR, Helper.ARGB_to_BGR(color), "-1");      // param : color, colId
 
@@ -458,7 +458,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
             Helper.AddCommand(commandList, TraceConst.CST_BACKGROUND_COLOR, Helper.ARGB_to_BGR(color), colId.ToString());      // param : color, colId
 
@@ -479,7 +479,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddXML(xml);
@@ -502,7 +502,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddTable(table);
@@ -525,7 +525,7 @@ namespace TraceTool
             if (Enabled == false)
                 return new TraceNode(this);
 
-            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new ID
+            TraceNodeEx result = new TraceNodeEx(this, true);  // create a node with same properties as "this" with new Id
             List<string> commandList = PrepareNewNode(leftMsg, result.Id);
 
             result.AddTable(table);
@@ -551,56 +551,38 @@ namespace TraceTool
         //----------------------------------------------------------------------
 
         /**
-        * Get the last context.
-        * @return last context for the thread
-        */
-        internal NodeContext GetLastContext()
-        {
-            List<NodeContext> cList;
-
-            if (WinTraceContext != null)
-                cList = WinTraceContext;
-            else if (ContextList != null)
-                cList = ContextList;
-            else
-                return null;
-
-            if (cList.Count == 0)
-                return null;
-            string thId = Helper.GetCurrentThreadId();
-            lock (cList)
-            {
-                foreach (NodeContext aContext in cList)
-                {
-                    if (aContext.ThreadId == thId)
-                        return aContext;
-                }
-            }
-            return null;
-        }
-
-        //------------------------------------------------------------------------------
-        /**
-        * Get the last context ID.
-        * @return last context ID for the thread
+        * Get the last context Id
+        * @return last context 
         */
         internal string GetLastContextId()
         {
-            NodeContext aContext = GetLastContext();
-            if (aContext == null)
-                return Id;
-            return aContext.NodeId;
+            List<string> cList;
+
+            if (WinTraceContext != null)
+                cList = WinTraceContext;
+            else if (ContextList != null)
+                cList = ContextList;
+            else
+                return this.Id;
+
+            lock (cList)
+            {
+                // list is ordered by last context on top
+                if (cList.Count == 0)
+                    return this.Id;
+                return cList[0];
+            }
         }
 
         //------------------------------------------------------------------------------
 
         /**
-        * Save the context
-        * @param newContext the context to push
+        * Save the context Id
+        * @param newContextId the context to push
         */
-        internal void PushContext(NodeContext newContext)
+        internal void PushContextId(string newContextId)
         {
-            List<NodeContext> cList;
+            List<string> cList;
 
             if (WinTraceContext != null)
                 cList = WinTraceContext;
@@ -608,13 +590,13 @@ namespace TraceTool
                 cList = ContextList;
             else
             {
-                ContextList = new List<NodeContext>();
-                cList = ContextList;
+                ContextList = new List<string>();       // dead code ?    
+                cList = ContextList;                    // cList elements not used
             }
 
             lock (cList)
             {
-                cList.Insert(0, newContext);
+                cList.Insert(0, newContextId);
             }
         }
 
@@ -622,9 +604,9 @@ namespace TraceTool
         /**
          * Delete the last context for the thread
          */
-        internal void DeleteLastContext()
+        internal void DeleteLastContextId()
         {
-            List<NodeContext> cList;
+            List<string> cList;
             if (WinTraceContext != null)
                 cList = WinTraceContext;
             else if (ContextList != null)
@@ -632,17 +614,11 @@ namespace TraceTool
             else
                 return;
 
-            string thId = Helper.GetCurrentThreadId();
             lock (cList)
             {
-                foreach (NodeContext aContext in cList)
-                {
-                    if (aContext.ThreadId == thId)
-                    {
-                        cList.Remove(aContext);   // no problem with cList iterator, since the function return after delete
-                        return;
-                    }
-                }
+                if (cList.Count == 0)
+                    return;
+                cList.RemoveAt(0);
             }
         }
 
@@ -655,7 +631,7 @@ namespace TraceTool
         {
             get
             {
-                List<NodeContext> cList;
+                List<string> cList;
 
                 if (WinTraceContext != null)
                     cList = WinTraceContext;
@@ -664,21 +640,12 @@ namespace TraceTool
                 else
                     return 0;
 
-                // no need to lock an empty list
-                if (cList.Count == 0)
-                    return 0;
-
-                string thId = Helper.GetCurrentThreadId();
-                int result = 0;
                 lock (cList)
                 {
-                    foreach (NodeContext aContext in cList)
-                    {
-                        if (aContext.ThreadId == thId)
-                            result++;
-                    }
+                    if (cList.Count == 0)
+                        return 0;
+                    return cList.Count;
                 }
-                return result;
             }
         }
 
@@ -730,34 +697,22 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return null;
-            string thId = Helper.GetCurrentThreadId();
 
-
-            NodeContext newContext = new NodeContext
-            {
-                ThreadId = thId,
-                NodeId = Helper.NewGuid().ToString()
-            };
+            string newContextId = Helper.NewGuid().ToString();
 
             TraceNode result = new TraceNode(this)
             {
-                Id = newContext.NodeId
+                Id = newContextId
             };
 
             List<string> commandList = new List<string>();
-            NodeContext lastContext = GetLastContext();
-            if (lastContext == null)
-            {
-                //newContext.level = 1 ;
-                Helper.AddCommand(commandList, TraceConst.CST_NEW_NODE, Id);              // param : parent Node id
-            }
-            else
-            {  // context already exist
-               //newContext.level = lastContext.level + 1 ;
-                Helper.AddCommand(commandList, TraceConst.CST_NEW_NODE, lastContext.NodeId);   // param : parent Node id
-            }
+            string lastContextId = GetLastContextId();
+            if (lastContextId == null)
+                Helper.AddCommand(commandList, TraceConst.CST_NEW_NODE, Id);               // param : parent Node id
+            else  // context already exist
+                Helper.AddCommand(commandList, TraceConst.CST_NEW_NODE, lastContextId);    // param : parent Node id
 
-            Helper.AddCommand(commandList, TraceConst.CST_TRACE_ID, newContext.NodeId);    // param : Node Id
+            Helper.AddCommand(commandList, TraceConst.CST_TRACE_ID, newContextId);         // param : Node Id
             Helper.AddCommand(commandList, TraceConst.CST_LEFT_MSG, leftMsg);              // param : left string
 
             if (!string.IsNullOrEmpty(rightMsg))
@@ -776,7 +731,7 @@ namespace TraceTool
             Helper.AddCommand(commandList, TraceConst.CST_ICO_INDEX, IconIndex);          // param : icon index
             TTrace.SendToWinTraceClient(commandList, WinTraceId);
 
-            PushContext(newContext);
+            PushContextId(newContextId);
             return result;
         }
 
@@ -789,7 +744,7 @@ namespace TraceTool
         {
             if (Enabled == false)
                 return;
-            DeleteLastContext();
+            DeleteLastContextId();
         }
 
         //----------------------------------------------------------------------
@@ -798,7 +753,7 @@ namespace TraceTool
         /// Delete indentation to the node added by indent()
         /// </summary>
         /// <param name="leftMsg">Message to send to close indentation (optional)</param>
-        public void UnIndent(String leftMsg)
+        public void UnIndent(string leftMsg)
         {
             if (Enabled == false)
                 return;
@@ -812,7 +767,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="leftMsg">Message to send to close indentation (optional)</param>
         /// <param name="rightMsg">Message to send to close indentation (optional)</param>
-        public void UnIndent(String leftMsg, String rightMsg)
+        public void UnIndent(string leftMsg, string rightMsg)
         {
             if (Enabled == false)
                 return;
@@ -827,7 +782,7 @@ namespace TraceTool
         /// <param name="leftMsg">Message to send to close indentation (optional)</param>
         /// <param name="rightMsg">Message to send to close indentation (optional)</param>
         /// <param name="backGroundColor">RGB background color (optional)(see Color.ToArgb function)</param>
-        public void UnIndent(String leftMsg, String rightMsg, int backGroundColor)
+        public void UnIndent(string leftMsg, string rightMsg, int backGroundColor)
         {
             if (Enabled == false)
                 return;
@@ -843,16 +798,16 @@ namespace TraceTool
         /// <param name="rightMsg">Message to send to close indentation (optional)</param>
         /// <param name="backGroundColor">RGB background color (optional)(see Color.ToArgb function)</param>
         /// <param name="isExit">if true, viewer type 'exit' is used</param>
-        public void UnIndent(String leftMsg, String rightMsg, int backGroundColor, bool isExit)
+        public void UnIndent(string leftMsg, string rightMsg, int backGroundColor, bool isExit)
         {
             if (Enabled == false)
                 return;
 
-            DeleteLastContext();
+            DeleteLastContextId();
 
             if (leftMsg != null || rightMsg != null)
             {
-                String nodeId = Helper.NewGuid().ToString();  // then give new ID
+                String nodeId = Helper.NewGuid().ToString();  // then give new Id
 
                 List<string> commandList = PrepareNewNode(leftMsg, nodeId);
 
@@ -878,7 +833,7 @@ namespace TraceTool
         /// Indent with "Enter " + left message + right message (optional) + background color (optional)
         /// </summary>
         /// <param name="leftMsg">Left message to send</param>
-        public TraceNode EnterMethod(String leftMsg)
+        public TraceNode EnterMethod(string leftMsg)
         {
             return Indent("Enter " + leftMsg, null, -1, true);
         }
@@ -890,7 +845,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="leftMsg">Left message to send</param>
         /// <param name="rightMsg">Right message to send</param>
-        public TraceNode EnterMethod(String leftMsg, String rightMsg)  // : TColor = clBlack
+        public TraceNode EnterMethod(string leftMsg, string rightMsg)  // : TColor = clBlack
         {
             return Indent("Enter " + leftMsg, rightMsg, -1, true);
         }
@@ -903,7 +858,7 @@ namespace TraceTool
         /// <param name="leftMsg">Left message to send</param>
         /// <param name="rightMsg">Right message to send</param>
         /// <param name="backGroundColor">RGB BackGround Color(see Color.ToArgb function)</param>
-        public TraceNode EnterMethod(String leftMsg, String rightMsg, int backGroundColor)
+        public TraceNode EnterMethod(string leftMsg, string rightMsg, int backGroundColor)
         {
             return Indent("Enter " + leftMsg, rightMsg, backGroundColor, true);
         }
@@ -924,7 +879,7 @@ namespace TraceTool
         /// UnIndent with "Exit " + left message (optional) + right message (optional) + background color (optional)
         /// </summary>
         /// <param name="leftMsg">Left message to send</param>
-        public void ExitMethod(String leftMsg)
+        public void ExitMethod(string leftMsg)
         {
             UnIndent("Exit " + leftMsg, null, -1, true);
         }
@@ -936,7 +891,7 @@ namespace TraceTool
         /// </summary>
         /// <param name="leftMsg">Left message to send</param>
         /// <param name="rightMsg">Right message to send</param>
-        public void ExitMethod(String leftMsg, String rightMsg)
+        public void ExitMethod(String leftMsg, string rightMsg)
         {
             UnIndent("Exit " + leftMsg, rightMsg, -1, true);
         }
@@ -949,22 +904,10 @@ namespace TraceTool
         /// <param name="leftMsg">Left message to send</param>
         /// <param name="rightMsg">Right message to send</param>
         /// <param name="backGroundColor">RGB BackGround Color(see Color.ToArgb function)</param>
-        public void ExitMethod(String leftMsg, String rightMsg, int backGroundColor)
+        public void ExitMethod(string leftMsg, string rightMsg, int backGroundColor)
         {
             UnIndent("Exit " + leftMsg, rightMsg, backGroundColor, true);
         }
 
     }     // TraceNode class
-
-    //----------------------------------------------------------------------
-    // InternalUse. Used to remind indentation node id
-
-    internal class NodeContext
-    {
-        public string ThreadId;
-        public String NodeId;
-    }
-
-    //----------------------------------------------------------------------
-
 }

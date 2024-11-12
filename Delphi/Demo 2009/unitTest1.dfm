@@ -10,12 +10,10 @@ object form1: Tform1
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = True
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDblClick = FormDblClick
-  PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
     Left = 0
@@ -25,6 +23,8 @@ object form1: Tform1
     ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 679
+    ExplicitHeight = 429
     object TabSheet1: TTabSheet
       Caption = 'Basic'
       object Image1: TImage
@@ -1778,10 +1778,6 @@ object form1: Tform1
     object TabSheet2: TTabSheet
       Caption = 'Nodes operations'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object butResend: TButton
         Left = 112
         Top = 24
@@ -1894,10 +1890,6 @@ object form1: Tform1
     object TabSheet3: TTabSheet
       Caption = 'Multi pages traces'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object butCreateTraceWin: TButton
         Left = 16
         Top = 24
@@ -1990,10 +1982,6 @@ object form1: Tform1
     object TabSheet5: TTabSheet
       Caption = 'Watches'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label6: TLabel
         Left = 24
         Top = 48
@@ -2081,10 +2069,6 @@ object form1: Tform1
     object TabSheet4: TTabSheet
       Caption = 'Other traces'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label2: TLabel
         Left = 248
         Top = 32
@@ -2134,9 +2118,9 @@ object form1: Tform1
       object butTail1: TButton
         Left = 16
         Top = 192
-        Width = 193
+        Width = 210
         Height = 25
-        Caption = 'Tail demo : Add lines to c:\log.txt'
+        Caption = 'Tail demo : Add lines to c:\temp\log.txt'
         TabOrder = 1
         OnClick = butTail1Click
       end
@@ -2159,18 +2143,18 @@ object form1: Tform1
       object butTail2: TButton
         Left = 16
         Top = 272
-        Width = 193
+        Width = 210
         Height = 25
-        Caption = 'Tail demo : Add chars to c:\log.txt'
+        Caption = 'Tail demo : Add chars to c:\temp\log.txt'
         TabOrder = 3
         OnClick = butTail2Click
       end
       object butTail3: TButton
         Left = 16
         Top = 232
-        Width = 193
+        Width = 210
         Height = 25
-        Caption = 'Tail demo : Add memo to c:\log.txt'
+        Caption = 'Tail demo : Add memo to c:\temp\log.txt'
         TabOrder = 2
         OnClick = butTail3Click
       end
@@ -2193,6 +2177,8 @@ object form1: Tform1
     Height = 41
     Align = alBottom
     TabOrder = 1
+    ExplicitTop = 429
+    ExplicitWidth = 679
     object butShow: TButton
       Left = 32
       Top = 8

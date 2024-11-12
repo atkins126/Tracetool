@@ -2,45 +2,60 @@ object Frm_ODS: TFrm_ODS
   Left = 358
   Top = 200
   Caption = 'ODS'
-  ClientHeight = 286
-  ClientWidth = 568
+  ClientHeight = 247
+  ClientWidth = 588
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object PanelOds: TPanel
     Left = 0
     Top = 0
-    Width = 568
-    Height = 286
+    Width = 588
+    Height = 247
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    OnCanResize = PanelOdsCanResize
     object VSplitter: TSplitter
-      Left = 176
+      Left = 196
       Top = 22
-      Height = 264
+      Height = 225
       Align = alRight
       Visible = False
+      OnCanResize = VSplitterCanResize
+      ExplicitLeft = 176
+      ExplicitHeight = 264
     end
-    object VstDebugString: TVirtualStringTree
+    object VstMain: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 164
-      Height = 264
+      Width = 184
+      Height = 225
       Align = alClient
       BevelInner = bvNone
-      Colors.BorderColor = clWindowText
+      Colors.BorderColor = clBlack
+      Colors.DisabledColor = clGray
+      Colors.DropMarkColor = 15385233
+      Colors.DropTargetColor = 15385233
+      Colors.DropTargetBorderColor = 15385233
+      Colors.FocusedSelectionColor = 15385233
+      Colors.FocusedSelectionBorderColor = 15385233
+      Colors.GridLineColor = 15987699
+      Colors.HeaderHotColor = clBlack
       Colors.HotColor = clBlack
-      Colors.UnfocusedSelectionColor = clHighlight
-      Colors.UnfocusedSelectionBorderColor = clHighlight
+      Colors.SelectionRectangleBlendColor = 15385233
+      Colors.SelectionRectangleBorderColor = 15385233
+      Colors.SelectionTextColor = clBlack
+      Colors.TreeLineColor = 9471874
+      Colors.UnfocusedColor = clGray
+      Colors.UnfocusedSelectionColor = 15385233
+      Colors.UnfocusedSelectionBorderColor = 15385233
       DragOperations = []
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -67,22 +82,22 @@ object Frm_ODS: TFrm_ODS
       TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
       TreeOptions.PaintOptions = [toHideSelection, toShowButtons, toShowDropmark, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
       TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect, toRightClickSelect]
-      OnAfterCellPaint = VstDebugStringAfterCellPaint
-      OnAfterPaint = VstDebugStringAfterPaint
-      OnBeforeCellPaint = VstDebugStringBeforeCellPaint
-      OnChange = VstDebugStringChange
-      OnCompareNodes = VstDebugStringCompareNodes
-      OnCreateEditor = VstDebugStringCreateEditor
-      OnDblClick = VstDebugStringDblClick
-      OnEditCancelled = VstDebugStringEditCancelled
-      OnEdited = VstDebugStringEdited
-      OnEditing = VstDebugStringEditing
-      OnFreeNode = VstDebugStringFreeNode
-      OnGetText = VstDebugStringGetText
-      OnPaintText = VstDebugStringPaintText
-      OnHeaderDragged = VstDebugStringHeaderDragged
-      OnKeyAction = VstDebugStringKeyAction
-      OnMeasureItem = VstDebugStringMeasureItem
+      OnAfterCellPaint = VstMainAfterCellPaint
+      OnAfterPaint = VstMainAfterPaint
+      OnBeforeCellPaint = VstMainBeforeCellPaint
+      OnChange = VstMainChange
+      OnCompareNodes = VstMainCompareNodes
+      OnCreateEditor = VstMainCreateEditor
+      OnDblClick = VstMainDblClick
+      OnEditCancelled = VstMainEditCancelled
+      OnEdited = VstMainEdited
+      OnEditing = VstMainEditing
+      OnFreeNode = VstMainFreeNode
+      OnGetText = VstMainGetText
+      OnPaintText = VstMainPaintText
+      OnHeaderDragged = VstMainHeaderDragged
+      OnKeyAction = VstMainKeyAction
+      OnMeasureItem = VstMainMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
       Columns = <
@@ -106,28 +121,51 @@ object Frm_ODS: TFrm_ODS
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 179
+      Left = 199
       Top = 22
       Width = 389
-      Height = 264
+      Height = 225
       Align = alRight
       BevelInner = bvLowered
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
       Visible = False
+      object SplitterH: TSplitter
+        Left = 2
+        Top = 136
+        Width = 385
+        Height = 5
+        Cursor = crVSplit
+        Align = alBottom
+        ExplicitTop = 2
+      end
       object VstDetail: TVirtualStringTree
         Left = 2
         Top = 2
         Width = 385
-        Height = 260
+        Height = 134
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
-        Colors.BorderColor = clWindowText
+        Colors.BorderColor = clBlack
+        Colors.DisabledColor = clGray
+        Colors.DropMarkColor = 15385233
+        Colors.DropTargetColor = 15385233
+        Colors.DropTargetBorderColor = 15385233
+        Colors.FocusedSelectionColor = 15385233
+        Colors.FocusedSelectionBorderColor = 15385233
+        Colors.GridLineColor = 15987699
+        Colors.HeaderHotColor = clBlack
         Colors.HotColor = clBlack
-        Colors.UnfocusedSelectionColor = clHighlight
-        Colors.UnfocusedSelectionBorderColor = clHighlight
+        Colors.SelectionRectangleBlendColor = 15385233
+        Colors.SelectionRectangleBorderColor = 15385233
+        Colors.SelectionTextColor = clBlack
+        Colors.TreeLineColor = 9471874
+        Colors.UnfocusedColor = clGray
+        Colors.UnfocusedSelectionColor = 15385233
+        Colors.UnfocusedSelectionBorderColor = 15385233
+        DefaultNodeHeight = 17
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -152,9 +190,11 @@ object Frm_ODS: TFrm_ODS
         TreeOptions.SelectionOptions = [toExtendedFocus]
         OnBeforeCellPaint = VstDetailBeforeCellPaint
         OnChange = VstDetailChange
+        OnColumnClick = VstDetailColumnClick
         OnCreateEditor = VstDetailCreateEditor
         OnDblClick = VstDetailDblClick
         OnEditing = VstDetailEditing
+        OnFocusChanged = VstDetailFocusChanged
         OnFreeNode = VstDetailFreeNode
         OnGetText = VstDetailGetText
         OnPaintText = VstDetailPaintText
@@ -175,19 +215,46 @@ object Frm_ODS: TFrm_ODS
             Width = 300
           end>
       end
+      inline FrameMemo: TFrameMemo
+        Left = 2
+        Top = 141
+        Width = 385
+        Height = 82
+        Align = alBottom
+        TabOrder = 1
+        ExplicitLeft = 2
+        ExplicitTop = 141
+        ExplicitWidth = 385
+        ExplicitHeight = 82
+        inherited SynMemo: TSynEdit
+          Width = 385
+          Height = 57
+          ExplicitWidth = 385
+          ExplicitHeight = 57
+        end
+        inherited PanelTop: TPanel
+          Width = 385
+          ExplicitWidth = 385
+          inherited LabelSelect: TLabel
+            Height = 13
+            ExplicitHeight = 13
+          end
+        end
+      end
     end
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 568
+      Width = 588
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 584
       DesignSize = (
-        568
+        588
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -197,7 +264,7 @@ object Frm_ODS: TFrm_ODS
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 545
+        Left = 565
         Top = 0
         Width = 22
         Height = 20
@@ -231,17 +298,19 @@ object Frm_ODS: TFrm_ODS
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 561
       end
     end
     object PanelGutter: TPanel
       Left = 0
       Top = 22
       Width = 12
-      Height = 264
+      Height = 225
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
+      ExplicitHeight = 224
     end
   end
   object PopupTree: TPopupMenu

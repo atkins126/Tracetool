@@ -2,39 +2,54 @@ inherited FrmEventLog: TFrmEventLog
   Left = 314
   Top = 235
   Caption = 'FrmEventLog'
-  ClientHeight = 171
-  ClientWidth = 569
-  OldCreateOrder = True
-  ExplicitWidth = 585
-  ExplicitHeight = 210
-  PixelsPerInch = 96
+  ClientHeight = 378
+  ClientWidth = 729
+  ExplicitWidth = 741
+  ExplicitHeight = 416
   TextHeight = 13
   object GroupPanel: TPanel
     Left = 0
     Top = 0
-    Width = 569
-    Height = 171
+    Width = 729
+    Height = 378
     Align = alClient
     BevelOuter = bvNone
     Caption = 'GroupPanel'
     TabOrder = 0
+    OnCanResize = GroupPanelCanResize
     object VSplitter: TSplitter
-      Left = 196
+      Left = 341
       Top = 22
-      Height = 149
+      Height = 356
       Align = alRight
+      OnCanResize = VSplitterCanResize
+      ExplicitLeft = 196
+      ExplicitHeight = 149
     end
-    object VstEvent: TVirtualStringTree
+    object VstMain: TVirtualStringTree
       Left = 12
       Top = 22
-      Width = 184
-      Height = 149
+      Width = 329
+      Height = 356
       Align = alClient
       BevelInner = bvNone
-      Colors.BorderColor = clWindowText
+      Colors.BorderColor = clBlack
+      Colors.DisabledColor = clGray
+      Colors.DropMarkColor = 15385233
+      Colors.DropTargetColor = 15385233
+      Colors.DropTargetBorderColor = 15385233
+      Colors.FocusedSelectionColor = 15385233
+      Colors.FocusedSelectionBorderColor = 15385233
+      Colors.GridLineColor = 15987699
+      Colors.HeaderHotColor = clBlack
       Colors.HotColor = clBlack
-      Colors.UnfocusedSelectionColor = clHighlight
-      Colors.UnfocusedSelectionBorderColor = clHighlight
+      Colors.SelectionRectangleBlendColor = 15385233
+      Colors.SelectionRectangleBorderColor = 15385233
+      Colors.SelectionTextColor = clBlack
+      Colors.TreeLineColor = 9471874
+      Colors.UnfocusedColor = clGray
+      Colors.UnfocusedSelectionColor = 15385233
+      Colors.UnfocusedSelectionBorderColor = 15385233
       DragOperations = []
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -60,40 +75,43 @@ inherited FrmEventLog: TFrmEventLog
       TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning]
       TreeOptions.PaintOptions = [toHideSelection, toShowButtons, toShowDropmark, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
       TreeOptions.SelectionOptions = [toFullRowSelect, toMultiSelect, toRightClickSelect]
-      OnAfterCellPaint = VstEventAfterCellPaint
-      OnAfterPaint = VstEventAfterPaint
-      OnBeforeCellPaint = VstEventBeforeCellPaint
-      OnChange = VstEventChange
-      OnCompareNodes = VstEventCompareNodes
-      OnCreateEditor = VstEventCreateEditor
-      OnDblClick = VstEventDblClick
-      OnEditCancelled = VstEventEditCancelled
-      OnEdited = VstEventEdited
-      OnEditing = VstEventEditing
-      OnFreeNode = VstEventFreeNode
-      OnGetText = VstEventGetText
-      OnPaintText = VstEventPaintText
-      OnGetImageIndex = VstEventGetImageIndex
-      OnHeaderDragged = VstEventHeaderDragged
-      OnKeyAction = VstEventKeyAction
-      OnMeasureItem = VstEventMeasureItem
+      OnAfterCellPaint = VstMainAfterCellPaint
+      OnAfterPaint = VstMainAfterPaint
+      OnBeforeCellPaint = VstMainBeforeCellPaint
+      OnChange = VstMainChange
+      OnCompareNodes = VstMainCompareNodes
+      OnCreateEditor = VstMainCreateEditor
+      OnDblClick = VstMainDblClick
+      OnEditCancelled = VstMainEditCancelled
+      OnEdited = VstMainEdited
+      OnEditing = VstMainEditing
+      OnFreeNode = VstMainFreeNode
+      OnGetText = VstMainGetText
+      OnPaintText = VstMainPaintText
+      OnGetImageIndex = VstMainGetImageIndex
+      OnHeaderDragged = VstMainHeaderDragged
+      OnKeyAction = VstMainKeyAction
+      OnMeasureItem = VstMainMeasureItem
       Touch.InteractiveGestures = [igPan, igPressAndTap]
       Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
       Columns = <
         item
+          Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible]
           Position = 0
+          Spacing = 1
+          Style = vsOwnerDraw
           Width = 20
         end
         item
           Position = 1
           Text = 'Time'
-          Width = 115
+          Width = 100
         end
         item
           MaxWidth = 1000
           Position = 2
           Text = 'Source'
-          Width = 150
+          Width = 130
         end
         item
           Color = 16705515
@@ -105,27 +123,49 @@ inherited FrmEventLog: TFrmEventLog
         end>
     end
     object PanelTraceInfo: TPanel
-      Left = 199
+      Left = 344
       Top = 22
-      Width = 370
-      Height = 149
+      Width = 385
+      Height = 356
       Align = alRight
       BevelInner = bvLowered
       ParentBackground = False
       ParentColor = True
       TabOrder = 1
+      object SplitterH: TSplitter
+        Left = 2
+        Top = 193
+        Width = 381
+        Height = 5
+        Cursor = crVSplit
+        Align = alBottom
+        ExplicitTop = 307
+      end
       object VstDetail: TVirtualStringTree
         Left = 2
         Top = 2
-        Width = 366
-        Height = 145
+        Width = 381
+        Height = 191
         Align = alClient
         BevelOuter = bvNone
         Color = 16117479
-        Colors.BorderColor = clWindowText
+        Colors.BorderColor = clBlack
+        Colors.DisabledColor = clGray
+        Colors.DropMarkColor = 15385233
+        Colors.DropTargetColor = 15385233
+        Colors.DropTargetBorderColor = 15385233
+        Colors.FocusedSelectionColor = 15385233
+        Colors.FocusedSelectionBorderColor = 15385233
+        Colors.GridLineColor = 15987699
+        Colors.HeaderHotColor = clBlack
         Colors.HotColor = clBlack
-        Colors.UnfocusedSelectionColor = clHighlight
-        Colors.UnfocusedSelectionBorderColor = clHighlight
+        Colors.SelectionRectangleBlendColor = 15385233
+        Colors.SelectionRectangleBorderColor = 15385233
+        Colors.SelectionTextColor = clBlack
+        Colors.TreeLineColor = 9471874
+        Colors.UnfocusedColor = clGray
+        Colors.UnfocusedSelectionColor = 15385233
+        Colors.UnfocusedSelectionBorderColor = 15385233
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -141,7 +181,6 @@ inherited FrmEventLog: TFrmEventLog
         Margin = 0
         ParentFont = False
         ParentShowHint = False
-        PopupMenu = PopupDetail
         ScrollBarOptions.AlwaysVisible = True
         ShowHint = True
         TabOrder = 0
@@ -150,9 +189,11 @@ inherited FrmEventLog: TFrmEventLog
         TreeOptions.PaintOptions = []
         OnBeforeCellPaint = VstDetailBeforeCellPaint
         OnChange = VstDetailChange
+        OnColumnClick = VstDetailColumnClick
         OnCreateEditor = VstDetailCreateEditor
         OnDblClick = VstDetailDblClick
         OnEditing = VstDetailEditing
+        OnFocusChanged = VstDetailFocusChanged
         OnFreeNode = VstDetailFreeNode
         OnGetText = VstDetailGetText
         OnPaintText = VstDetailPaintText
@@ -181,19 +222,46 @@ inherited FrmEventLog: TFrmEventLog
             Width = 3000
           end>
       end
+      inline FrameMemo: TFrameMemo
+        Left = 2
+        Top = 198
+        Width = 381
+        Height = 156
+        Align = alBottom
+        TabOrder = 1
+        ExplicitLeft = 2
+        ExplicitTop = 198
+        ExplicitWidth = 381
+        ExplicitHeight = 156
+        inherited SynMemo: TSynEdit
+          Width = 381
+          Height = 131
+          ExplicitWidth = 381
+          ExplicitHeight = 131
+        end
+        inherited PanelTop: TPanel
+          Width = 381
+          ExplicitWidth = 381
+          inherited LabelSelect: TLabel
+            Height = 13
+            ExplicitHeight = 13
+          end
+        end
+      end
     end
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 569
+      Width = 729
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 725
       DesignSize = (
-        569
+        729
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -203,7 +271,7 @@ inherited FrmEventLog: TFrmEventLog
         Caption = 'TracesInfo'
       end
       object butClose: TBitBtn
-        Left = 546
+        Left = 706
         Top = 0
         Width = 22
         Height = 20
@@ -237,37 +305,41 @@ inherited FrmEventLog: TFrmEventLog
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 702
       end
       object butReload: TBitBtn
-        Left = 478
-        Top = 0
-        Width = 65
-        Height = 20
+        Left = 595
+        Top = 1
+        Width = 109
+        Height = 22
         Anchors = [akTop, akRight]
-        Caption = 'Reload (50)'
+        Caption = 'Reload 500 (10 days)'
         TabOrder = 1
         OnClick = butReloadClick
+        ExplicitLeft = 591
       end
       object butGetAll: TBitBtn
-        Left = 378
-        Top = 0
-        Width = 97
-        Height = 20
+        Left = 441
+        Top = 1
+        Width = 149
+        Height = 22
         Anchors = [akTop, akRight]
-        Caption = 'Get All messages'
+        Caption = 'Get All messages (10 days)'
         TabOrder = 2
         OnClick = butGetAllClick
+        ExplicitLeft = 437
       end
     end
     object PanelGutter: TPanel
       Left = 0
       Top = 22
       Width = 12
-      Height = 149
+      Height = 356
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       OnDblClick = PanelGutterDblClick
+      ExplicitHeight = 355
     end
   end
   object PopupTree: TPopupMenu
@@ -293,23 +365,6 @@ inherited FrmEventLog: TFrmEventLog
       Caption = '-'
     end
     object SelectAll1: TMenuItem
-      Action = FrmPageContainer.actSelectAll
-    end
-  end
-  object PopupDetail: TPopupMenu
-    Images = Frm_Tool.ilActions
-    Left = 416
-    Top = 78
-    object MenuItem2: TMenuItem
-      Action = FrmPageContainer.actCopy
-    end
-    object MenuItem3: TMenuItem
-      Action = FrmPageContainer.actCopyCurrentCell
-    end
-    object N2: TMenuItem
-      Caption = '-'
-    end
-    object MenuItem1: TMenuItem
       Action = FrmPageContainer.actSelectAll
     end
   end

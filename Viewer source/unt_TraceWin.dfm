@@ -2,8 +2,8 @@ object Frm_Trace: TFrm_Trace
   Left = 323
   Top = 184
   Caption = 'TTRACE'
-  ClientHeight = 325
-  ClientWidth = 572
+  ClientHeight = 324
+  ClientWidth = 568
   Color = clBtnFace
   DragKind = dkDock
   Font.Charset = DEFAULT_CHARSET
@@ -11,45 +11,65 @@ object Frm_Trace: TFrm_Trace
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object PanelTTraces: TPanel
     Left = 0
     Top = 0
-    Width = 572
-    Height = 325
+    Width = 568
+    Height = 324
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    OnCanResize = PanelTTracesCanResize
+    ExplicitWidth = 564
+    ExplicitHeight = 323
     object VSplitter: TSplitter
-      Left = 220
+      Left = 216
       Top = 22
       Width = 5
-      Height = 303
+      Height = 302
       Align = alRight
       Visible = False
+      OnCanResize = VSplitterCanResize
+      ExplicitLeft = 220
+      ExplicitHeight = 303
     end
     object PanelLeft: TPanel
       Left = 0
       Top = 22
-      Width = 220
-      Height = 303
+      Width = 216
+      Height = 302
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      object vstTrace: TVirtualStringTree
+      OnResize = PanelLeftResize
+      ExplicitWidth = 212
+      ExplicitHeight = 301
+      object vstMain: TVirtualStringTree
         Left = 12
         Top = 0
-        Width = 208
-        Height = 303
+        Width = 204
+        Height = 302
         Align = alClient
         BevelInner = bvLowered
         BevelOuter = bvRaised
-        Colors.BorderColor = clWindowText
+        Colors.BorderColor = clBlack
+        Colors.DisabledColor = clGray
+        Colors.DropMarkColor = 15385233
+        Colors.DropTargetColor = 15385233
+        Colors.DropTargetBorderColor = 15385233
+        Colors.FocusedSelectionColor = 15385233
+        Colors.FocusedSelectionBorderColor = 15385233
+        Colors.GridLineColor = 15987699
+        Colors.HeaderHotColor = clBlack
         Colors.HotColor = clBlack
+        Colors.SelectionRectangleBlendColor = 15385233
+        Colors.SelectionRectangleBorderColor = 15385233
+        Colors.SelectionTextColor = clBlack
+        Colors.TreeLineColor = 9471874
+        Colors.UnfocusedColor = clBlack
         Colors.UnfocusedSelectionColor = clGray
         Colors.UnfocusedSelectionBorderColor = clGray
         DragOperations = []
@@ -79,24 +99,24 @@ object Frm_Trace: TFrm_Trace
         TreeOptions.MiscOptions = []
         TreeOptions.PaintOptions = []
         TreeOptions.SelectionOptions = [toExtendedFocus, toFullRowSelect, toMultiSelect, toRightClickSelect, toSimpleDrawSelection]
-        OnAfterCellPaint = vstTraceAfterCellPaint
-        OnAfterPaint = vstTraceAfterPaint
-        OnBeforeCellPaint = vstTraceBeforeCellPaint
-        OnChange = vstTraceChange
-        OnCompareNodes = vstTraceCompareNodes
-        OnCreateEditor = vstTraceCreateEditor
-        OnDblClick = vstTraceDblClick
-        OnEditCancelled = vstTraceEditCancelled
-        OnEdited = vstTraceEdited
-        OnEditing = vstTraceEditing
-        OnFreeNode = vstTraceFreeNode
-        OnGetText = vstTraceGetText
-        OnPaintText = vstTracePaintText
-        OnGetImageIndex = vstTraceGetImageIndex
-        OnGetHint = vstTraceGetHint
-        OnHeaderDragged = vstTraceHeaderDragged
-        OnKeyAction = vstTraceKeyAction
-        OnMeasureItem = vstTraceMeasureItem
+        OnAfterCellPaint = vstMainAfterCellPaint
+        OnAfterPaint = vstMainAfterPaint
+        OnBeforeCellPaint = vstMainBeforeCellPaint
+        OnChange = vstMainChange
+        OnCompareNodes = vstMainCompareNodes
+        OnCreateEditor = vstMainCreateEditor
+        OnDblClick = vstMainDblClick
+        OnEditCancelled = vstMainEditCancelled
+        OnEdited = vstMainEdited
+        OnEditing = vstMainEditing
+        OnFreeNode = vstMainFreeNode
+        OnGetText = vstMainGetText
+        OnPaintText = vstMainPaintText
+        OnGetImageIndex = vstMainGetImageIndex
+        OnGetHint = vstMainGetHint
+        OnHeaderDragged = vstMainHeaderDragged
+        OnKeyAction = vstMainKeyAction
+        OnMeasureItem = vstMainMeasureItem
         Touch.InteractiveGestures = [igPan, igPressAndTap]
         Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
         Columns = <
@@ -136,35 +156,39 @@ object Frm_Trace: TFrm_Trace
         Left = 0
         Top = 0
         Width = 12
-        Height = 303
+        Height = 302
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 1
         OnDblClick = PanelGutterDblClick
+        ExplicitHeight = 301
       end
     end
     object PanelRight: TPanel
-      Left = 225
+      Left = 221
       Top = 22
       Width = 347
-      Height = 303
+      Height = 302
       Align = alRight
       BevelOuter = bvNone
       TabOrder = 1
       Visible = False
+      ExplicitLeft = 217
+      ExplicitHeight = 301
     end
     object PanelTop: TPanel
       Left = 0
       Top = 0
-      Width = 572
+      Width = 568
       Height = 22
       Align = alTop
       BevelOuter = bvNone
       Color = clCream
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 564
       DesignSize = (
-        572
+        568
         22)
       object TracesInfo: TLabel
         Left = 3
@@ -175,7 +199,7 @@ object Frm_Trace: TFrm_Trace
         OnClick = TracesInfoClick
       end
       object LabelLogFile: TLabel
-        Left = 487
+        Left = 483
         Top = 5
         Width = 60
         Height = 13
@@ -190,9 +214,10 @@ object Frm_Trace: TFrm_Trace
         Font.Style = [fsUnderline]
         ParentFont = False
         OnClick = LabelLogFileClick
+        ExplicitLeft = 487
       end
       object butClose: TBitBtn
-        Left = 549
+        Left = 545
         Top = 0
         Width = 22
         Height = 22
@@ -226,12 +251,13 @@ object Frm_Trace: TFrm_Trace
           00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
         TabOrder = 0
         OnClick = butCloseClick
+        ExplicitLeft = 541
       end
     end
   end
   object PopupTree: TPopupMenu
     Images = Frm_Tool.ilActions
-    Left = 24
+    Left = 56
     Top = 46
     object Cut1: TMenuItem
       Action = FrmPageContainer.actCut

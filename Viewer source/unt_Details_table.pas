@@ -4,62 +4,70 @@ interface
 
 uses
   system.Contnrs, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, unt_Details_base, VirtualTrees,
+  Dialogs, unt_Details_base, VirtualTrees, VirtualTrees.Types,
   unt_Editor, Menus , ExtCtrls, clipbrd,
   unt_TraceWin ,
   unt_utility,
-  unt_tool;            // VstEditor, IVstEditor, TMember
+  vstSort,
+  VstSelector,
+  unt_tool,
+  System.Generics.Collections,
+  System.TypInfo,
+  System.Math,
+  VirtualTrees.BaseAncestorVCL,
+  VirtualTrees.BaseTree,
+  VirtualTrees.AncestorVCL;            // VstEditor, IVstEditor, TMember
 
 type
   PTableRec = ^TTableRec ;
   TTableRec = record
+     OriginalOrder: integer; // Original order when inserted. Used to Unsort nodes
      Columns : TStringList ;
   end ;
 
   Tframe_table = class(Tframe_BaseDetails)
-    VstTable: TVirtualStringTree;
+    VstDetail: TVirtualStringTree;
     PopupDetail: TPopupMenu;
     CopyMenu: TMenuItem;
     N2: TMenuItem;
     SelectAllMenu: TMenuItem;
-    procedure VstTableCreateEditor(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
-    procedure VstTableDblClick(Sender: TObject);
-    procedure VstTableEditCancelled(Sender: TBaseVirtualTree;
-      Column: TColumnIndex);
-    procedure VstTableEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex);
-    procedure VstTableFreeNode(Sender: TBaseVirtualTree;
-      Node: PVirtualNode);
-    procedure VstTableMeasureItem(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
-    procedure VstTablePaintText(Sender: TBaseVirtualTree;
-      const TargetCanvas: TCanvas; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType);
-    procedure VstTableKeyAction(Sender: TBaseVirtualTree;
-      var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-    procedure VstTableGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure VstTableChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VstDetailCreateEditor(Sender: TBaseVirtualTree;Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
+    procedure VstDetailDblClick(Sender: TObject);
+    procedure VstDetailEditCancelled(Sender: TBaseVirtualTree;Column: TColumnIndex);
+    procedure VstDetailEdited(Sender: TBaseVirtualTree; Node: PVirtualNode;Column: TColumnIndex);
+    procedure VstDetailFreeNode(Sender: TBaseVirtualTree;Node: PVirtualNode);
+    procedure VstDetailMeasureItem(Sender: TBaseVirtualTree;TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+    procedure VstDetailPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType);
+    procedure VstDetailGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+    procedure VstDetailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure VstDetailColumnClick(Sender: TBaseVirtualTree; Column: TColumnIndex; Shift: TShiftState);
+    procedure VstDetailBeforeCellPaint(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+    procedure VstDetailFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
   private
     procedure WMStartEditingMember(var Message: TMessage); message WM_STARTEDITING_MEMBER;
+    procedure VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
   public
     { Public declarations }
     TraceWin: TFrm_Trace;
+    Sorter: TVstSort;
+    VstDetailSelector: TVstSelector;
+
     Constructor Create(AOwner: TComponent);  override ;
     Procedure AddDetails(TreeRec: PTreeRec; RootMember : TMember); override;
     function HasFocus : boolean ; override;
     procedure SelectAll() ; override;
-    procedure copySelected() ; override;
+    function copySelected():boolean ; override;
+
   end;
 
 var
   frame_table: Tframe_table;
 
+
 implementation
 
 uses
-unt_TraceConfig ;
+unt_TraceConfig, unt_Details_Classic,  unt_search ;
 
 {$R *.dfm}
 
@@ -68,54 +76,86 @@ unt_TraceConfig ;
 constructor Tframe_table.Create(AOwner: TComponent);
 begin
    inherited create (AOwner) ;
-   
+
    TraceWin := TFrm_Trace(owner);
 
-   VstTable.NodeDataSize := sizeof (TTableRec) ;
-   //VstTable.Header.SortColumn := 0 ;
-   VstTable.Header.MainColumn := 0 ;
-   VstTable.Header.AutoSizeIndex := -1 ;     // 2
+   // initialize sort
+   Sorter := TVstSort.Create(self);
+   Sorter.tree := VstDetail;
+   Sorter.UtilityImages := Frm_Tool.UtilityImages;
+   Sorter.canUnsort := true;
+
+   // redirect some events to the sorter
+   VstDetail.onHeaderClick := Sorter.onHeaderClick;
+   VstDetail.OnKeyUp := Sorter.OnKeyUp;
+   VstDetail.onHeaderDrawQueryElements := Sorter.onHeaderDrawQueryElements;
+   VstDetail.onAdvancedHeaderDraw := Sorter.onAdvancedHeaderDraw;
+
+   VstDetail.NodeDataSize := sizeof (TTableRec) ;
+   //VstDetail.Header.SortColumn := 0 ;
+   VstDetail.Header.MainColumn := 0 ;
+   VstDetail.Header.AutoSizeIndex := -1 ;     // 2
 
    // header must be visible to enable resize !
-   VstTable.Header.Columns.Items[0].text := '' ;
-   VstTable.Header.Columns.Items[1].text := '' ;
-   VstTable.Header.Columns.Items[2].text := '' ;
+   VstDetail.Header.Columns.Items[0].text := '' ;
+   VstDetail.Header.Columns.Items[1].text := '' ;
+   VstDetail.Header.Columns.Items[2].text := '' ;
 
+   VstDetail.Header.Options           := TraceWin.VstMain.Header.Options ;
+   VstDetail.TreeOptions.AutoOptions  := TraceWin.VstMain.TreeOptions.AutoOptions
+      + [toAutoSpanColumns]           // Large entries continue into next columns
+      - [toDisableAutoscrollOnFocus]  // Disable scrolling a column entirely into view if it gets focused.
+      + [toDisableAutoscrollOnEdit];  // Do not center a node horizontally when it is edited.
 
-   VstTable.Header.Options           := TraceWin.vstTrace.Header.Options ;
-   VstTable.TreeOptions.AutoOptions  := TraceWin.vstTrace.TreeOptions.AutoOptions
-             + [toDisableAutoscrollOnEdit] ; // Do not center a node horizontally when it is edited.
+   VstDetail.TreeOptions.PaintOptions := TraceWin.VstMain.TreeOptions.PaintOptions
+      - [toUseBlendedImages]        // Don't use blended images
+      - [toShowTreeLines]           // don't Display tree lines to show hierarchy of nodes.
+      - [toHideSelection]           // show a grayed selection when the tree lose the focus
+      + [toShowRoot]                // show root.
+      + [toShowButtons]             // Display collapse/expand buttons left to a node.
+      + [toThemeAware]              // Draw UI elements (header, tree buttons etc.) according to the current theme
+      + [toHideFocusRect];          // hide focus rect
 
-   VstTable.TreeOptions.PaintOptions := TraceWin.vstTrace.TreeOptions.PaintOptions
-             - [toShowTreeLines] ;        // show tree lines in 'members' tree
+   VstDetail.TreeOptions.SelectionOptions := TraceWin.VstMain.TreeOptions.SelectionOptions
+      + [toDisableDrawSelection]    // Prevent user from selecting with the selection rectangle in multiselect mode.
+      + [toExtendedFocus]           // Entries other than in the main column can be selected, edited etc.
+      - [toMultiselect]             // Allow more than one node to be selected.
+      + [toSimpleDrawSelection]     // Simplifies draw selection, so a node's caption does not need to intersect with the selection rectangle.
+      - [toFullRowSelect];          // selection highlight the whole line
 
-   VstTable.TreeOptions.SelectionOptions := TraceWin.vstTrace.TreeOptions.SelectionOptions
-             + [toExtendedFocus]          // Entries other than in the main column can be selected, edited etc.
-             + [toFullRowSelect]          // selection highlight the whole line
-             + [toMultiselect] ;          // don't Allow more than one node to be selected.
+   VstDetail.TreeOptions.MiscOptions := TraceWin.VstMain.TreeOptions.MiscOptions
+      - [toReportMode]              // Tree behaves like TListView in report mode.
+      + [toFullRepaintOnResize]     // Fully invalidate the tree when its window is resized (CS_HREDRAW/CS_VREDRAW).
+      + [toWheelPanning]            // Support for mouse panning (wheel mice only).
+      - [toFullRowDrag]             // Start node dragging by clicking anywhere in it instead only on the caption or image.
+                                    // Must be used together with toDisableDrawSelection.
+      + [toGridExtensions]          // Use some special enhancements to simulate and support grid behavior.
+      - [toVariableNodeHeight]      // variable node height
+      - [toToggleOnDblClick]        // Toggle node expansion state when it is double clicked.
+      - [toEditable]                // don't allow edition. Code is used to detect double click
+      - [toCheckSupport];           // no checkboxes
 
-   VstTable.TreeOptions.MiscOptions := TraceWin.vstTrace.TreeOptions.MiscOptions
-             - [toEditable]               // don't allow edition. Code is used to detect double click or F2 key
-             - [toReportMode] ;           // Tree behaves like TListView in report mode.
+   VstDetail.Colors.UnfocusedColor                := TraceWin.VstMain.Colors.UnfocusedColor ;
+   VstDetail.Colors.UnfocusedSelectionColor       := TraceWin.VstMain.Colors.UnfocusedSelectionColor ;
+   VstDetail.Colors.UnfocusedSelectionBorderColor := TraceWin.VstMain.Colors.UnfocusedSelectionBorderColor ;
 
-   VstTable.Colors.UnfocusedSelectionColor       := TraceWin.vstTrace.Colors.UnfocusedSelectionColor ;
-   VstTable.Colors.UnfocusedSelectionBorderColor := TraceWin.vstTrace.Colors.UnfocusedSelectionBorderColor ;
-
-   //VstTable.OnDrawNode := DrawNode ;
-
+   // multiple selection handler
+   VstDetailSelector := TVstSelector.Create(self);   // self is owner
+   VstDetailSelector.Init(VstDetail);
+   VstDetailSelector.OnSelectionChanged := VstDetailSelectorSelectionChanged;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+procedure Tframe_table.VstDetailChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
 begin
    // scroll into view
    sender.ScrollIntoView (node,false,false);     // center and horizontally false
 end;
+
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableCreateEditor(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
+procedure Tframe_table.VstDetailCreateEditor(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex; out EditLink: IVTEditLink);
 begin
    if IVstEditor = nil then begin
       VstEditor  := TMoveMemoEditLink.Create ();    // unt_tool
@@ -126,27 +166,27 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableDblClick(Sender: TObject);
+procedure Tframe_table.VstDetailDblClick(Sender: TObject);
 var
    P: TPoint;
    SelectedNode, MouseNode : PVirtualNode ;
    Dummy: Integer;
 begin
-   SelectedNode := VstTable.GetFirstSelected  ;
+   SelectedNode := VstDetail.GetFirstSelected  ;
 
    // no node selected
    if SelectedNode = nil then
      exit ;
 
    GetCursorPos(P);
-   P := VstTable.ScreenToClient(P);
-   MouseNode := VstTable.GetNodeAt(P.X, P.Y, True, Dummy) ;
+   P := VstDetail.ScreenToClient(P);
+   MouseNode := VstDetail.GetNodeAt(P.X, P.Y, True, Dummy) ;
 
    // the mouse under the cursor is not the selected node
    if SelectedNode <> MouseNode then
       exit ;
 
-   VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
+   VstDetail.TreeOptions.MiscOptions := VstDetail.TreeOptions.MiscOptions + [toEditable] ;
 
    // We want to start editing the currently selected node. However it might well happen that this change event
    // here is caused by the node editor if another node is currently being edited. It causes trouble
@@ -164,29 +204,26 @@ var
 begin
    Node := Pointer(Message.WParam);
    if Assigned(Node) then
-      VstTable.EditNode(Node, VstTable.FocusedColumn);
+      VstDetail.EditNode(Node, VstDetail.FocusedColumn);
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableEditCancelled(Sender: TBaseVirtualTree;
-  Column: TColumnIndex);
+procedure Tframe_table.VstDetailEditCancelled(Sender: TBaseVirtualTree; Column: TColumnIndex);
 begin
-   VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions - [toEditable] ;
+   VstDetail.TreeOptions.MiscOptions := VstDetail.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableEdited(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
+procedure Tframe_table.VstDetailEdited(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
 begin
-   VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions - [toEditable] ;
+   VstDetail.TreeOptions.MiscOptions := VstDetail.TreeOptions.MiscOptions - [toEditable] ;
 end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableFreeNode(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
+procedure Tframe_table.VstDetailFreeNode(Sender: TBaseVirtualTree;  Node: PVirtualNode);
 var
    DetailRec : PTableRec ;
    //c : integer ;
@@ -196,7 +233,7 @@ begin
       DetailRec.Columns.free();
    except
       on e : exception do begin
-         TFrm_Trace.InternalTrace('VstTableFreeNode exception when resetting', e.message) ;
+         TFrm_Trace.InternalTrace('VstDetailFreeNode exception when resetting', e.message) ;
       end ;
    end ;
 
@@ -204,12 +241,9 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTableGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: string);
+procedure Tframe_table.VstDetailGetText(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;  var CellText: string);
 var
    DetailRec : PTableRec ;
-
 begin
    CellText := '' ;
    DetailRec := Sender.GetNodeData(Node) ;
@@ -219,19 +253,94 @@ begin
    if Column >= DetailRec.Columns.count then
       CellText := ''
    else
+
+   if (not (toEditable in VstDetail.TreeOptions.MiscOptions)) and (Length(DetailRec.Columns[Column]) > 400) then
+      CellText := Copy(DetailRec.Columns[Column], 1, 400) + '...'
+   else
       CellText := DetailRec.Columns[Column] ;
 end;
 
 //------------------------------------------------------------------------------
-procedure Tframe_table.VstTableMeasureItem(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
+
+procedure Tframe_table.VstDetailSelectorSelectionChanged(Sender: TVstSelector; selectionAsText: string);
+begin
+   Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption := selectionAsText;
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption <> '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).FrameMemo.SetMemoText('',false,false);
+end;
+
+procedure Tframe_table.VstDetailFocusChanged(Sender: TBaseVirtualTree;  Node: PVirtualNode; Column: TColumnIndex);
+var
+   DetailRec : PTableRec ;
+   CellText: String;
+begin
+   DetailRec := Sender.GetNodeData(Node) ;
+   if DetailRec = nil then
+      exit ;
+   CellText := DetailRec.Columns[Column] ;
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption = '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailColumnClick(Sender: TBaseVirtualTree;  Column: TColumnIndex; Shift: TShiftState);
+var
+   DetailRec : PTableRec ;
+   CellText: String;
+   SelectedNode: PVirtualNode ;
+begin
+   SelectedNode := Sender.GetFirstSelected  ;
+
+   // no node selected
+   if SelectedNode = nil then
+     exit ;
+
+   DetailRec := Sender.GetNodeData(SelectedNode) ;
+   if DetailRec = nil then
+      exit ;
+
+   CellText := DetailRec.Columns[Column] ;
+
+   if (Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.LabelSelect.Caption = '') then
+      Tframe_Classic(TraceWin.TreeDetailFrame).frameMemo.SetMemoText(CellText,false,false);
+end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailBeforeCellPaint(Sender: TBaseVirtualTree;   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+var
+   DetailRec : PTableRec ;
+begin
+   DetailRec := Sender.GetNodeData(Node) ;
+   if (SearchText <> '') {and (SearchKind = mrYesToAll)} then begin  //  mrYesToAll means Highlight all
+      if (MatchSearch (DetailRec.Columns[Column]) <> 0) then
+         DrawHighlight (TargetCanvas, CellRect,false) ;
+   end;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailPaintText(Sender: TBaseVirtualTree;  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;  TextType: TVSTTextType);
+//var
+//   DetailRec : PTableRec ;
+begin
+   //DetailRec := Sender.GetNodeData(Node) ;
+
+   // force font
+   //TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure Tframe_table.VstDetailMeasureItem(Sender: TBaseVirtualTree;  TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
 var
 //   h2,h3 : integer ;
 //   DetailRec : PTableRec ;
    newNodeHeight : integer ;
 begin
    if TraceWin.IsWatch then
-      newNodeHeight := VstTable.DefaultNodeHeight
+      newNodeHeight := VstDetail.DefaultNodeHeight
    else
       newNodeHeight := TraceConfig.Framework_info_NodeHeight ;
    NodeHeight := newNodeHeight ;
@@ -261,19 +370,6 @@ end;
 
 //------------------------------------------------------------------------------
 
-procedure Tframe_table.VstTablePaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
-//var
-//   DetailRec : PTableRec ;
-begin
-//   DetailRec := Sender.GetNodeData(Node) ;
-//   // force font
-//   TraceWin.ChangeFontDetail ({IsTrace}false,TargetCanvas,  Column, DetailRec.fontDetails,(vsSelected in Node.States)) ;
-end;
-
-//------------------------------------------------------------------------------
-
 procedure Tframe_table.AddDetails(TreeRec: PTreeRec; RootMember: TMember);
 var
    cols : TStringList ;
@@ -282,45 +378,54 @@ var
    SubMember : TMember ;
    DetailNode :  PVirtualNode ;
    DetailRec : PTableRec ;
-
 begin
-   VstTable.Clear ;
-   VstTable.header.Columns.Clear ;
+
+   VstDetailSelector.ResetSelection();
+
+   VstDetail.Clear ;
+   if Sorter.SortColumns.Count > 1 then  
+      Sorter.ClearSortExcept(nil);
+   
+   VstDetail.header.Columns.Clear ;
 
    // first member, col1 is the title
    cols := getTabStrings(pchar(RootMember.Col1)) ;
    for c := 0 to cols.Count-1 do begin
-      col := VstTable.header.Columns.Add ;
+      col := VstDetail.header.Columns.Add ;
       col.options  := col.options + [coAllowFocus] ;  // ensure user can focus to this column
       col.MinWidth := 10 ;
       col.MaxWidth := 1000 ;
       col.Width := 100 ;
       col.Text := cols[c] ;
    end ;
-   VstTable.Header.MainColumn := 0 ;
-   VstTable.Header.AutoSizeIndex := -1 ;  // auto
+   VstDetail.Header.MainColumn := 0 ;
+   VstDetail.Header.AutoSizeIndex := -1 ;  // auto
    cols.Free ;
-
+   //LowTrace ('before add table');
+   //TFrm_Trace.InternalTrace (FormatDateTime('yyyymmdd hh:mm:ss:zzz',now) + ' before add table');
    // add lines
    for c := 0 to RootMember.SubMembers.Count -1 do begin
       SubMember := TMember (RootMember.SubMembers.Items[c]) ;
-      DetailNode := VstTable.AddChild(nil) ;
+      DetailNode := VstDetail.AddChild(nil) ;
       // ensure node is initialized. Needed when the node is free to call onFreeNode
-      VstTable.ReinitNode(DetailNode,false);
-      DetailNode.Align := (VstTable.DefaultNodeHeight div 2)-2 ;
-      DetailRec := VstTable.GetNodeData(DetailNode) ;
+      VstDetail.ReinitNode(DetailNode,false);
+      DetailNode.Align := (VstDetail.DefaultNodeHeight div 2)-2 ;
+      DetailRec := VstDetail.GetNodeData(DetailNode) ;
 
       cols := getTabStrings(pchar(SubMember.Col1)) ;
-      DetailRec.Columns := cols ; // free by OnFreeNodes
+      DetailRec.OriginalOrder := c;   // for unsort
+      DetailRec.Columns := cols ;     // free by OnFreeNodes
    end ;
 
-   // resize all columns, using the header text and all lines
-   AutosizeAll (VstTable) ;
+   //TFrm_Trace.InternalTrace (FormatDateTime('yyyymmdd hh:mm:ss:zzz',now) + ' after add table');
+
+   // resize all columns, using the header text and all visible (true) lines
+   AutosizeAll (VstDetail,true) ;
 
    // force last column width to maximum
-   VstTable.Header.Columns[VstTable.Header.Columns.Count-1].Width := 9000 ;
+   VstDetail.Header.Columns[VstDetail.Header.Columns.Count-1].Width := 9000 ;
 
-   VstTable.Visible := true ;
+   VstDetail.Visible := true ;
    TFrm_Trace(Owner).CurrentViewers.add(self) ;
 end;
 
@@ -328,84 +433,33 @@ end;
 
 procedure Tframe_table.SelectAll;
 begin
-   VstTable.SelectAll(false) ;
+   VstDetail.SelectAll(false) ;
 end;
 
 //------------------------------------------------------------------------------
 
 function Tframe_table.HasFocus: boolean;
 begin
-  result := Focused or VstTable.focused ;
+  result := Focused or VstDetail.focused ;
 end;
 
 //------------------------------------------------------------------------------
 
-
-procedure Tframe_table.copySelected;
-var
-   CopyStrings : TStringList ;
-   CopyText: PChar;
-   DetailRec : PTableRec ;
-
-   procedure CopyDetail (TestNode : PVirtualNode);
-   var
-      node : PVirtualNode ;
-      NewLine: string;
-      c : integer ;
-      CellText :string ;
-      //col : TVirtualTreeColumn ;
-   begin
-      if VstTable.Selected [TestNode] then begin
-         DetailRec := VstTable.GetNodeData(TestNode) ;
-         if DetailRec = nil then
-            exit ;
-         NewLine := '' ;
-         for c := 0 to VstTable.header.Columns.Count-1 do begin
-            //col := VstTable.header.Columns[c] ;
-            CellText := DetailRec.Columns[c] ;
-            if NewLine = '' then
-               NewLine := TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier
-            else
-               NewLine := NewLine + TraceConfig.TextExport_Separator  + TraceConfig.TextExport_TextQualifier + CellText + TraceConfig.TextExport_TextQualifier ;
-         end ;
-         CopyStrings.Add(NewLine);
-      end ;
-
-      // multi select
-      node := TestNode.FirstChild ;
-      while Node <> nil do begin
-         CopyDetail (node) ;
-         node := node.NextSibling ;
-      end ;
-   end ;
+function Tframe_table.copySelected: boolean;
 begin
-   CopyStrings := TStringList.Create;
+   result := VstDetail.Focused();
+   var CopyStrings := TStringList.Create;
    try
-      CopyDetail (VstTable.RootNode);
-      CopyText := CopyStrings.GetText;
+      VstDetailSelector.CopySelectedCells(CopyStrings, TraceConfig.TextExport_TextQualifier, TraceConfig.TextExport_Separator);
+      var CopyText: PChar := CopyStrings.GetText;
+      Clipboard.SetTextBuf(CopyText);
+      StrDispose(CopyText);
    finally
       CopyStrings.Free ;
    end ;
-
-   try
-      Clipboard.SetTextBuf(CopyText);
-   finally
-      StrDispose(CopyText);
-   end;
-
 end;
 
 //------------------------------------------------------------------------------
 
-// Detect the F2 key.
-// To not allow editing on simple click, the vstTrace.TreeOptions.MiscOptions toEditable flag is not set.
-// When the F2 key is pressed or the user double click the node, the flag is set
-
-procedure Tframe_table.VstTableKeyAction(Sender: TBaseVirtualTree;
-  var CharCode: Word; var Shift: TShiftState; var DoDefault: Boolean);
-begin
-   if CharCode = VK_F2 then
-      VstTable.TreeOptions.MiscOptions := VstTable.TreeOptions.MiscOptions + [toEditable] ;
-end;
 
 end.

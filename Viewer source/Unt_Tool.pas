@@ -33,7 +33,7 @@ uses
   , IdUDPServer //, IdCustomTCPServer;
   , Config, System.Actions, System.ImageList, system.UITypes ;
 
-// ensure the path the viewer is on the Options/delphi/library/Library Path
+// ensure the path the viewer is on the tools/Options/Language/delphi/library/Library Path (32 and 64 platform)
 // c:\GitHub\Tracetool\Delphi\Delphi Library\
 {$Include TraceTool.Inc}
 
@@ -91,13 +91,14 @@ type
     UtilityImages: TImageList;
     MadExceptionHandler1: TMadExceptionHandler;
     IdHTTPServer: TIdHTTPServer;
-    actDepends: TMenuItem;
     OpenFileDialog: TOpenDialog;
     MadExceptionHandler2: TMadExceptionHandler;
     TCPServer2: TIdTCPServer;
     SocketPolicyServer: TIdTCPServer;
     UDPServer1: TIdUDPServer;
     UDPServer2: TIdUDPServer;
+    Showat001: TMenuItem;
+    actShowOnMain: TAction;
     
     procedure FormCreate(Sender: TObject);
     procedure actShowExecute(Sender: TObject);
@@ -139,6 +140,7 @@ type
       AException: Exception);
     procedure SocketPolicyServerAfterBind(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure actShowOnMainExecute(Sender: TObject);
 
   private
 
@@ -165,7 +167,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function getCommandName (SingleMsg : string;LastParsedTreeRec : pointer = nil) : string ;
-    procedure ShowParsedMessage;
+    procedure ShowParsedMessage(context:string);
     procedure ShowParsedForm(TraceForm: TForm);
     function LoadTracetoolConfig(): IXMLConfig;
     procedure SaveTracetoolConfig(XMLConfig: IXMLConfig);
@@ -233,7 +235,7 @@ var
   BaseList        : TObjectList ;    // all TFrmBase form (Trace, tail, ods, eventlog)
   FormTraceList   : TObjectList ;    // all trace form . not owner
   TailList        : TObjectList ;    // all Tail
-  ContainerList   : TObjectList ;
+  ContainerList   : TObjectList ;    // TFrmPageContainer
   ConnectionList  : TObjectList ;
   ScriptMessages  : TStringList ;
   CriticalSection : TCriticalSection ;   // protect the MessageStack and the number of socket connection
@@ -259,7 +261,7 @@ implementation
 
 uses unt_receiver, unt_about, unt_tail,Unt_linkedList , unt_TraceWin, unt_parse, unt_base ,
      unt_ODS, unt_utility, unt_selectEvent , unt_eventLog, unt_SelectTail, unt_search, unt_TraceConfig,
-  unt_FrmPlugin;
+  unt_FrmPlugin, unt_Details_Classic;
 
 
 var
@@ -346,7 +348,6 @@ var
    MessageString: string;
    CDS: TCopyDataStruct;
    resetDebugMode : boolean ;
-   c : integer ;
    EnterDebugMode : boolean;
    LeaveDebugMode : boolean ;
 begin
@@ -655,6 +656,9 @@ begin
    FrmInternalTraces.ID := 'ERRID' ;
    FrmInternalTraces.Caption := 'Internal Trace' ;
 
+   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstMain=' +  inttostr(integer(FrmInternalTraces.VstMain)));
+   // FrmInternalTraces.InternalTrace('TFrm_Trace.FormCreate ' + FrmInternalTraces.Caption +  ', VstDetail=' +  inttostr(integer(FrmInternalTraces.VstDetail)));
+
    if TraceConfig.DebugMode then begin
       FrmInternalTraces.Visible := true ;
       if FrmInternalTraces.Parent = nil then
@@ -698,9 +702,9 @@ begin
    mitTrayShow.Visible := not TraceConfig.AppDisplay_HideViewer ;
 
    // hide cutter, time and thread id columns for the Internal trace window
-   FrmInternalTraces.vstTrace.Header.Columns[0].Options := FrmInternalTraces.vstTrace.Header.Columns[0].Options - [coVisible] ;
-   FrmInternalTraces.vstTrace.Header.Columns[1].Options := FrmInternalTraces.vstTrace.Header.Columns[1].Options - [coVisible] ;
-   FrmInternalTraces.vstTrace.Header.Columns[2].Options := FrmInternalTraces.vstTrace.Header.Columns[2].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[0].Options := FrmInternalTraces.VstMain.Header.Columns[0].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[1].Options := FrmInternalTraces.VstMain.Header.Columns[1].Options - [coVisible] ;
+   FrmInternalTraces.VstMain.Header.Columns[2].Options := FrmInternalTraces.VstMain.Header.Columns[2].Options - [coVisible] ;
 
    // force redesign toolbar and menu for the new active page
    MainPageContainer.DockingPagecontrol.onChange(nil) ;
@@ -1585,7 +1589,7 @@ begin
    // Disable all ttraces window
    for c := 0 to FormTraceList.Count-1 do begin
       FrmTrace := TFrm_Trace (FormTraceList.Items[c]) ;
-      FrmTrace.vstTrace.BeginUpdate ;
+      FrmTrace.VstMain.BeginUpdate ;
       FrmTrace.NodeToFocus := nil ;
    end ;
 
@@ -1636,9 +1640,9 @@ begin
          // to do : only if changed (add a flag)
          FrmTrace.CheckAutoClear () ;
          if FrmTrace.NodeToFocus <> nil then
-            FrmTrace.VstTrace.FocusedNode := FrmTrace.NodeToFocus ;
+            FrmTrace.VstMain.FocusedNode := FrmTrace.NodeToFocus ;
 
-         FrmTrace.vstTrace.EndUpdate ;
+         FrmTrace.VstMain.EndUpdate ;
       end ;
    end ;
 end;
@@ -1688,7 +1692,6 @@ begin
    actShow.Execute;
 end;
 
-
 //------------------------------------------------------------------------------
 
 // TaskBar / Show or double click (TrayIconDblClick) or ParseTraceMsg
@@ -1699,6 +1702,22 @@ begin
    Application.ShowMainForm := true ;
    TaskBarButton(true) ;
    Application.Restore ;
+   Show;
+   BringToFront;
+   Application.BringToFront;
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TFrm_Tool.actShowOnMainExecute(Sender: TObject);
+begin
+   if TraceConfig.AppDisplay_HideViewer = true then
+      exit ;
+   Application.ShowMainForm := true ;
+   TaskBarButton(true) ;
+   Application.Restore ;
+   Left := 0;
+   Top := 0;
    Show;
    BringToFront;
    Application.BringToFront;
@@ -2024,27 +2043,26 @@ end;
 procedure TFrm_Tool.actEventlogExecute(Sender: TObject);
 var
    EVLog : TFrmEventLog;  // not (yet) stored in a list of event log forms
-   c : integer ;
    RadioButton: TRadioButton;
 begin
    FrmSelectEvent.ShowModal ;
    if FrmSelectEvent.ModalResult <> mrOk then
       exit ;
 
+   // create the Event log form
+   Application.CreateForm(TFrmEventLog, EVLog);
+
+   EVLog.DockToMainPanel() ;
+   EVLog.Show ;
+   EVLog.SetActivePage() ;
+
    // search for selected radiobutton
-   for c := 0 to eventFiles.Count - 1 do begin
+   for var c := 0 to eventFiles.Count - 1 do begin
       RadioButton := TRadioButton (eventFiles.Objects [c]) ;
       if RadioButton.Checked  then begin
-         // create the Event log form
-         Application.CreateForm(TFrmEventLog, EVLog);      
-
-         EVLog.Caption := 'EventLog::' + eventFiles.Strings[c] ;
-         EVLog.DockToMainPanel() ;
-         EVLog.Show ;
-         EVLog.SetActivePage() ;
-
          EventForm.AddObject (eventFiles.Strings[c], EVLog) ;
-         EVLog.SetEventLog (eventFiles.Strings[c],50) ;
+         EVLog.Caption := 'EventLog::' + eventFiles.Strings[c] ;
+         EVLog.SetEventLog (eventFiles.Strings[c],500) ;
       end ;
    end ;
 end;
@@ -2402,56 +2420,57 @@ begin
    treeRec := LastParsedTreeRec ;
    command := strtointdef (copy (SingleMsg, 1,5),-1);
    case command of
-   CST_TREE_COLUMNWIDTH      : result := 'CST_TREE_COLUMNWIDTH  (widths) ' ; // change the columns widths
-   CST_TREE_MULTI_COLUMN     : result := 'CST_TREE_MULTI_COLUMN (index)  ' ; // change the tree to display multiple column. Param : Main column index
-   CST_TREE_COLUMNTITLE      : result := 'CST_TREE_COLUMNTITLE  (Titles) ' ; // change the columns titles
-   CST_DISPLAY_TREE          : result := 'CST_DISPLAY_TREE      ()       ' ; // display tree windows
-   CST_TREE_NAME             : result := 'CST_TREE_NAME         (name)   ' ; // param : the new name of the tree (use CST_USE_TREE just before to specify the tree)
-   CST_USE_TREE              : result := 'CST_USE_TREE          (treeId) ' ; // param : Id (CLSID for example) of the tree to use for other command.
-   CST_TRACE_ID              : result := 'CST_TRACE_ID          (strId)  ' ; // param : CLSID
-   CST_SHOW                  : result := 'CST_SHOW              (int)    ' ; // param : 1 : show.  0 : hide
-   CST_ICO_INDEX             : result := 'CST_ICO_INDEX         (idx)    ' ; // param : image index
-   CST_CLEAR_ALL             : result := 'CST_CLEAR_ALL         ()       ' ; // no param
-   CST_WINWATCH_NAME         : result := 'CST_WINWATCH_NAME     (name)   ' ; // Watch Window name
-   CST_WINWATCH_ID           : result := 'CST_WINWATCH_ID       (id)     ' ; // Watch Window ID
-   CST_WATCH_NAME            : result := 'CST_WATCH_NAME        (name)   ' ; // watch name
-   CST_SET_BOOKMARK          : result := 'CST_SET_BOOKMARK      (bool)   ' ; // param : 1/0
-   CST_VISIBLE_NODE          : result := 'CST_VISIBLE_NODE      (bool)   ' ; // param : 1/0
-   CST_CLEAR_NODE            : result := 'CST_CLEAR_NODE        (id)     ' ; // param : the node to clear
-   CST_CLEAR_SUBNODES        : result := 'CST_CLEAR_SUBNODES    (id)     ' ; // param : the parent node
-   CST_THREAD_ID             : result := 'CST_THREAD_ID         (id)     ' ; // param : thread ID
-   CST_PROCESS_NAME          : result := 'CST_PROCESS_NAME      (name)   ' ; // param process name
-   CST_MESSAGE_TIME          : result := 'CST_MESSAGE_TIME      (time)   ' ; // param : the time of the message
-   CST_THREAD_NAME           : result := 'CST_THREAD_NAME       (name)   ' ; // param : thread name
-   CST_IP                    : result := 'CST_IP                (string) ' ; // param : client IP adress
-   CST_CREATE_MEMBER         : result := 'CST_CREATE_MEMBER     (col1)   ' ; // param : Member name
-   CST_MEMBER_FONT_DETAIL    : result := 'CST_MEMBER_FONT_DETAIL(6 p)    ' ; // param : ColId Bold Italic Color size  Fontname
-   CST_MEMBER_COL2           : result := 'CST_MEMBER_COL2       (col2)   ' ; // param : info col 2
-   CST_MEMBER_COL3           : result := 'CST_MEMBER_COL3       (col3)   ' ; // param : info col 3
-   CST_MEMBER_VIEWER_KIND    : result := 'CST_MEMBER_VIEWER_KIND(id)     ' ; // param : viewer id
-   CST_ADD_MEMBER            : result := 'CST_ADD_MEMBER        ()       ' ; // add member to upper level. No param (for now)
-   CST_NEW_NODE              : result := 'CST_NEW_NODE          (id)     ' ; // param : parent node ID
-   CST_SELECT_NODE           : result := 'CST_SELECT_NODE       (id)     ' ; // set the node as 'Selected' by the user.  param : Node id
-   CST_GET_NODE              : result := 'CST_GET_NODE          () ???   ' ; // return the node id
-   CST_USE_NODE              : result := 'CST_USE_NODE          (id)     ' ; // use an existing node. param : Node id
-   CST_APPEND_LEFT_MSG       : result := 'CST_APPEND_LEFT_MSG   (left)   ' ; // param : left msg to append
-   CST_APPEND_RIGHT_MSG      : result := 'CST_APPEND_RIGHT_MSG  (right)  ' ; // param : right msg to append
-   CST_FOCUS_NODE            : result := 'CST_FOCUS_NODE        (id)     ' ; // Focus to the node.
-   CST_SAVETOTEXT            : result := 'CST_SAVETOTEXT        (file)   ' ; // save to text file, parameter : filename
-   CST_SAVETOXML             : result := 'CST_SAVETOXML         (files)  ' ; // save to  XML file, parameter : filename
-   CST_LOADXML               : result := 'CST_LOADXML           (file)   ' ; // load an XML file to the current wintrace
-   CST_LOGFILE               : result := 'CST_LOGFILE           (mode,limit,file) ' ; // define the log file. Parameter : mode and filename
-   CST_LINKTOPLUGIN          : result := 'CST_LINKTOPLUGIN      (f,name) ' ; // link a wintrace to a plugin
-   CST_CREATE_RESOURCE       : result := 'CST_CREATE_RESOURCE   (4)      ' ; // create a resource on a wintrace
-   CST_SET_TEXT_RESOURCE     : result := 'CST_SET_TEXT_RESOURCE (id,text)' ; // set the text resource
-   CST_DISABLE_RESOURCE      : result := 'CST_DISABLE_RESOURCE  (id)     ' ; // disable a resource
-   CST_FONT_DETAIL           : result := 'CST_FONT_DETAIL       (6)      ' ; // param : ColId Bold Italic Color size  Fontname
-   CST_BACKGROUND_COLOR      : result := 'CST_BACKGROUND_COLOR  (c,id)   ' ; // param : background color
-   CST_GET_OBJECT            : result := 'CST_GET_OBJECT        () ???   ' ; // the user interface ask to retreive an object
-   CST_FLUSH                 : result := 'CST_FLUSH             (evn)    ' ; // special case to be interpreted by the sender thread (not to be send)
-   CST_ENTER_DEBUG_MODE      : result := 'CST_ENTER_DEBUG_MODE  ()       ' ; // Enter debug mode
-   CST_LEAVE_DEBUG_MODE      : result := 'CST_LEAVE_DEBUG_MODE  ()       ' ; // Leave debug mode
-   CST_OPEN_TAIL             : result := 'CST_OPEN_TAIL         (file)   ' ; // Open Tail file
+   CST_TREE_COLUMNWIDTH      : result := 'CST_TREE_COLUMNWIDTH  (widths)          :' ; // change the columns widths
+   CST_TREE_MULTI_COLUMN     : result := 'CST_TREE_MULTI_COLUMN (index)           :' ; // change the tree to display multiple column. Param : Main column index
+   CST_TREE_COLUMNTITLE      : result := 'CST_TREE_COLUMNTITLE  (Titles)          :' ; // change the columns titles
+   CST_DISPLAY_TREE          : result := 'CST_DISPLAY_TREE      ()                :' ; // display tree windows
+   CST_TREE_NAME             : result := 'CST_TREE_NAME         (name)            :' ; // param : the new name of the tree (use CST_USE_TREE just before to specify the tree)
+   CST_USE_TREE              : result := 'CST_USE_TREE          (treeId)          :' ; // param : Id (CLSID for example) of the tree to use for other command.
+   CST_TRACE_ID              : result := 'CST_TRACE_ID          (strId)           :' ; // param : CLSID
+   CST_SHOW                  : result := 'CST_SHOW              (int)             :' ; // param : 1 : show.  0 : hide
+   CST_ICO_INDEX             : result := 'CST_ICO_INDEX         (idx)             :' ; // param : image index
+   CST_CLEAR_ALL             : result := 'CST_CLEAR_ALL         ()                :' ; // no param
+   CST_WINWATCH_NAME         : result := 'CST_WINWATCH_NAME     (name)            :' ; // Watch Window name
+   CST_WINWATCH_ID           : result := 'CST_WINWATCH_ID       (id)              :' ; // Watch Window ID
+   CST_WATCH_NAME            : result := 'CST_WATCH_NAME        (name)            :' ; // watch name
+   CST_SET_BOOKMARK          : result := 'CST_SET_BOOKMARK      (bool)            :' ; // param : 1/0
+   CST_VISIBLE_NODE          : result := 'CST_VISIBLE_NODE      (bool)            :' ; // param : 1/0
+   CST_CLEAR_NODE            : result := 'CST_CLEAR_NODE        (id)              :' ; // param : the node to clear
+   CST_CLEAR_SUBNODES        : result := 'CST_CLEAR_SUBNODES    (id)              :' ; // param : the parent node
+   CST_THREAD_ID             : result := 'CST_THREAD_ID         (id)              :' ; // param : thread ID
+   CST_PROCESS_NAME          : result := 'CST_PROCESS_NAME      (name)            :' ; // param process name
+   CST_MESSAGE_TIME          : result := 'CST_MESSAGE_TIME      (time)            :' ; // param : the time of the message
+   CST_THREAD_NAME           : result := 'CST_THREAD_NAME       (name)            :' ; // param : thread name
+   CST_IP                    : result := 'CST_IP                (string)          :' ; // param : client IP adress
+   CST_CREATE_MEMBER         : result := 'CST_CREATE_MEMBER     (col1)            :' ; // param : Member name
+   CST_MEMBER_FONT_DETAIL    : result := 'CST_MEMBER_FONT_DETAIL(6 p)             :' ; // param : ColId Bold Italic Color size  Fontname
+   CST_MEMBER_COL2           : result := 'CST_MEMBER_COL2       (col2)            :' ; // param : info col 2
+   CST_MEMBER_COL3           : result := 'CST_MEMBER_COL3       (col3)            :' ; // param : info col 3
+   CST_MEMBER_VIEWER_KIND    : result := 'CST_MEMBER_VIEWER_KIND(id)              :' ; // param : viewer id
+   CST_ADD_MEMBER            : result := 'CST_ADD_MEMBER        ()                :' ; // add member to upper level. No param (for now)
+   CST_NEW_NODE              : result := 'CST_NEW_NODE          (id)              :' ; // param : parent node ID
+   CST_SELECT_NODE           : result := 'CST_SELECT_NODE       (id)              :' ; // set the node as 'Selected' by the user.  param : Node id
+   CST_GET_NODE              : result := 'CST_GET_NODE          () ???            :' ; // return the node id
+   CST_USE_NODE              : result := 'CST_USE_NODE          (id)              :' ; // use an existing node. param : Node id
+   CST_APPEND_LEFT_MSG       : result := 'CST_APPEND_LEFT_MSG   (left)            :' ; // param : left msg to append
+   CST_APPEND_RIGHT_MSG      : result := 'CST_APPEND_RIGHT_MSG  (right)           :' ; // param : right msg to append
+   CST_FOCUS_NODE            : result := 'CST_FOCUS_NODE        (id)              :' ; // Focus to the node.
+   CST_SAVETOTEXT            : result := 'CST_SAVETOTEXT        (file)            :' ; // save to text file, parameter : filename
+   CST_SAVETOXML             : result := 'CST_SAVETOXML         (files)           :' ; // save to  XML file, parameter : filename
+   CST_LOADXML               : result := 'CST_LOADXML           (file)            :' ; // load an XML file to the current wintrace
+   CST_LOGFILE               : result := 'CST_LOGFILE           (mode,limit,file) :' ; // define the log file. Parameter : mode and filename
+   CST_LINKTOPLUGIN          : result := 'CST_LINKTOPLUGIN      (f,name)          :' ; // link a wintrace to a plugin
+   CST_CREATE_RESOURCE       : result := 'CST_CREATE_RESOURCE   (4)               :' ; // create a resource on a wintrace
+   CST_SET_TEXT_RESOURCE     : result := 'CST_SET_TEXT_RESOURCE (id,text)         :' ; // set the text resource
+   CST_DISABLE_RESOURCE      : result := 'CST_DISABLE_RESOURCE  (id)              :' ; // disable a resource
+   CST_FONT_DETAIL           : result := 'CST_FONT_DETAIL       (6 p)             :' ; // param : ColId Bold Italic Color size  Fontname
+   CST_BACKGROUND_COLOR      : result := 'CST_BACKGROUND_COLOR  (c,id)            :' ; // param : background color
+   CST_GET_OBJECT            : result := 'CST_GET_OBJECT        () ???            :' ; // the user interface ask to retreive an object
+   CST_FLUSH                 : result := 'CST_FLUSH             (evn)             :' ; // special case to be interpreted by the sender thread (not to be send)
+   CST_ENTER_DEBUG_MODE      : result := 'CST_ENTER_DEBUG_MODE  ()                :' ; // Enter debug mode
+   CST_LEAVE_DEBUG_MODE      : result := 'CST_LEAVE_DEBUG_MODE  ()                :' ; // Leave debug mode
+   CST_OPEN_TAIL             : result := 'CST_OPEN_TAIL         (file)            :' ; // Open Tail file
+   CST_FIND_TEXT             : result := 'CST_FIND_TEXT         (flags,string)    :' ; // find text
 
    // special case for CST_LEFT_MSG and CST_RIGHT_MSG : change the debug node text
    CST_LEFT_MSG :
@@ -2474,7 +2493,7 @@ end ;
 
 //------------------------------------------------------------------------------
 
-procedure TFrm_Tool.ShowParsedMessage() ;
+procedure TFrm_Tool.ShowParsedMessage(context:string) ;
 var
    SingleMsg : string ;
    //command : integer ;
@@ -2486,25 +2505,38 @@ begin
       ParentNode := TFrm_Trace.InternalTrace ('ParseTraceMsg') ;
       if ParentNode = nil then
          exit ;
-      LastParsedTreeRec := FrmInternalTraces.vstTrace.GetNodeData(ParentNode) ;
+      LastParsedTreeRec := FrmInternalTraces.VstMain.GetNodeData(ParentNode) ;
       if LastParsedTreeRec = nil then
          exit ;
       if LastParsedTreeRec.Members = nil then
          LastParsedTreeRec.Members := TMember.create();
+
+      if context <> '' then
+          LowTrace(context);
 
       MessageLength := 0 ;
       for CommandIndex := 0 to CurrentParseMsgList.Count-1 do begin
           SingleMsg := CurrentParseMsgList[CommandIndex] ;
           MessageLength := MessageLength + length(SingleMsg) ;
           //command := strtointdef (copy (SingleMsg, 1,5),-1);
-          LastParsedTreeRec.Members.SubMembers.Add (TMember.create('[' + inttostr(CommandIndex) + '] : ' + getCommandName(SingleMsg,LastParsedTreeRec) , SingleMsg)) ;
+          var commandIndexAndName:String := '[' + inttostr(CommandIndex) + '] : ' + getCommandName(SingleMsg,LastParsedTreeRec);
+          LastParsedTreeRec.Members.SubMembers.Add (TMember.create(commandIndexAndName , SingleMsg)) ;
+
+          if context <> '' then begin
+            LowTrace(commandIndexAndName + ' ' + SingleMsg);
+          end ;
+
       end ;
       LastParsedTreeRec.RightMsg := 'msg count : ' + inttostr(CurrentParseMsgList.Count) + ' / MsgLen : ' + inttostr(MessageLength);
    except
+      // Eat exception
+      on e: exception do
+         LowTrace('ShowParsedMessage exception: ' + e.Message);
    end ;
 end ;
 
 //------------------------------------------------------------------------------
+
 
 procedure TFrm_Tool.ShowParsedForm(TraceForm : TForm) ;
 begin
@@ -2553,7 +2585,7 @@ begin
    //else begin
    try
       ParentNode := TFrm_Trace.InternalTrace (string(exceptIntf.ExceptClass),string(exceptIntf.ExceptMessage)) ;
-      TreeRec := FrmInternalTraces.vstTrace.GetNodeData(ParentNode) ;
+      TreeRec := FrmInternalTraces.VstMain.GetNodeData(ParentNode) ;
       if TreeRec.Members = nil then
          TreeRec.Members := TMember.create();
       

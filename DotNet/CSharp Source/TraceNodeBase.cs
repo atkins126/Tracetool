@@ -33,12 +33,12 @@ namespace TraceTool
     public abstract class TraceNodeBase
     {
         /// <summary>
-        /// The unique ID. Normally it's a GUID, but can be replaced by something else for inter process traces.
+        /// The unique Id. Normally it's a GUID, but can be replaced by something else for inter process traces.
         /// </summary>
         public string Id;
         /// <summary>
         /// When Enabled is false, all traces are disabled. Default is true.
-        /// All node have a Enabled property, that lets you define group of Enabled trace.
+        /// All node have an Enabled property, that lets you define group of Enabled trace.
         /// For example set the TTrace.Debug.enabled to false but continue to accept Error and Warning traces
         /// </summary>
         public bool Enabled;

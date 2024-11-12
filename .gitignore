@@ -307,9 +307,11 @@ paket-files/
 # CodeRush
 .cr/
 
-# Python Tools for Visual Studio (PTVS)
+# Python 
 __pycache__/
 *.pyc
+*.egg-info/ 
+Python/dist/
 
 #tracetool
 #--------------------------------------------
@@ -335,3 +337,10 @@ NodeJs/Sample/typings/
 
 !Viewer/*
 !viewer/WebSock/*.*
+!viewer/32/*.*
+!viewer/64/*.*
+Viewer/TraceTool.drc
+Viewer/TraceTool.map
+Viewer/TraceTool.rsm
+Viewer32/
+Viewer64/

@@ -14,12 +14,13 @@ https://www.codeproject.com/Articles/5498/TraceTool-The-Swiss-Army-Knife-of-Trac
 -->
 
 # Tracetool
+Download the Viewer [here](https://github.com/capslock66/Tracetool/raw/Develop/GithubFiles/Viewer32.zip "Viewer32.zip") 
 
 ![Viewer](/GithubFiles/Server1.jpg)
 
 * [What is TraceTool](#What-is-TraceTool "What is TraceTool")
-* [Viewer Installation](#Installation "Installation")
-* [Client Api](#ClientAPI "Client Api")
+* [Viewer Installation](#Viewer-Installation "Installation")
+* [Client Api](#Client-API "Client Api")
   * [DotNet](#DotNet)
   * [Blazor Client / Server](#Blazor-client--server)
   * [Java, Android](#Java)
@@ -56,34 +57,40 @@ https://www.codeproject.com/Articles/5498/TraceTool-The-Swiss-Army-Knife-of-Trac
   * [Event Log Traces](#Event-Log-Traces "Event Log Traces")
   * [Save/Load to XML File](#Save-Load-to-XML-File "Save/Load to XML File")
 
-# What is TraceTool ?
+## What is TraceTool
 
 * A viewer that displays multiple kinds of sources (from the tracetool framework, log file, event log, or OutputDebugString)
-* A native language client framework (Dotnet, Java, Javasvript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
+* A native language client framework (Dotnet, Java, Javascript, C++ , Python, Delphi) to send simple traces, class and object viewer, dump, and call stack to the viewer. See [Working with the viewer](#Working-with-the-viewer "Working with the viewer") for user interface
 
-# Viewer Installation
+## Viewer Installation
 
-Download the [Viewer](/GithubFiles/Viewer.zip "Viewer.zip") and unpack the file into a folder of your chose(windows only).
+Download the [Viewer](/GithubFiles/Viewer32.zip "Viewer32.zip") and unpack the file into a folder of your chose (windows only).
 
 If you plan to use the "windows message" mode, you must start once the viewer to self register his location into the registry. For socket mode, the viewer must always be started manually
 
 When the viewer is started, he appears on the tray icon. Closing the viewer just reduce it to systray. \
 Hit ctrl - Alt - X to close it.
 
-# Client Api
+## Client Api
 
-You can chose how to send trace to the viewer.
+You can chose the protocol to send traces to the viewer.
 
+* Socket connection (localhost or remote) This is the prefered mode. Work with many languages , except javascript / TypeSCript and node
 * Windows message (same computer). Don't work with Java, javascript / TypeScript, node and python
-* Socket connection (localhost or remote). Don't work with javascript / TypeSCript, node
-* Web socket connection. Work only on dotnet
-* http connection. Work only javascript / Typescript
+* Web socket connection. Work only with dotnet
+* http connection. Work only with javascript / Typescript
 
-On dotnet, you can use Asynchronous or worker Thread. Blazor support only Synchronous communi
-Demo is provided for each client api
+Demo is provided for each client api \
 
+Blazor client support only Synchronous communication (Web socket connection) \
+\
 Note for Web socket connection: The viewer use a plugin to receive traces and display on the viewer. \
 The plugin is configured, but not activated by default. \
+Update the path to the WebsockPlugin.dll (require dotnet 4.8)\
+The following parameter tell the plugin to receive from web socket 0.0.0.0 on port 8091 and resend the trace to itself on port 8090
+WebSocketHost = 0.0.0.0, WebSocketPort = 8091, ViewerSocketHost = 127.0.0.1, ViewerSocketPort = 8090
+
+\
 On the view menu, select options... item, click on "WebsockPlugin.dll" item, click "Load at startup",
 click "Load and start" button then "Ok" button.
 
@@ -98,7 +105,7 @@ The "web socket" label is displayed in the trace window. Clicking on this label 
 In visual studio, reference the client Api nuget using "manage nuget packages","Manage Nuget Packages for solution" context menus or via the nuget console
 >Install-Package Tracetool.DotNet.Api
 
-The nuget contains DotNet4.7, Standard 1.6 and Standard 2.0 libraries
+The nuget contains DotNet4.8 and Standard 2.0 libraries
 
 Sample code
 
@@ -289,10 +296,14 @@ See the [Samples](#Samples "Samples") section for more examples
 ## Python
 
 Python file ([tracetool.py](/Python/Src/tracetool.py "tracetool.py"))
-is included in the Python/Src folder.
+is included in the Python/Src folder. \
+Alternatively, your can install the library using the pip command (windows or lunix command line)
 
-The library is compatible with Python 2, Python 3, and Iron Python (.NET). \
-The library was also tested under Blender
+``` shell
+pip install --upgrade tracetool
+```
+
+The library is compatible with Python 2, Python 3, and Iron Python (.NET). Also tested under Blender
 
 Sample code
 
@@ -325,7 +336,7 @@ var TTrace = new ActiveXObject("TraceToolCom.XTrace");
 TTrace.Debug.Send("hello from jScript") ;
 ```
 
-# Samples
+## Samples
 
 For facility, all samples uses the DOTNET syntax.
 Note that not all client framework support all functionalities like sending image to viewer with Python
@@ -347,11 +358,14 @@ masterNode.Send("Detail 2");
 
 ## Indent
 
-Another way to have master detail is to use indent and UnIndent methods
+Another way to have master detail is to use Indent and UnIndent methods.
+Important Note, since the version 14, the Dotnet api introduce a breaking change:
+When async operations are used together with TTrace.Send() methods, the traces stays under the parent nodes. The ThiId column will show the new thread Id after async operations
 
 ``` C#
 TTrace.Debug.Indent ("Begin of procedure") ;
 TTrace.Debug.Send ("inside procedure" ) ;
+await Task.Delay(500);
 TTrace.Debug.Send ("Do some work" ) ;
 TTrace.Debug.UnIndent ("end of procedure") ;
 ```

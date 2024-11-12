@@ -23,29 +23,29 @@ object frmPlugin: TfrmPlugin
   object LabelStatus: TLabel
     Left = 149
     Top = 202
-    Width = 56
-    Height = 13
+    Width = 60
+    Height = 15
     Caption = 'LabelStatus'
   end
   object Label2: TLabel
     Left = 13
     Top = 65
-    Width = 45
-    Height = 13
+    Width = 50
+    Height = 15
     Caption = 'Plug type'
   end
   object LabelPlugType: TLabel
     Left = 85
     Top = 65
-    Width = 45
-    Height = 13
+    Width = 50
+    Height = 15
     Caption = 'Plug type'
   end
   object Label1: TLabel
     Left = 13
     Top = 88
-    Width = 55
-    Height = 13
+    Width = 59
+    Height = 15
     Caption = 'Parameters'
   end
   object chkLoadAtStartup: TCheckBox
@@ -106,7 +106,7 @@ object frmPlugin: TfrmPlugin
   object butRemove: TButton
     Left = 13
     Top = 304
-    Width = 145
+    Width = 156
     Height = 25
     Caption = 'Remove from configuration'
     TabOrder = 7
