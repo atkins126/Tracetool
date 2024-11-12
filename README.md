@@ -73,14 +73,14 @@ Hit ctrl - Alt - X to close it.
 
 ## Client Api
 
-You can chose how to send traces to the viewer.
+You can chose the protocol to send traces to the viewer.
 
+* Socket connection (localhost or remote) This is the prefered mode. Work with many languages , except javascript / TypeSCript and node
 * Windows message (same computer). Don't work with Java, javascript / TypeScript, node and python
-* Socket connection (localhost or remote). Don't work with javascript / TypeSCript, node
-* Web socket connection. Work only on dotnet
-* http connection. Work only javascript / Typescript
+* Web socket connection. Work only with dotnet
+* http connection. Work only with javascript / Typescript
 
-On dotnet, you can use Asynchronous or worker Thread. 
+Demo is provided for each client api \
 
 Blazor client support only Synchronous communication (Web socket connection) \
 \
