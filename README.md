@@ -80,11 +80,16 @@ You can chose how to send traces to the viewer.
 * Web socket connection. Work only on dotnet
 * http connection. Work only javascript / Typescript
 
-On dotnet, you can use Asynchronous or worker Thread. Blazor support only Synchronous communi
-Demo is provided for each client api
+On dotnet, you can use Asynchronous or worker Thread. 
 
+Blazor client support only Synchronous communication (Web socket connection)
 Note for Web socket connection: The viewer use a plugin to receive traces and display on the viewer. \
 The plugin is configured, but not activated by default. \
+Update the path to the WebsockPlugin.dll (require dotnet 4.8)\
+The parameters tell the plugins to receive from web socket 0.0.0.0 on port 8091 and resend the trace to itself on port 8090
+WebSocketHost = 0.0.0.0, WebSocketPort = 8091, ViewerSocketHost = 127.0.0.1, ViewerSocketPort = 8090
+
+\
 On the view menu, select options... item, click on "WebsockPlugin.dll" item, click "Load at startup",
 click "Load and start" button then "Ok" button.
 
